@@ -14,6 +14,26 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
 });
 
+//Route to store
+app.get('/store', (req, res) => {
+  res.render('store');
+});
+
+//Route to schedule
+app.get('/schedule', (req, res) => {
+  res.render('schedule');
+});
+
+//Route to news
+app.get('/news', (req, res) => {
+  res.render('news');
+});
+
+//Route to players
+app.get('/players', (req, res) => {
+  res.render('players');
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
