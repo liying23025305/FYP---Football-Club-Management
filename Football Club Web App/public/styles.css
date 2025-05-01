@@ -1,5 +1,4 @@
 .logo {
-    height: 10px; /* Adjust height */
-    width: auto; /* Maintain aspect ratio */
-    margin-right: 10px; /* Add spacing if needed */
-  }
+  height: 50px; /* Adjust as needed */
+  width: auto; /* Maintain aspect ratio */
+}
