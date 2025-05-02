@@ -2,23 +2,29 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql2');
 const session = require('express-session');
-
-// Load environment variables from .env file
 const app = express();
 
-// Middleware setup
+// Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static('public'));
+
+// Middleware to serve static files (like styles.css)
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
+app.use(
+  session({
+    secret: 'your-secret-key', // Replace with a strong secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 1 day
+  })
+);
 
-
-// Database connection using environment variables
-// Database connection using environment variables
+// Database connection
 const db = mysql.createConnection({
-  host: 'localhost', // Use quotes to define localhost as a string
+  host: '127.0.0.1', // Use IPv4 explicitly
   user: 'root', // Replace with your MySQL username
   password: '', // Replace with your MySQL password
   database: 'fyp1', // Replace with your database name
@@ -32,35 +38,45 @@ db.connect((err) => {
   console.log('Connected to the database.');
 });
 
+// Temporary in-memory cart
+let cart = [];
+
 // Routes
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Home Page', message: 'Welcome to the Football Club Management System!' });
+  res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
 });
 
+// Route to login
 app.get('/login', (req, res) => {
   res.render('login');
 });
 
+// Route to register
 app.get('/register', (req, res) => {
   res.render('register');
 });
 
+// Route to store
 app.get('/store', (req, res) => {
-  const query = 'SELECT * FROM gear';
+  const query = 'SELECT * FROM gear'; // Fetch all items from the gear table
   db.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching gear:', err);
-      res.status(500).send('Error fetching gear');
+      console.error('Error fetching store items:', err);
+      res.status(500).send('Error fetching store items');
       return;
     }
-    res.render('store', { gear: results });
+    res.render('store', { gear: results }); // Pass the gear data to store.ejs
   });
 });
 
-let cart = []; // Temporary in-memory cart
-
+// Add item to cart
 app.post('/cart/add/:id', (req, res) => {
-  const gearId = req.params.id;
+  const gearId = parseInt(req.params.id, 10);
+  if (isNaN(gearId)) {
+    res.status(400).send('Invalid gear ID');
+    return;
+  }
+
   const query = 'SELECT * FROM gear WHERE gear_id = ?';
   db.query(query, [gearId], (err, results) => {
     if (err) {
@@ -69,7 +85,7 @@ app.post('/cart/add/:id', (req, res) => {
       return;
     }
     if (results.length > 0) {
-      const existingItem = cart.find((item) => item.gear_id == gearId);
+      const existingItem = cart.find((item) => item.gear_id === gearId);
       if (existingItem) {
         existingItem.quantity = (existingItem.quantity || 1) + 1; // Increment quantity
       } else {
@@ -81,8 +97,9 @@ app.post('/cart/add/:id', (req, res) => {
   });
 });
 
+// View cart
 app.get('/cart', (req, res) => {
-  const accountId = req.session.userId; // Replace with dynamic user ID from session
+  const accountId = req.session.userId || 1; // Replace with dynamic user ID from session
   const query = 'SELECT is_member FROM customer_account WHERE account_id = ?';
 
   db.query(query, [accountId], (err, results) => {
@@ -97,30 +114,40 @@ app.get('/cart', (req, res) => {
   });
 });
 
+// Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
-  const gearId = req.params.id;
-  cart = cart.filter((item) => item.gear_id != gearId); // Remove the item from the cart
+  const gearId = parseInt(req.params.id, 10);
+  if (isNaN(gearId)) {
+    res.status(400).send('Invalid gear ID');
+    return;
+  }
+
+  cart = cart.filter((item) => item.gear_id !== gearId); // Remove the item from the cart
   res.redirect('/cart');
 });
 
+// Update cart item quantity
 app.post('/cart/update/:id', (req, res) => {
-  const gearId = req.params.id;
+  const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
-  const item = cart.find((item) => item.gear_id == gearId);
+
+  if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
+    res.status(400).send('Invalid input');
+    return;
+  }
+
+  const item = cart.find((item) => item.gear_id === gearId);
   if (item) {
     item.quantity = newQuantity; // Update the quantity
   }
   res.redirect('/cart');
 });
 
+// Payment route
 app.get('/payment', (req, res) => {
-  const accountId = req.session.userId; // Replace with dynamic user ID from session
-  if (!accountId) {
-    res.redirect('/login'); // Redirect to login if user is not authenticated
-    return;
-  }
-
+  const accountId = req.session.userId || 1; // Replace with dynamic user ID from session
   const query = 'SELECT name, email, address FROM customer_account WHERE account_id = ?';
+
   db.query(query, [accountId], (err, results) => {
     if (err) {
       console.error('Error fetching customer details:', err);
@@ -138,10 +165,11 @@ app.get('/payment', (req, res) => {
   });
 });
 
+// Process payment
 app.post('/payment/process', (req, res) => {
   const { paymentMethod, name, email, address } = req.body;
-  const accountId = req.session.userId; // Replace with dynamic user ID
-  const totalAmount = cart.reduce((sum, item) => sum + parseFloat(item.price_per_unit), 0);
+  const accountId = req.session.userId || 1; // Replace with dynamic user ID
+  const totalAmount = cart.reduce((sum, item) => sum + parseFloat(item.price_per_unit) * (item.quantity || 1), 0);
 
   const orderQuery = `
     INSERT INTO \`order\` (order_date, account_id, total_amount)
@@ -163,7 +191,7 @@ app.post('/payment/process', (req, res) => {
     const orderItemsData = cart.map((item) => [
       orderId,
       item.gear_id,
-      1, // Assuming quantity is 1 for now
+      item.quantity || 1,
       item.price_per_unit,
     ]);
 
@@ -180,14 +208,17 @@ app.post('/payment/process', (req, res) => {
   });
 });
 
+// Route to schedule
 app.get('/schedule', (req, res) => {
   res.render('schedule');
 });
 
+// Route to news
 app.get('/news', (req, res) => {
   res.render('news');
 });
 
+// Route to players
 app.get('/players', (req, res) => {
   res.render('players');
 });
