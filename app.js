@@ -1,52 +1,63 @@
 const express = require('express');
 const path = require('path');
-const app = express();
 const mysql = require('mysql2');
-const bodyParser = require('body-parser');
 const session = require('express-session');
-const accountId = req.session.userId; // Assuming userId is stored in the session
 
-// Set EJS as the view engine
+// Load environment variables from .env file
+const app = express();
+
+// Middleware setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware to serve static files (like styles.css)
 app.use(express.static('public'));
-
-// Use built-in body-parser functionality in Express
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
+
+
+// Database connection using environment variables
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    process.exit(1);
+  }
+  console.log('Connected to the database.');
+});
 
 // Routes
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
+  res.render('index', { title: 'Home Page', message: 'Welcome to the Football Club Management System!' });
 });
 
-//Route to login
 app.get('/login', (req, res) => {
   res.render('login');
 });
 
-//Route to register 
 app.get('/register', (req, res) => {
   res.render('register');
 });
 
-// Store route: Display all gear
 app.get('/store', (req, res) => {
-  const query = 'SELECT * FROM gear'; // Fetch all gear from the database
+  const query = 'SELECT * FROM gear';
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching gear:', err);
       res.status(500).send('Error fetching gear');
       return;
     }
-    res.render('store', { gear: results }); // Pass the gear data to the store.ejs file
+    res.render('store', { gear: results });
   });
 });
 
 let cart = []; // Temporary in-memory cart
 
-// Add gear to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = req.params.id;
   const query = 'SELECT * FROM gear WHERE gear_id = ?';
@@ -57,18 +68,18 @@ app.post('/cart/add/:id', (req, res) => {
       return;
     }
     if (results.length > 0) {
-      const existingItem = cart.find(item => item.gear_id == gearId);
+      const existingItem = cart.find((item) => item.gear_id == gearId);
       if (existingItem) {
         existingItem.quantity = (existingItem.quantity || 1) + 1; // Increment quantity
       } else {
         results[0].quantity = 1; // Initialize quantity
         cart.push(results[0]); // Add the gear to the cart
       }
-    }}
-  };
-)''
+    }
+    res.redirect('/cart');
+  });
+});
 
-// View cart
 app.get('/cart', (req, res) => {
   const accountId = req.session.userId; // Replace with dynamic user ID from session
   const query = 'SELECT is_member FROM customer_account WHERE account_id = ?';
@@ -85,25 +96,22 @@ app.get('/cart', (req, res) => {
   });
 });
 
-// Remove gear from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = req.params.id;
-  cart = cart.filter(item => item.gear_id != gearId); // Remove the item from the cart
+  cart = cart.filter((item) => item.gear_id != gearId); // Remove the item from the cart
   res.redirect('/cart');
 });
 
-// Update gear quantity in cart
 app.post('/cart/update/:id', (req, res) => {
   const gearId = req.params.id;
   const newQuantity = parseInt(req.body.quantity, 10);
-  const item = cart.find(item => item.gear_id == gearId);
+  const item = cart.find((item) => item.gear_id == gearId);
   if (item) {
     item.quantity = newQuantity; // Update the quantity
   }
   res.redirect('/cart');
 });
 
-// Payment route
 app.get('/payment', (req, res) => {
   const accountId = req.session.userId; // Replace with dynamic user ID from session
   if (!accountId) {
@@ -129,10 +137,9 @@ app.get('/payment', (req, res) => {
   });
 });
 
-// Process payment
 app.post('/payment/process', (req, res) => {
   const { paymentMethod, name, email, address } = req.body;
-  const accountId = 1; // Replace with dynamic user ID
+  const accountId = req.session.userId; // Replace with dynamic user ID
   const totalAmount = cart.reduce((sum, item) => sum + parseFloat(item.price_per_unit), 0);
 
   const orderQuery = `
@@ -152,14 +159,14 @@ app.post('/payment/process', (req, res) => {
       INSERT INTO order_items (order_id, gear_id, quantity, price)
       VALUES ?
     `;
-    const orderItemsData = cart.map(item => [
+    const orderItemsData = cart.map((item) => [
       orderId,
       item.gear_id,
       1, // Assuming quantity is 1 for now
-      item.price_per_unit
+      item.price_per_unit,
     ]);
 
-    db.query(orderItemsQuery, [orderItemsData], err => {
+    db.query(orderItemsQuery, [orderItemsData], (err) => {
       if (err) {
         console.error('Error inserting order items:', err);
         res.status(500).send('Error processing payment');
@@ -172,17 +179,14 @@ app.post('/payment/process', (req, res) => {
   });
 });
 
-//Route to schedule
 app.get('/schedule', (req, res) => {
   res.render('schedule');
 });
 
-//Route to news
 app.get('/news', (req, res) => {
   res.render('news');
 });
 
-//Route to players
 app.get('/players', (req, res) => {
   res.render('players');
 });
