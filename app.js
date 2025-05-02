@@ -22,12 +22,12 @@ app.use(
   })
 );
 
-// Database connection
 const db = mysql.createConnection({
-  host: '127.0.0.1', // Use IPv4 explicitly
-  user: 'root', // Replace with your MySQL username
-  password: '', // Replace with your MySQL password
-  database: 'fyp1', // Replace with your database name
+  host: '127.0.0.1',
+  user: 'root',
+  password: '',
+  database: 'fyp1',
+  port: 3000, // Add this line if MySQL is running on a non-default port
 });
 
 db.connect((err) => {
