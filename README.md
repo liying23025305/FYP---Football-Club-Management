@@ -16,40 +16,25 @@ A full-stack web application built to manage football club operations such as me
 ## ⚙️ How to Run This Project
 
 ### 1. Clone the Repository
-
-```bash
 git clone https://github.com/liying23025305/FYP---Football-Club-Management.git
 cd FYP---Football-Club-Management
-2. Start MySQL Using XAMPP
+
+### 2. Start MySQL Using XAMPP
 Open XAMPP Control Panel
-
 Start Apache and MySQL
-
 Open phpMyAdmin and import the database (e.g. football_club.sql if provided)
 
-3. Install Node.js Dependencies
-bash
-Copy
-Edit
+### 3. Install Node.js Dependencies
 npm install
-4. Set Up the Database
-Make sure the database credentials in models/db.js match your local XAMPP MySQL settings:
 
-js
-Copy
-Edit
+### 4.Set Up the Database
+Make sure the database credentials in models/db.js match your local XAMPP MySQL settings:
 host: 'localhost',
 user: 'root',
 password: '',
 database: 'your_database_name'
-5. Run the App
-bash
-Copy
-Edit
+
+### 1. Run the app
 node app.js
 Then open your browser and go to:
-
-arduino
-Copy
-Edit
 http://localhost:3000
