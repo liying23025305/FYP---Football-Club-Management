@@ -14,6 +14,16 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
 });
 
+//Route to login
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+//Route to register 
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+ 
 //Route to store
 app.get('/store', (req, res) => {
   res.render('store');
@@ -32,21 +42,6 @@ app.get('/news', (req, res) => {
 //Route to players
 app.get('/players', (req, res) => {
   res.render('players');
-});
-
-// Route to contact
-app.get('/contact', (req, res) => {
-  res.render('contact');
-});
-
-//Route to cart
-app.get('/cart', (req, res) => {
-  res.render('cart');
-});
-
-// Route to checkout
-app.get('/checkout', (req, res) => {
-  res.render('checkout');
 });
 
 // Start the server
