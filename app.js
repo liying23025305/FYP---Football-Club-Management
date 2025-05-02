@@ -16,11 +16,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Database connection using environment variables
+// Database connection using environment variables
 const db = mysql.createConnection({
-  host: localhost,
-  user: root,
-  password: '',
-  database: fyp1,
+  host: 'localhost', // Use quotes to define localhost as a string
+  user: 'root', // Replace with your MySQL username
+  password: '', // Replace with your MySQL password
+  database: 'fyp1', // Replace with your database name
 });
 
 db.connect((err) => {
