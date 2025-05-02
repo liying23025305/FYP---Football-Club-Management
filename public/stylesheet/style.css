@@ -1,0 +1,10 @@
+/* Adjust the logo size */
+.logo {
+    height: 40px; /* Adjust height as needed */
+    width: auto; /* Maintain aspect ratio */
+}
+
+/* Change the navbar background color to blue */
+.navbar {
+    background-color:  !important; /* Override Bootstrap's default styles */
+}
