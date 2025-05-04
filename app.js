@@ -11,7 +11,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
 app.use(
@@ -31,16 +30,11 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
 });
 
-<<<<<<< HEAD
-// Login Page
-=======
-// Route to login
->>>>>>> origin/backup
+// Login Route
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-<<<<<<< HEAD
 // Login Submission
 app.post('/loginAccount', (req, res) => {
   const { username, password } = req.body;
@@ -53,15 +47,11 @@ app.post('/loginAccount', (req, res) => {
   }
 });
 
-// Register Page
-=======
-// Route to register
->>>>>>> origin/backup
+// Register Route
 app.get('/register', (req, res) => {
   res.render('register');
 });
 
-<<<<<<< HEAD
 // Register Submission
 app.post('/registerAccount', (req, res) => {
   const { username, password } = req.body;
@@ -69,64 +59,50 @@ app.post('/registerAccount', (req, res) => {
   res.redirect('/login');
 });
 
-// Other Pages
-=======
-
-// Route to store
->>>>>>> origin/backup
+// Store Route
 app.get('/store', (req, res) => {
-  // Placeholder for store items
   const gear = [
     { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  // Placeholder for cart items
   const cart = [
     { gear_id: 1, gear_name: 'Football', price_per_unit: 25.99, quantity: 2 },
     { gear_id: 2, gear_name: 'Jersey', price_per_unit: 49.99, quantity: 1 },
   ];
 
-  // Pass the gear and cart variables to the view
   res.render('store', { gear, cart });
 });
 
-<<<<<<< HEAD
-=======
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
 
-  // Placeholder for store items
   const gear = [
     { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  // Find the item in the store
   const item = gear.find((g) => g.gear_id === gearId);
   if (!item) {
     return res.status(404).send('Item not found');
   }
 
-  // Check if the item already exists in the cart
   const existingItem = cart.find((c) => c.gear_id === gearId);
   if (existingItem) {
-    existingItem.quantity += 1; // Increment quantity
+    existingItem.quantity += 1;
   } else {
-    cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
+    cart.push({ ...item, quantity: 1 });
   }
 
-  // Redirect back to the store page with a success message
   res.redirect('/store?success=true');
 });
 
 // View cart
 app.get('/cart', (req, res) => {
-  // Placeholder for membership status
-  const isMember = false; // Assume the user is not a member for now
+  const isMember = false;
   res.render('cart', { cart, isMember });
 });
 
@@ -138,7 +114,7 @@ app.post('/cart/remove/:id', (req, res) => {
     return;
   }
 
-  cart = cart.filter((item) => item.gear_id !== gearId); // Remove the item from the cart
+  cart = cart.filter((item) => item.gear_id !== gearId);
   res.redirect('/cart');
 });
 
@@ -154,43 +130,34 @@ app.post('/cart/update/:id', (req, res) => {
 
   const item = cart.find((item) => item.gear_id === gearId);
   if (item) {
-    item.quantity = newQuantity; // Update the quantity
+    item.quantity = newQuantity;
   }
   res.redirect('/cart');
 });
 
 // Payment route
 app.get('/payment', (req, res) => {
-  // Placeholder for customer details
   const customer = { name: 'John Doe', email: 'john.doe@example.com', address: '123 Main St' };
   res.render('payment', { cart, customer });
 });
 
 // Process payment
 app.post('/payment/process', (req, res) => {
-  // Placeholder for processing payment
-  cart = []; // Clear the cart
+  cart = [];
   res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
 });
 
-// Route to schedule
->>>>>>> origin/backup
+// Schedule route
 app.get('/schedule', (req, res) => {
   res.render('schedule');
 });
 
-<<<<<<< HEAD
-=======
-// Route to news
->>>>>>> origin/backup
+// News route
 app.get('/news', (req, res) => {
   res.render('news');
 });
 
-<<<<<<< HEAD
-=======
-// Route to players
->>>>>>> origin/backup
+// Players route
 app.get('/players', (req, res) => {
   res.render('players');
 });
