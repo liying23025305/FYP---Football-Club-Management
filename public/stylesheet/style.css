@@ -1,12 +1,13 @@
 /* Adjust the logo size */
-.logo {
-    height: 40px; /* Set a fixed height */
+.navbar .logo {
+    height: 50px; /* Set a fixed height */
     width: auto; /* Maintain aspect ratio */
-    max-width: 100%; /* Prevent it from exceeding its container */
+    max-width: 150px; /* Optional: Limit the maximum width */
     object-fit: contain; /* Ensure the image fits within the specified dimensions */
+    margin-right: 10px; /* Add spacing if needed */
 }
 
-/* Change the navbar background color to blue */
+/* Ensure the navbar background color is consistent */
 .navbar {
-    background-color:  !important; /* Override Bootstrap's default styles */
+    background-color: #212529 !important; /* Dark background */
 }
