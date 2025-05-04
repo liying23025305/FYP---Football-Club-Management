@@ -78,7 +78,7 @@ app.post('/cart/add/:id', (req, res) => {
 // View cart
 app.get('/cart', (req, res) => {
   // Placeholder for membership status
-  const isMember = true; // Assume the user is a member for now
+  const isMember = false; // Assume the user is not a member for now
   res.render('cart', { cart, isMember });
 });
 
