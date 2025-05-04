@@ -49,11 +49,14 @@ app.get('/store', (req, res) => {
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  // Placeholder for membership status
-  const isMember = false; // Assume the user is not a member for now
+  // Placeholder for cart items
+  const cart = [
+    { gear_id: 1, gear_name: 'Football', price_per_unit: 25.99, quantity: 2 },
+    { gear_id: 2, gear_name: 'Jersey', price_per_unit: 49.99, quantity: 1 },
+  ];
 
-  // Pass the cart, gear, and isMember variables to the view
-  res.render('store', { gear, cart, isMember });
+  // Pass the gear and cart variables to the view
+  res.render('store', { gear, cart });
 });
 
 // Add item to cart
