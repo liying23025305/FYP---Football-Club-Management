@@ -151,7 +151,7 @@ app.get('/payment/options', (req, res) => {
   };
 
   // Render the payment options page with customer details
-  res.render('payment-options', { customer });
+  res.render('paymentoptions', { customer });
 });
 
 // Payment processing page
@@ -184,7 +184,7 @@ app.post('/payment/processing', (req, res) => {
 
 // Payment success page
 app.get('/payment/success', (req, res) => {
-  res.render('payment-success');
+  res.render('paymentsuccess');
 });
 
 // Route to schedule
