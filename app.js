@@ -2,49 +2,67 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// Set EJS as the view engine
+// Dummy in-memory user storage
+let users = [];
+
+// Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware to serve static files (like styles.css)
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
+// Home Route
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
 });
 
-//Route to login
+// Login Page
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { error: null });
 });
 
-//Route to register 
+// Login Submission
+app.post('/loginAccount', (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username && u.password === password);
+
+  if (user) {
+    res.redirect('/');
+  } else {
+    res.render('login', { error: 'Invalid credentials. Please register.' });
+  }
+});
+
+// Register Page
 app.get('/register', (req, res) => {
   res.render('register');
 });
- 
-//Route to store
+
+// Register Submission
+app.post('/registerAccount', (req, res) => {
+  const { username, password } = req.body;
+  users.push({ username, password }); // store user temporarily
+  res.redirect('/login');
+});
+
+// Other Pages
 app.get('/store', (req, res) => {
   res.render('store');
 });
 
-//Route to schedule
 app.get('/schedule', (req, res) => {
   res.render('schedule');
 });
 
-//Route to news
 app.get('/news', (req, res) => {
   res.render('news');
 });
 
-//Route to players
 app.get('/players', (req, res) => {
   res.render('players');
 });
 
-// Start the server
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

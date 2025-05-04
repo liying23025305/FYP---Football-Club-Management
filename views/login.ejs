@@ -13,7 +13,7 @@
   <main class="container mt-5" style="max-width: 400px;">
     <h2 class="text-center mb-4">Login to Your Account</h2>
 
-    <% if (typeof error !== 'undefined') { %>
+    <% if (error) { %>
       <div class="alert alert-danger text-center"><%= error %></div>
     <% } %>
 
@@ -35,5 +35,7 @@
       <p class="mt-3 text-center">Don't have an account? <a href="/register">Register here</a></p>
     </form>
   </main>
+
+  <%- include('partials/footer') %>
 </body>
 </html>
