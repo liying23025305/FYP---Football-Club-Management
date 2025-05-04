@@ -139,18 +139,6 @@ app.get('/paymentmethod', (req, res) => {
   res.render('paymentmethod', { cart, customer });
 });
 
-// Example of fetching customer details from a database
-const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
-db.query('SELECT name, email, address FROM membership WHERE id = ?', [customerId], (err, results) => {
-  if (err) {
-    console.error(err);
-    return res.status(500).send('Database error');
-  }
-
-  const customer = results[0]; // Fetch the first result
-  res.render('paymentmethod', { cart, customer });
-});
-
 // Payment options page
 app.get('/payment/options', (req, res) => {
   // Placeholder for fetching customer details from the database
