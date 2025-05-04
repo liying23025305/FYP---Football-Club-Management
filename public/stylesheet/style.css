@@ -1,7 +1,9 @@
 /* Adjust the logo size */
-.logo {
-    height: 40px; /* Adjust height as needed */
-    width: auto; /* Maintain aspect ratio */
+.navbar .logo {
+    height: 40px !important; /* Set the height of the logo */
+    width: auto !important; /* Maintain aspect ratio */
+    max-width: 100%; /* Prevent it from exceeding its container */
+    object-fit: contain; /* Ensure the image fits within the specified dimensions */
 }
 
 /* Change the navbar background color to blue */

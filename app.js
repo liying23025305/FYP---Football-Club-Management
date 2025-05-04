@@ -40,6 +40,7 @@ app.get('/register', (req, res) => {
 });
 
 // Route to store
+// Route to store
 app.get('/store', (req, res) => {
   // Placeholder for store items
   const gear = [
@@ -47,7 +48,9 @@ app.get('/store', (req, res) => {
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
-  res.render('store', { gear }); // Pass placeholder data to store.ejs
+
+  // Pass the cart variable along with the gear data
+  res.render('store', { gear, cart });
 });
 
 // Add item to cart
