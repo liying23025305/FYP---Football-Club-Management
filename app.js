@@ -62,20 +62,30 @@ app.get('/store', (req, res) => {
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  if (isNaN(gearId)) {
-    res.status(400).send('Invalid gear ID');
-    return;
+
+  // Placeholder for store items
+  const gear = [
+    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
+    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
+    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
+  ];
+
+  // Find the item in the store
+  const item = gear.find((g) => g.gear_id === gearId);
+  if (!item) {
+    return res.status(404).send('Item not found');
   }
 
-  // Placeholder for adding items to the cart
-  const placeholderItem = { gear_id: gearId, gear_name: `Item ${gearId}`, price_per_unit: 20.0, quantity: 1 };
-  const existingItem = cart.find((item) => item.gear_id === gearId);
+  // Check if the item already exists in the cart
+  const existingItem = cart.find((c) => c.gear_id === gearId);
   if (existingItem) {
     existingItem.quantity += 1; // Increment quantity
   } else {
-    cart.push(placeholderItem); // Add placeholder item to the cart
+    cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
   }
-  res.redirect('/cart');
+
+  // Redirect back to the store page with a success message
+  res.redirect('/store?success=true');
 });
 
 // View cart
