@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2');
 const session = require('express-session');
 const app = express();
 
@@ -22,22 +21,6 @@ app.use(
   })
 );
 
-const db = mysql.createConnection({
-  host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'fyp1',
-  port: 3000, // Add this line if MySQL is running on a non-default port
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-    process.exit(1);
-  }
-  console.log('Connected to the database.');
-});
-
 // Temporary in-memory cart
 let cart = [];
 
@@ -58,15 +41,13 @@ app.get('/register', (req, res) => {
 
 // Route to store
 app.get('/store', (req, res) => {
-  const query = 'SELECT * FROM gear'; // Fetch all items from the gear table
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching store items:', err);
-      res.status(500).send('Error fetching store items');
-      return;
-    }
-    res.render('store', { gear: results }); // Pass the gear data to store.ejs
-  });
+  // Placeholder for store items
+  const gear = [
+    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
+    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
+    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
+  ];
+  res.render('store', { gear }); // Pass placeholder data to store.ejs
 });
 
 // Add item to cart
@@ -77,41 +58,22 @@ app.post('/cart/add/:id', (req, res) => {
     return;
   }
 
-  const query = 'SELECT * FROM gear WHERE gear_id = ?';
-  db.query(query, [gearId], (err, results) => {
-    if (err) {
-      console.error('Error adding to cart:', err);
-      res.status(500).send('Error adding to cart');
-      return;
-    }
-    if (results.length > 0) {
-      const existingItem = cart.find((item) => item.gear_id === gearId);
-      if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 1) + 1; // Increment quantity
-      } else {
-        results[0].quantity = 1; // Initialize quantity
-        cart.push(results[0]); // Add the gear to the cart
-      }
-    }
-    res.redirect('/cart');
-  });
+  // Placeholder for adding items to the cart
+  const placeholderItem = { gear_id: gearId, gear_name: `Item ${gearId}`, price_per_unit: 20.0, quantity: 1 };
+  const existingItem = cart.find((item) => item.gear_id === gearId);
+  if (existingItem) {
+    existingItem.quantity += 1; // Increment quantity
+  } else {
+    cart.push(placeholderItem); // Add placeholder item to the cart
+  }
+  res.redirect('/cart');
 });
 
 // View cart
 app.get('/cart', (req, res) => {
-  const accountId = req.session.userId || 1; // Replace with dynamic user ID from session
-  const query = 'SELECT is_member FROM customer_account WHERE account_id = ?';
-
-  db.query(query, [accountId], (err, results) => {
-    if (err) {
-      console.error('Error fetching membership status:', err);
-      res.status(500).send('Error fetching membership status');
-      return;
-    }
-
-    const isMember = results.length > 0 ? results[0].is_member : false; // Check if the user is a member
-    res.render('cart', { cart, isMember });
-  });
+  // Placeholder for membership status
+  const isMember = true; // Assume the user is a member for now
+  res.render('cart', { cart, isMember });
 });
 
 // Remove item from cart
@@ -145,67 +107,16 @@ app.post('/cart/update/:id', (req, res) => {
 
 // Payment route
 app.get('/payment', (req, res) => {
-  const accountId = req.session.userId || 1; // Replace with dynamic user ID from session
-  const query = 'SELECT name, email, address FROM customer_account WHERE account_id = ?';
-
-  db.query(query, [accountId], (err, results) => {
-    if (err) {
-      console.error('Error fetching customer details:', err);
-      res.status(500).send('Error fetching customer details');
-      return;
-    }
-
-    if (!results.length) {
-      res.status(404).send('Customer not found');
-      return;
-    }
-
-    const customer = results[0];
-    res.render('payment', { cart, customer });
-  });
+  // Placeholder for customer details
+  const customer = { name: 'John Doe', email: 'john.doe@example.com', address: '123 Main St' };
+  res.render('payment', { cart, customer });
 });
 
 // Process payment
 app.post('/payment/process', (req, res) => {
-  const { paymentMethod, name, email, address } = req.body;
-  const accountId = req.session.userId || 1; // Replace with dynamic user ID
-  const totalAmount = cart.reduce((sum, item) => sum + parseFloat(item.price_per_unit) * (item.quantity || 1), 0);
-
-  const orderQuery = `
-    INSERT INTO \`order\` (order_date, account_id, total_amount)
-    VALUES (NOW(), ?, ?)
-  `;
-  db.query(orderQuery, [accountId, totalAmount], (err, orderResult) => {
-    if (err) {
-      console.error('Error inserting order:', err);
-      res.status(500).send('Error processing payment');
-      return;
-    }
-
-    const orderId = orderResult.insertId;
-
-    const orderItemsQuery = `
-      INSERT INTO order_items (order_id, gear_id, quantity, price)
-      VALUES ?
-    `;
-    const orderItemsData = cart.map((item) => [
-      orderId,
-      item.gear_id,
-      item.quantity || 1,
-      item.price_per_unit,
-    ]);
-
-    db.query(orderItemsQuery, [orderItemsData], (err) => {
-      if (err) {
-        console.error('Error inserting order items:', err);
-        res.status(500).send('Error processing payment');
-        return;
-      }
-
-      cart = []; // Clear the cart
-      res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
-    });
-  });
+  // Placeholder for processing payment
+  cart = []; // Clear the cart
+  res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
 });
 
 // Route to schedule
