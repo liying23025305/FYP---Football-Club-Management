@@ -23,7 +23,7 @@ http://localhost:3000
 
 ----
 
-Home page structure (Draft 1):
+Home page layout (Draft 1 - Frontend interface):
 - Navigation Bar (Tickets | Players | Shop | Calendar | About | Contact)
 - Membership Benefits, Worldwide Store, Events & Training > Containerized code
 - Upcoming Events (Team Matches - Scores, Training session)
