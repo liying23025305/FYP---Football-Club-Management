@@ -1,0 +1,149 @@
+<style>
+.login-logo {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    width: 80px;
+}
+.login-bg {
+    background: #f3f3f3;
+    min-height: 100vh;
+}
+.login-card {
+    max-width: 480px;
+    margin: 60px auto;
+    border-top: 4px solid #a00000;
+    border-radius: 0 0 10px 10px;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 40px 32px 32px 32px;
+    position: relative;
+}
+.login-title {
+    font-family: 'Oswald', Arial, sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.login-subtitle {
+    color: #888;
+    text-align: center;
+    margin-bottom: 24px;
+}
+.login-notice {
+    background: #f5f5f5;
+    border-left: 4px solid #a00000;
+    color: #333;
+    padding: 16px 18px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-size: 1rem;
+}
+.login-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.login-input {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    width: 100%;
+    font-size: 1rem;
+}
+.login-forgot {
+    font-size: 0.95rem;
+    color: #888;
+    text-decoration: underline;
+    margin-bottom: 18px;
+    display: inline-block;
+}
+.login-btn {
+    background: #a00000;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px 0;
+    width: 100%;
+    margin-bottom: 18px;
+    transition: background 0.2s;
+}
+.login-btn:hover {
+    background: #7a0000;
+}
+.login-or {
+    text-align: center;
+    color: #888;
+    margin: 18px 0 10px 0;
+    font-size: 1rem;
+}
+.social-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.social-btn {
+    flex: 1;
+    background: #f3f3f3;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.social-btn:hover {
+    background: #e0e0e0;
+}
+.login-register {
+    text-align: center;
+    color: #888;
+    font-size: 1rem;
+}
+.login-register a {
+    color: #a00000;
+    font-weight: 600;
+    text-decoration: underline;
+}
+</style>
+<link href="https://fonts.googleapis.com/css?family=Oswald:700&display=swap" rel="stylesheet">
+<div class="login-bg">
+    <div class="login-card">
+        <div class="login-title">SIGN IN</div>
+        <div class="login-subtitle">Use your email address or username to sign<br>into your account</div>
+        <div class="login-notice">
+            If you are signing in for the first time, you must reset you password before you will be able to continue. Click <a href="#" style="color:#a00000;font-weight:600;">here</a> to reset your password.
+        </div>
+        <form action="/users/login" method="POST">
+            <div>
+                <label class="login-label" for="email">Email / Username</label>
+                <input type="text" id="email" name="email" class="login-input" required>
+            </div>
+            <div>
+                <label class="login-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="login-input" required>
+            </div>
+            <a href="#" class="login-forgot">Forgotten Password?</a>
+            <button type="submit" class="login-btn">SIGN IN</button>
+        </form>
+        <div class="login-or">OR</div>
+        <div class="social-btns">
+            <button class="social-btn"><i class="fab fa-google"></i> Google</button>
+            <button class="social-btn"><i class="fab fa-facebook"></i> Facebook</button>
+            <button class="social-btn"><i class="fab fa-apple"></i> Apple</button>
+        </div>
+        <div class="login-register">
+            Don't have an account? <a href="/users/register">Register here</a>
+        </div>
+    </div>
+</div> 

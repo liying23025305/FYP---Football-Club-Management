@@ -1,0 +1,137 @@
+<% const sections = [
+  { key: 'rewards', label: 'MY MEMBERSHIP TIER REWARDS' },
+  { key: 'ticketing', label: 'TICKETING' },
+  { key: 'disability', label: 'DISABILITY ACCESS' },
+  { key: 'gold', label: 'GOLD' },
+  { key: 'silver', label: 'SILVER' },
+  { key: 'bronze', label: 'BRONZE' }
+];
+const faqs = {
+  rewards: [
+    { q: 'How do I activate my membership?', a: 'Once you have completed your registration and payment, your membership will be activated automatically. You will receive a confirmation email with your membership details.' },
+    { q: 'What are the benefits of Gold, Silver, and Bronze memberships?', a: '<b>Gold:</b> 15% discount, 3% cashback, VIP access, best perks.<br><b>Silver:</b> 10% discount, 2% cashback, priority booking, great value.<br><b>Bronze:</b> 5% discount, 1% cashback, essential benefits, club newsletter.' },
+    { q: 'Can I upgrade or downgrade my membership tier?', a: 'Yes, you can upgrade or downgrade your membership tier at any time from your profile page. The new benefits will apply immediately after payment adjustment.' },
+    { q: 'How do I access my account?', a: 'Log in using your registered email or username. If you forgot your password, use the "Forgotten Password?" link on the login page.' },
+    { q: 'What is the cashback and how do I use it?', a: 'Cashback is earned on eligible purchases (gear, restaurant, tickets) and can be redeemed in the online store or at the club. Cashback expires at the end of each season.' },
+    { q: 'Who do I contact for membership support?', a: 'Contact our support team at <a href="mailto:support@footballclub.com">support@footballclub.com</a> or call (123) 456-7890.' },
+    { q: 'Can I cancel my membership?', a: 'Yes, you can cancel your membership at any time from your profile page. Your benefits will remain active until the end of the current season.' }
+  ],
+  ticketing: [
+    { q: 'Will Members be given a choice of what area/price range when they apply in the ballot?', a: 'Yes, members can select their preferred area and price range when entering the ticket ballot.' },
+    { q: 'How long will Members be given to pay for their tickets if they are successful in the ballot?', a: 'Members will have 48 hours to complete payment for their tickets if successful in the ballot.' },
+    { q: 'Will there be a limit to how many match ballots a Member can enter across the course of the season?', a: 'There is no limit to the number of ballots a member can enter, but each ballot is subject to availability.' },
+    { q: 'What is the average chance of success for a Member entering the ballot?', a: 'The chance of success varies by match and demand. Higher tier members have better odds.' },
+    { q: 'What priority do Silver members have over Bronze members?', a: 'Silver members have earlier access to ballots and ticket sales than Bronze members.' },
+    { q: 'What happens if there are seats remaining after the ballot because the number of applications is lower than the number of seats available?', a: 'Remaining seats will be made available for general sale to all members.' },
+    { q: 'If a Member is successful in the ballot and is not able to attend, will we offer a refund?', a: 'Refunds are available if you notify the club at least 48 hours before the match.' },
+    { q: 'What happens if my payment card does not authorise for my tickets?', a: 'If your card is not authorised, your ticket will be released and offered to another member.' },
+    { q: 'Will tickets for Disability Access Members be balloted?', a: 'Yes, Disability Access Members will also be included in the ballot process.' }
+  ],
+  disability: [
+    { q: 'Will tickets for Disability Access Members be balloted?', a: 'Yes, Disability Access Members will also be included in the ballot process.' },
+    { q: 'How do I apply for Disability Access tickets?', a: 'You can apply for Disability Access tickets through your online account or by contacting our support team.' },
+    { q: 'What facilities are available for Disability Access Members?', a: 'Accessible seating, parking, and assistance are available. Please see our Disability Access page for details.' }
+  ],
+  gold: [
+    { q: 'What priority do Gold members have over Silver and Bronze members?', a: 'Gold members have the highest priority for ticket sales, ballots, and exclusive events.' },
+    { q: 'What are the exclusive benefits for Gold members?', a: 'VIP access, best discounts, highest cashback, and exclusive club experiences.' },
+    { q: 'Can Gold members access all club events?', a: 'Yes, Gold members have access to all club events, subject to availability.' },
+    { q: 'Will Members be given a choice of what area/price range when they apply in the ballot?', a: 'Yes, members can select their preferred area and price range when entering the ticket ballot.' },
+    { q: 'How long will Members be given to pay for their tickets if they are successful in the ballot?', a: 'Members will have 48 hours to complete payment for their tickets if successful in the ballot.' }
+  ],
+  silver: [
+    { q: 'What priority do Silver members have over Bronze members?', a: 'Silver members have earlier access to ballots and ticket sales than Bronze members.' },
+    { q: 'What are the benefits of Silver membership?', a: '10% discount, 2% cashback, priority booking, and great value.' },
+    { q: 'Will there be a limit to how many match ballots a Member can enter across the course of the season?', a: 'There is no limit to the number of ballots a member can enter, but each ballot is subject to availability.' },
+    { q: 'What is the average chance of success for a Member entering the ballot?', a: 'The chance of success varies by match and demand. Higher tier members have better odds.' }
+  ],
+  bronze: [
+    { q: 'What are the benefits of Bronze membership?', a: '5% discount, 1% cashback, essential benefits, club newsletter.' },
+    { q: 'Can Bronze members upgrade to Silver or Gold?', a: 'Yes, Bronze members can upgrade at any time from their profile page.' },
+    { q: 'What happens if there are seats remaining after the ballot because the number of applications is lower than the number of seats available?', a: 'Remaining seats will be made available for general sale to all members.' },
+    { q: 'If a Member is successful in the ballot and is not able to attend, will we offer a refund?', a: 'Refunds are available if you notify the club at least 48 hours before the match.' }
+  ]
+};
+const currentFaqs = faqs[section] || faqs['rewards'];
+%>
+<style>
+.faq-header {
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #d0001a;
+  margin: 32px 0 18px 0;
+  letter-spacing: 2px;
+}
+.faq-nav {
+  display: flex;
+  gap: 32px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 32px;
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.faq-nav a {
+  color: #d0001a;
+  text-decoration: none;
+  padding: 12px 0;
+  border-bottom: 3px solid transparent;
+  transition: border 0.2s;
+}
+.faq-nav a.active, .faq-nav a:hover {
+  border-bottom: 3px solid #d0001a;
+}
+.faq-section {
+  margin-bottom: 32px;
+}
+.faq-q {
+  background: #f3f3f3;
+  font-weight: 700;
+  padding: 18px 24px;
+  margin-bottom: 0;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 1.1rem;
+  border-radius: 4px 4px 0 0;
+  outline: none;
+}
+.faq-a {
+  background: #fff;
+  padding: 18px 24px;
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eee;
+  margin-bottom: 18px;
+  font-size: 1rem;
+}
+</style>
+<link href="https://fonts.googleapis.com/css?family=Oswald:700&display=swap" rel="stylesheet">
+<div class="container">
+  <div class="faq-header">FAQ</div>
+  <div class="faq-nav">
+    <% sections.forEach(s => { %>
+      <a href="/users/membership/faqs?section=<%= s.key %>" class="<%= section === s.key ? 'active' : '' %>"><%= s.label %></a>
+    <% }) %>
+  </div>
+  <div class="faq-section">
+    <% currentFaqs.forEach((item, i) => { %>
+      <button class="faq-q" onclick="toggleFaq(this)"><%= item.q %></button>
+      <div class="faq-a" style="display:none;"><%- item.a %></div>
+    <% }) %>
+  </div>
+</div>
+<script>
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  if (answer.style.display === 'none') {
+    answer.style.display = 'block';
+    btn.style.background = '#e0e0e0';
+  } else {
+    answer.style.display = 'none';
+    btn.style.background = '';
+  }
+}
+</script> 
