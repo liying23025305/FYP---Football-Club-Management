@@ -125,17 +125,78 @@ app.post('/cart/update/:id', (req, res) => {
 });
 
 // Payment route
-app.get('/payment', (req, res) => {
-  // Placeholder for customer details
-  const customer = { name: 'John Doe', email: 'john.doe@example.com', address: '123 Main St' };
-  res.render('payment', { cart, customer });
+app.get('/paymentmethod', (req, res) => {
+  // Placeholder for fetching customer details from the database
+  const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
+  const customer = {
+    id: customerId,
+    name: "John Doe", // Placeholder for customer name
+    email: "john.doe@example.com", // Placeholder for customer email
+    address: "123 Main St", // Placeholder for customer address
+  };
+
+  // Render the payment method page with cart and customer details
+  res.render('paymentmethod', { cart, customer });
 });
 
-// Process payment
-app.post('/payment/process', (req, res) => {
-  // Placeholder for processing payment
-  cart = []; // Clear the cart
-  res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
+// Example of fetching customer details from a database
+const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
+db.query('SELECT name, email, address FROM membership WHERE id = ?', [customerId], (err, results) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).send('Database error');
+  }
+
+  const customer = results[0]; // Fetch the first result
+  res.render('paymentmethod', { cart, customer });
+});
+
+// Payment options page
+app.get('/payment/options', (req, res) => {
+  // Placeholder for fetching customer details from the database
+  const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
+  const customer = {
+    id: customerId,
+    name: "John Doe", // Placeholder for customer name
+    email: "john.doe@example.com", // Placeholder for customer email
+    address: "123 Main St", // Placeholder for customer address
+  };
+
+  // Render the payment options page with customer details
+  res.render('payment-options', { customer });
+});
+
+// Payment processing page
+app.post('/payment/processing', (req, res) => {
+  const paymentMethod = req.body.paymentMethod; // Get selected payment method
+  const savePaymentMethod = req.body.savePaymentMethod === 'true'; // Check if the checkbox is ticked
+
+  console.log(`Processing payment with ${paymentMethod}...`);
+  console.log(`Save payment method: ${savePaymentMethod}`);
+
+  // Placeholder for saving the payment method to the database
+  if (savePaymentMethod) {
+    const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
+    console.log(`Saving payment method "${paymentMethod}" for customer ID ${customerId}...`);
+    // Simulate database query
+    // db.query('UPDATE membership SET payment_method = ? WHERE id = ?', [paymentMethod, customerId], (err) => {
+    //   if (err) {
+    //     console.error(err);
+    //     return res.status(500).send('Database error');
+    //   }
+    //   console.log('Payment method saved successfully.');
+    // });
+  }
+
+  // Simulate payment processing
+  setTimeout(() => {
+    res.redirect('/payment/success');
+  }, 3000); // Simulate a 3-second delay
+});
+
+// Payment success page
+app.get('/payment/success', (req, res) => {
+  res.render('payment-success');
 });
 
 // Route to schedule

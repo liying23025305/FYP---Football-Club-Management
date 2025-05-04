@@ -47,8 +47,10 @@
       <p><strong>Address:</strong> <%= customer.address %></p>
     </div>
     <div class="text-end mt-4">
-      <form action="/payment/process" method="POST">
+      <form action="/payment/options" method="GET">
         <button type="submit" class="btn btn-success">Pay Now</button>
+      </form>
+    </div>
       </form>
     </div>
   </main>
