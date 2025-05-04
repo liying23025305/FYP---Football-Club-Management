@@ -39,7 +39,7 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
-// Route to store
+
 // Route to store
 app.get('/store', (req, res) => {
   // Placeholder for store items
@@ -49,8 +49,11 @@ app.get('/store', (req, res) => {
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  // Pass the cart variable along with the gear data
-  res.render('store', { gear, cart });
+  // Placeholder for membership status
+  const isMember = false; // Assume the user is not a member for now
+
+  // Pass the cart, gear, and isMember variables to the view
+  res.render('store', { gear, cart, isMember });
 });
 
 // Add item to cart
