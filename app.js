@@ -184,6 +184,35 @@ app.get('/players', (req, res) => {
   res.render('players');
 });
 
+//Route to membership page
+app.get('/membership', (req, res) => {
+  // Dummy user object — replace with real user session/db data
+  const user = {
+    username: 'john_doe',
+    email: 'john@example.com',
+    birthday: '1999-04-21',
+    membershipTier: 'Gold',
+    phone: '98765432',
+    favoriteTeam: 'FC Barcha',
+    joinDate: '2023-01-10'
+  };
+
+  res.render('membership', { user });
+});
+
+//Route to admin page
+app.get('/admin', (req, res) => {
+  // Dummy admin data for now
+  const adminData = {
+    username: 'admin_john',
+    email: 'admin@example.com',
+    phone: '91234567',
+    joinDate: '2023-06-15'
+  };
+
+  res.render('admin', { admin: adminData });
+});
+
 // Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
