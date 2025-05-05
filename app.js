@@ -98,16 +98,20 @@ app.get('/cart', (req, res) => {
 
   res.render('cart', { cart, isMember });
 });
+
 // Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  if (isNaN(gearId)) {
-    res.status(400).send('Invalid gear ID');
-    return;
+
+  // Ensure the cart exists in the session
+  if (!req.session.cart) {
+    req.session.cart = [];
   }
 
-  cart = cart.filter((item) => item.gear_id !== gearId); // Remove the item from the cart
-  res.redirect('/cart');
+  // Remove the item from the session cart
+  req.session.cart = req.session.cart.filter((item) => item.gear_id !== gearId);
+
+  res.redirect('/cart'); // Redirect back to the cart page
 });
 
 // Update cart item quantity
@@ -115,18 +119,24 @@ app.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
 
+  // Validate input
   if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
-    res.status(400).send('Invalid input');
-    return;
+    return res.status(400).send('Invalid input');
   }
 
-  const item = cart.find((item) => item.gear_id === gearId);
+  // Ensure the cart exists in the session
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
+  // Find the item in the session cart and update its quantity
+  const item = req.session.cart.find((item) => item.gear_id === gearId);
   if (item) {
-    item.quantity = newQuantity; // Update the quantity
+    item.quantity = newQuantity;
   }
-  res.redirect('/cart');
-});
 
+  res.redirect('/cart'); // Redirect back to the cart page
+});
 // Payment route
 app.get('/paymentmethod', (req, res) => {
   // Placeholder for fetching customer details from the database
