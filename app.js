@@ -90,11 +90,14 @@ app.post('/cart/add/:id', (req, res) => {
 
 // View cart
 app.get('/cart', (req, res) => {
+  // Retrieve the cart from the session or initialize it
+  const cart = req.session.cart || [];
+
   // Placeholder for membership status
   const isMember = false; // Assume the user is not a member for now
+
   res.render('cart', { cart, isMember });
 });
-
 // Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
