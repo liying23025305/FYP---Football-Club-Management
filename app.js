@@ -4,7 +4,10 @@ const session = require('express-session');
 const app = express();
 
 // Dummy in-memory user storage
-let users = [];
+let users = [
+  { username: "admin", password: "adminpass", role: "admin" },
+  { username: "user", password: "userpass", role: "member" }
+];
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -15,10 +18,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Session middleware
 app.use(
   session({
-    secret: 'your-secret-key', // Replace with a strong secret
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 1 day
+    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }
   })
 );
 
@@ -27,7 +30,11 @@ let cart = [];
 
 // Home Route
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
+  res.render('index', {
+    title: 'Home Page',
+    message: 'Welcome to my basic Express app!',
+    user: req.session.user
+  });
 });
 
 // Login Route
@@ -35,16 +42,31 @@ app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login Submission
+// Login Submission with role check
 app.post('/loginAccount', (req, res) => {
   const { username, password } = req.body;
   const user = users.find(u => u.username === username && u.password === password);
 
   if (user) {
-    res.redirect('/');
+    req.session.user = user;
+
+    if (user.role === 'admin') {
+      return res.redirect('/admin/dashboard');
+    } else {
+      return res.redirect('/');
+    }
   } else {
     res.render('login', { error: 'Invalid credentials. Please register.' });
   }
+});
+
+// Admin Dashboard (Protected)
+app.get('/admin/dashboard', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Access denied.');
+  }
+
+  res.render('admin_dashboard', { user: req.session.user });
 });
 
 // Register Route
@@ -52,11 +74,18 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
-// Register Submission
+// Register Submission (default role = member)
 app.post('/registerAccount', (req, res) => {
   const { username, password } = req.body;
-  users.push({ username, password }); // store user temporarily
+  users.push({ username, password, role: 'member' }); // default new users are members
   res.redirect('/login');
+});
+
+// Logout Route
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
 });
 
 // Store Route
@@ -65,11 +94,6 @@ app.get('/store', (req, res) => {
     { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
-  ];
-
-  const cart = [
-    { gear_id: 1, gear_name: 'Football', price_per_unit: 25.99, quantity: 2 },
-    { gear_id: 2, gear_name: 'Jersey', price_per_unit: 49.99, quantity: 1 },
   ];
 
   res.render('store', { gear, cart });
@@ -102,7 +126,7 @@ app.post('/cart/add/:id', (req, res) => {
 
 // View cart
 app.get('/cart', (req, res) => {
-  const isMember = false;
+  const isMember = req.session.user && req.session.user.role === 'member';
   res.render('cart', { cart, isMember });
 });
 
@@ -137,7 +161,7 @@ app.post('/cart/update/:id', (req, res) => {
 
 // Payment route
 app.get('/payment', (req, res) => {
-  const customer = { name: 'John Doe', email: 'john.doe@example.com', address: '123 Main St' };
+  const customer = req.session.user || { name: 'Guest', email: '', address: '' };
   res.render('payment', { cart, customer });
 });
 
@@ -147,17 +171,15 @@ app.post('/payment/process', (req, res) => {
   res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
 });
 
-// Schedule route
+// Static content routes
 app.get('/schedule', (req, res) => {
   res.render('schedule');
 });
 
-// News route
 app.get('/news', (req, res) => {
   res.render('news');
 });
 
-// Players route
 app.get('/players', (req, res) => {
   res.render('players');
 });
