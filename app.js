@@ -49,13 +49,8 @@ app.get('/store', (req, res) => {
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  // Placeholder for cart items
-  const cart = [
-    { gear_id: 1, gear_name: 'Football', price_per_unit: 25.99, quantity: 2 },
-    { gear_id: 2, gear_name: 'Jersey', price_per_unit: 49.99, quantity: 1 },
-  ];
-
-  // Pass the gear and cart variables to the view
+  // Retrieve the cart from the session or initialize it
+  const cart = req.session.cart || [];
   res.render('store', { gear, cart });
 });
 
@@ -76,16 +71,21 @@ app.post('/cart/add/:id', (req, res) => {
     return res.status(404).send('Item not found');
   }
 
+  // Initialize the cart in the session if it doesn't exist
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
   // Check if the item already exists in the cart
-  const existingItem = cart.find((c) => c.gear_id === gearId);
+  const existingItem = req.session.cart.find((c) => c.gear_id === gearId);
   if (existingItem) {
     existingItem.quantity += 1; // Increment quantity
   } else {
-    cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
+    req.session.cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
   }
 
-  // Redirect back to the store page with a success message
-  res.redirect('/store?success=true');
+  // Redirect back to the store page
+  res.redirect('/store');
 });
 
 // View cart
