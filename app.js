@@ -21,6 +21,14 @@ app.use(
   })
 );
 
+// Middleware to initialize session cart
+app.use((req, res, next) => {
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+  next();
+});
+
 // Temporary in-memory cart
 let cart = [];
 
@@ -136,9 +144,13 @@ app.post('/cart/update/:id', (req, res) => {
   }
 
   res.redirect('/cart'); // Redirect back to the cart page
-});
-// Payment route
+}); 
+
+  // Payment route
 app.get('/paymentmethod', (req, res) => {
+  // Retrieve the cart from the session or initialize it
+  const cart = req.session.cart || [];
+
   // Placeholder for fetching customer details from the database
   const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
   const customer = {
@@ -219,4 +231,4 @@ app.get('/players', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-});
+}});
