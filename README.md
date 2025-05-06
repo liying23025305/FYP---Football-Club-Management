@@ -1,32 +1,40 @@
-# Football Club Management Web Application
-This web application is designed to manage football club operations.
-- Featuring member account management with an online merchandise store (offering discounts & cashback), a calendar for schedules & events, and payment processing for club services & purchases.
+# Football Club Management Web App
 
-## How to Run the Application
-1. **Install Dependencies**
-   Run the following command to install all required dependencies: npm install
+The Football Club Management System is a full-stack web application designed to streamline football club operations and enhance the experience for both club members and administrators.
 
-2. **Start the Application**
-   Start the application using one of the following commands:
-- For development mode (with automatic restarts using `nodemon`):
-  ```
-  npm run dev
-  ```
-  OR
-- For production mode:
-  ```
-  node app.js
-  ```
-3. **Access the Application**
-Open your browser and navigate to:
+---
+
+## 🛠 Tech Stack
+
+- **Frontend**: HTML, CSS (Bootstrap 5), EJS (Embedded JavaScript Templates)
+- **Backend**: Node.js, Express.js
+- **Database**: MySQL
+- **Server**: XAMPP (for MySQL service)
+
+---
+
+## ⚙️ How to Run This Project
+
+### 1. Clone the Repository
+git clone https://github.com/liying23025305/FYP---Football-Club-Management.git
+cd FYP---Football-Club-Management
+
+### 2. Start MySQL Using XAMPP
+Open XAMPP Control Panel
+Start Apache and MySQL
+Open phpMyAdmin and import the database (e.g. football_club.sql if provided)
+
+### 3. Install Node.js Dependencies
+npm install
+
+### 4.Set Up the Database
+Make sure the database credentials in models/db.js match your local XAMPP MySQL settings:
+host: 'localhost',
+user: 'root',
+password: '',
+database: 'your_database_name'
+
+### 5. Run the app
+node app.js
+Then open your browser and go to:
 http://localhost:3000
-
-----
-
-Home page layout (Draft 1 - Frontend interface):
-- Navigation Bar (Tickets | Players | Shop | Calendar | About | Contact)
-- Membership Benefits, Worldwide Store, Events & Training > Containerized code
-- Upcoming Events (Team Matches - Scores, Training session)
-- Trending (story highlights)
-- News (Popular Headlines)
-
