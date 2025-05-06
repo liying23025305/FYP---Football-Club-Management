@@ -94,7 +94,7 @@ app.post('/cart/add/:id', (req, res) => {
 
   // Redirect back to the store page
   res.redirect('/store');
-});
+}); // <-- Properly close the route here
 
 // View cart
 app.get('/cart', (req, res) => {
