@@ -205,7 +205,7 @@ app.post('/payment/processing', (req, res) => {
   setTimeout(() => {
     res.redirect('/payment/success');
   }, 3000); // Simulate a 3-second delay
-});
+}); 
 
 // Payment success page
 app.get('/payment/success', (req, res) => {
@@ -231,4 +231,4 @@ app.get('/players', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-}});
+});
