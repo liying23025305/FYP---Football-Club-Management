@@ -71,7 +71,7 @@ app.get('/admin/dashboard', (req, res) => {
 
 // Register Route
 app.get('/register', (req, res) => {
-  res.render('register');
+  res.render('register', { error: null });
 });
 
 // Register Submission (default role = member)
@@ -203,6 +203,28 @@ app.get('/membership', (req, res) => {
 // Route to membership tiers page
 app.get('/membership_tiers', (req, res) => {
   res.render('membership_tiers');
+});
+
+// Routes for membership overview pages
+app.get('/membership/gold', (req, res) => {
+  res.render('gold_membership', { title: 'Gold Membership' });
+  console.log('Gold membership page requested');
+});
+
+app.get('/membership/silver', (req, res) => {
+  res.render('silver_membership', { title: 'Silver Membership' });
+  console.log('Silver membership page requested');
+});
+
+app.get('/membership/bronze', (req, res) => {
+  res.render('bronze_membership', { title: 'Bronze Membership' });
+  console.log('Bronze membership page requested');
+});
+
+// Route to membership FAQs page
+app.get('/membership_faqs', (req, res) => {
+  res.render('membership_faqs', { title: 'Membership FAQs' });
+  console.log('Membership FAQs page requested');
 });
 
 // Route to matches page
