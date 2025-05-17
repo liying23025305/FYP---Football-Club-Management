@@ -2,6 +2,23 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const app = express();
+const mysql = require('mysql2');
+
+// MySQL connection configuration
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'mydb'
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
+});
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -29,9 +46,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Temporary in-memory cart
-let cart = [];
-
 // Routes
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
@@ -50,50 +64,48 @@ app.get('/register', (req, res) => {
 
 // Route to store
 app.get('/store', (req, res) => {
-  // Placeholder for store items
-  const gear = [
-    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
-    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
-    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
-  ];
-
-  // Retrieve the cart from the session or initialize it
-  const cart = req.session.cart || [];
-  res.render('store', { gear, cart });
+  connection.query('SELECT * FROM gear', (err, results) => {
+    if (err) {
+      console.error('Error fetching gear:', err);
+      return res.status(500).send('Database error');
+    }
+    const cart = req.session.cart || [];
+    res.render('store', { gear: results, cart });
+  });
 });
 
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
 
-  // Placeholder for store items
-  const gear = [
-    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
-    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
-    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
-  ];
+  // Fetch the item from the database
+  connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
+    if (err) {
+      console.error('Error fetching gear:', err);
+      return res.status(500).send('Database error');
+    }
+    if (results.length === 0) {
+      return res.status(404).send('Item not found');
+    }
 
-  // Find the item in the store
-  const item = gear.find((g) => g.gear_id === gearId);
-  if (!item) {
-    return res.status(404).send('Item not found');
-  }
+    const item = results[0];
 
-  // Initialize the cart in the session if it doesn't exist
-  if (!req.session.cart) {
-    req.session.cart = [];
-  }
+    // Initialize the cart in the session if it doesn't exist
+    if (!req.session.cart) {
+      req.session.cart = [];
+    }
 
   // Check if the item already exists in the cart
-  const existingItem = req.session.cart.find((c) => c.gear_id === gearId);
-  if (existingItem) {
-    existingItem.quantity += 1; // Increment quantity
-  } else {
-    req.session.cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
-  }
+    const existingItem = req.session.cart.find((c) => c.gear_id === gearId);
+    if (existingItem) {
+      existingItem.quantity += 1; // Increment quantity
+    } else {
+      req.session.cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
+    }
 
-  // Redirect back to the store page
-  res.redirect('/store');
+    // Redirect back to the store page
+    res.redirect('/store');
+  });
 }); // <-- Properly close the route here
 
 // View cart
@@ -179,32 +191,58 @@ app.get('/payment/options', (req, res) => {
   res.render('paymentoptions', { customer });
 });
 
-// Payment processing page
 app.post('/payment/processing', (req, res) => {
-  const paymentMethod = req.body.paymentMethod; // Get selected payment method
-  const savePaymentMethod = req.body.savePaymentMethod === 'true'; // Check if the checkbox is ticked
+  const paymentMethod = req.body.paymentMethod;
+  const savePaymentMethod = req.body.savePaymentMethod === 'true';
+  const cart = req.session.cart || [];
+  const customerId = req.session.customerId || 1; // Replace with real user ID
 
-  console.log(`Processing payment with ${paymentMethod}...`);
-  console.log(`Save payment method: ${savePaymentMethod}`);
-
-  // Placeholder for saving the payment method to the database
-  if (savePaymentMethod) {
-    const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
-    console.log(`Saving payment method "${paymentMethod}" for customer ID ${customerId}...`);
-    // Simulate database query
-    // db.query('UPDATE membership SET payment_method = ? WHERE id = ?', [paymentMethod, customerId], (err) => {
-    //   if (err) {
-    //     console.error(err);
-    //     return res.status(500).send('Database error');
-    //   }
-    //   console.log('Payment method saved successfully.');
-    // });
+  if (cart.length === 0) {
+    return res.status(400).send('Cart is empty');
   }
 
-  // Simulate payment processing
-  setTimeout(() => {
-    res.redirect('/payment/success');
-  }, 3000); // Simulate a 3-second delay
+  // 1. Insert order
+  const orderData = {
+    user_id: customerId,
+    order_date: new Date(),
+    payment_method: paymentMethod // Add this column to your order table if needed
+  };
+
+  connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
+    if (err) {
+      console.error('Error creating order:', err);
+      return res.status(500).send('Database error');
+    }
+
+    const orderId = orderResult.insertId;
+
+    // 2. Insert order items
+    const orderItems = cart.map(item => [
+      orderId,
+      item.gear_id,
+      item.quantity,
+      item.price_per_unit
+    ]);
+
+    connection.query(
+      'INSERT INTO order_item (order_id, gear_id, quantity, price_per_unit) VALUES ?',
+      [orderItems],
+      (err) => {
+        if (err) {
+          console.error('Error inserting order items:', err);
+          return res.status(500).send('Database error');
+        }
+
+        // 3. Clear the cart
+        req.session.cart = [];
+
+        // 4. Simulate payment processing and redirect
+        setTimeout(() => {
+          res.redirect('/payment/success');
+        }, 3000);
+      }
+    );
+  });
 }); 
 
 // Payment success page
