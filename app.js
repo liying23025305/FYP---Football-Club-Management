@@ -2,12 +2,11 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const app = express();
+const db = require('./models/db');
 
-// Dummy in-memory user storage
-let users = [
-  { username: "admin", password: "adminpass", role: "admin" },
-  { username: "user", password: "userpass", role: "member" }
-];
+// Route modules
+const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -25,8 +24,18 @@ app.use(
   })
 );
 
+// Expose session user to all views
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
 // Temporary in-memory cart
 let cart = [];
+
+// Routes
+app.use(authRoutes);
+app.use(adminRoutes);
 
 // Home Route
 app.get('/', (req, res) => {
@@ -34,57 +43,6 @@ app.get('/', (req, res) => {
     title: 'Home Page',
     message: 'Welcome to my basic Express app!',
     user: req.session.user
-  });
-});
-
-// Login Route
-app.get('/login', (req, res) => {
-  res.render('login', { error: null });
-});
-
-// Login Submission with role check
-app.post('/loginAccount', (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(u => u.username === username && u.password === password);
-
-  if (user) {
-    req.session.user = user;
-
-    if (user.role === 'admin') {
-      return res.redirect('/admin/dashboard');
-    } else {
-      return res.redirect('/');
-    }
-  } else {
-    res.render('login', { error: 'Invalid credentials. Please register.' });
-  }
-});
-
-// Admin Dashboard (Protected)
-app.get('/admin/dashboard', (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.status(403).send('Access denied.');
-  }
-
-  res.render('admin_dashboard', { user: req.session.user });
-});
-
-// Register Route
-app.get('/register', (req, res) => {
-  res.render('register', { error: null });
-});
-
-// Register Submission (default role = member)
-app.post('/registerAccount', (req, res) => {
-  const { username, password } = req.body;
-  users.push({ username, password, role: 'member' }); // default new users are members
-  res.redirect('/login');
-});
-
-// Logout Route
-app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
   });
 });
 
@@ -102,7 +60,6 @@ app.get('/store', (req, res) => {
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-
   const gear = [
     { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
@@ -110,9 +67,7 @@ app.post('/cart/add/:id', (req, res) => {
   ];
 
   const item = gear.find((g) => g.gear_id === gearId);
-  if (!item) {
-    return res.status(404).send('Item not found');
-  }
+  if (!item) return res.status(404).send('Item not found');
 
   const existingItem = cart.find((c) => c.gear_id === gearId);
   if (existingItem) {
@@ -133,23 +88,19 @@ app.get('/cart', (req, res) => {
 // Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  if (isNaN(gearId)) {
-    res.status(400).send('Invalid gear ID');
-    return;
-  }
+  if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
   cart = cart.filter((item) => item.gear_id !== gearId);
   res.redirect('/cart');
 });
 
-// Update cart item quantity
+// Update item quantity
 app.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
 
   if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
-    res.status(400).send('Invalid input');
-    return;
+    return res.status(400).send('Invalid input');
   }
 
   const item = cart.find((item) => item.gear_id === gearId);
@@ -165,28 +116,23 @@ app.get('/payment', (req, res) => {
   res.render('payment', { cart, customer });
 });
 
-// Process payment
+// Payment processing
 app.post('/payment/process', (req, res) => {
   cart = [];
   res.send('<h1>Payment Successful!</h1><p>Your order has been placed successfully.</p>');
 });
 
-// Static content routes
-app.get('/schedule', (req, res) => {
-  res.render('schedule');
-});
+// Static routes
+app.get('/schedule', (req, res) => res.render('schedule'));
+app.get('/news', (req, res) => res.render('news'));
+app.get('/players', (req, res) => res.render('players'));
+app.get('/profile', (req, res) => res.render('profile'));
+app.get('/matches', (req, res) => res.render('matches', { title: 'Matches' }));
+app.get('/membership_tiers', (req, res) => res.render('membership_tiers', { title: 'Membership Tiers' }));
+app.get('/membership_faqs', (req, res) => res.render('membership_faqs', { title: 'Membership FAQs' }));
 
-app.get('/news', (req, res) => {
-  res.render('news');
-});
-
-app.get('/players', (req, res) => {
-  res.render('players');
-});
-
-//Route to membership page
+// Membership page
 app.get('/membership', (req, res) => {
-  // Dummy user object — replace with real user session/db data (TODO)
   const user = {
     username: 'john_doe',
     email: 'john@example.com',
@@ -196,16 +142,10 @@ app.get('/membership', (req, res) => {
     favoriteTeam: 'FC Barcha',
     joinDate: '2023-01-10'
   };
-
   res.render('membership', { user });
 });
 
-// Route to membership tiers page
-app.get('/membership_tiers', (req, res) => {
-  res.render('membership_tiers');
-});
-
-// Routes for membership overview pages
+// Membership tier pages
 app.get('/membership/gold', (req, res) => {
   res.render('gold_membership', { title: 'Gold Membership' });
   console.log('Gold membership page requested');
@@ -221,31 +161,7 @@ app.get('/membership/bronze', (req, res) => {
   console.log('Bronze membership page requested');
 });
 
-// Route to membership FAQs page
-app.get('/membership_faqs', (req, res) => {
-  res.render('membership_faqs', { title: 'Membership FAQs' });
-  console.log('Membership FAQs page requested');
-});
-
-// Route to matches page
-app.get('/matches', (req, res) => {
-  res.render('matches');
-});
-
-//Route to admin page
-app.get('/admin', (req, res) => {
-  // Dummy admin data for now
-  const adminData = {
-    username: 'admin_john',
-    email: 'admin@example.com',
-    phone: '91234567',
-    joinDate: '2023-06-15'
-  };
-
-  res.render('admin', { admin: adminData });
-});
-
-// Start Server
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
