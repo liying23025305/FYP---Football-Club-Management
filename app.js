@@ -2,9 +2,6 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const app = express();
-<<<<<<< HEAD
-const db = require('./models/db');
-=======
 const mysql = require('mysql2');
 
 // MySQL connection configuration
@@ -22,7 +19,6 @@ connection.connect((err) => {
   }
   console.log('Connected to MySQL database');
 });
->>>>>>> 13639749f225b4b0693b1bd17dcc231555f8f031
 
 // Route modules
 const authRoutes = require('./routes/authRoutes');
@@ -44,16 +40,6 @@ app.use(
   })
 );
 
-<<<<<<< HEAD
-// Expose session user to all views
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
-
-// Temporary in-memory cart
-let cart = [];
-=======
 // Middleware to initialize session cart
 app.use((req, res, next) => {
   if (!req.session.cart) {
@@ -61,7 +47,6 @@ app.use((req, res, next) => {
   }
   next();
 });
->>>>>>> 13639749f225b4b0693b1bd17dcc231555f8f031
 
 // Routes
 app.use(authRoutes);
@@ -78,15 +63,6 @@ app.get('/', (req, res) => {
 
 // Store Route
 app.get('/store', (req, res) => {
-<<<<<<< HEAD
-  const gear = [
-    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
-    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
-    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
-  ];
-
-  res.render('store', { gear, cart });
-=======
   connection.query('SELECT * FROM gear', (err, results) => {
     if (err) {
       console.error('Error fetching gear:', err);
@@ -95,13 +71,11 @@ app.get('/store', (req, res) => {
     const cart = req.session.cart || [];
     res.render('store', { gear: results, cart });
   });
->>>>>>> 13639749f225b4b0693b1bd17dcc231555f8f031
 });
 
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-<<<<<<< HEAD
   const gear = [
     { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
     { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
@@ -124,59 +98,16 @@ app.post('/cart/add/:id', (req, res) => {
 // View cart
 app.get('/cart', (req, res) => {
   const isMember = req.session.user && req.session.user.role === 'member';
-=======
-
-  // Fetch the item from the database
-  connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
-    if (err) {
-      console.error('Error fetching gear:', err);
-      return res.status(500).send('Database error');
-    }
-    if (results.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    const item = results[0];
-
-    // Initialize the cart in the session if it doesn't exist
-    if (!req.session.cart) {
-      req.session.cart = [];
-    }
-
-  // Check if the item already exists in the cart
-    const existingItem = req.session.cart.find((c) => c.gear_id === gearId);
-    if (existingItem) {
-      existingItem.quantity += 1; // Increment quantity
-    } else {
-      req.session.cart.push({ ...item, quantity: 1 }); // Add item to cart with quantity
-    }
-
-    // Redirect back to the store page
-    res.redirect('/store');
-  });
-}); // <-- Properly close the route here
-
-// View cart
-app.get('/cart', (req, res) => {
-  // Retrieve the cart from the session or initialize it
-  const cart = req.session.cart || [];
-
-  // Placeholder for membership status
-  const isMember = false; // Assume the user is not a member for now
-
->>>>>>> 13639749f225b4b0693b1bd17dcc231555f8f031
   res.render('cart', { cart, isMember });
 });
 
 // Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-<<<<<<< HEAD
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
   cart = cart.filter((item) => item.gear_id !== gearId);
   res.redirect('/cart');
-=======
 
   // Ensure the cart exists in the session
   if (!req.session.cart) {
@@ -187,7 +118,6 @@ app.post('/cart/remove/:id', (req, res) => {
   req.session.cart = req.session.cart.filter((item) => item.gear_id !== gearId);
 
   res.redirect('/cart'); // Redirect back to the cart page
->>>>>>> 13639749f225b4b0693b1bd17dcc231555f8f031
 });
 
 // Update item quantity
