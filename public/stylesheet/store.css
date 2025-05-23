@@ -10,10 +10,14 @@
 }
 
 .store-jersey-img {
-  /* Set a specific size for the image (e.g., for a thumbnail) */
-  width: 80px; /* Adjust this to your desired thumbnail width */
-  height: 80px; /* Make height equal to width for a square thumbnail, or adjust as needed */
-  object-fit: contain; /* Ensure the image fits within the defined area */
-  display: block; /* Important: removes extra space below the image */
-  margin: 0 auto; /* Center the image within the card */
+  width: 40px !important;      /* Force a very small width */
+  height: 40px !important;     /* Force a very small height */
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
 }
