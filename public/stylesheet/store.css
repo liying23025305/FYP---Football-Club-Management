@@ -1,6 +1,6 @@
 .store-card {
   /* Keep the card at a reasonable size */
-  max-width: 250px; /* Or whatever appropriate size for your card */
+  max-width: 150px !important; /* Or whatever appropriate size for your card */
   width: 100%;
   margin: 0 auto;
   padding: 10px;
