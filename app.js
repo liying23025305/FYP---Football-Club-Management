@@ -51,6 +51,13 @@ app.use((req, res, next) => {
 // Routes
 app.use(authRoutes);
 app.use(adminRoutes);
+app.use((req, res) => {
+  res.status(404).render('404', { title: 'Page Not Found' });
+});
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error', { error: err });
+});
 
 // Home Route
 app.get('/', (req, res) => {
@@ -68,36 +75,45 @@ app.get('/store', (req, res) => {
       console.error('Error fetching gear:', err);
       return res.status(500).send('Database error');
     }
+    // Convert price_per_unit to a number for each item
+    const gear = results.map(item => ({
+      ...item,
+      price_per_unit: Number(item.price_per_unit)
+    }));
     const cart = req.session.cart || [];
-    res.render('store', { gear: results, cart });
+    res.render('store', { gear, cart });
   });
 });
 
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  const gear = [
-    { gear_id: 1, gear_name: 'Football', gear_desc: 'High-quality football', price_per_unit: 25.99 },
-    { gear_id: 2, gear_name: 'Jersey', gear_desc: 'Team jersey', price_per_unit: 49.99 },
-    { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
-  ];
+  if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
-  const item = gear.find((g) => g.gear_id === gearId);
-  if (!item) return res.status(404).send('Item not found');
+  // Fetch the item from the database
+  connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
+    if (err || results.length === 0) return res.status(404).send('Item not found');
+    const item = results[0];
+    item.price_per_unit = Number(item.price_per_unit);
 
-  const existingItem = cart.find((c) => c.gear_id === gearId);
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.push({ ...item, quantity: 1 });
-  }
+    // Use session cart
+    const cart = req.session.cart;
 
-  res.redirect('/store?success=true');
+    const existingItem = cart.find((c) => c.gear_id === gearId);
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({ ...item, quantity: 1 });
+    }
+
+    res.redirect('/store?success=true');
+  });
 });
 
 // View cart
 app.get('/cart', (req, res) => {
   const isMember = req.session.user && req.session.user.role === 'member';
+  const cart = req.session.cart || [];
   res.render('cart', { cart, isMember });
 });
 
@@ -105,9 +121,6 @@ app.get('/cart', (req, res) => {
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
-
-  cart = cart.filter((item) => item.gear_id !== gearId);
-  res.redirect('/cart');
 
   // Ensure the cart exists in the session
   if (!req.session.cart) {
@@ -144,37 +157,34 @@ app.post('/cart/update/:id', (req, res) => {
   res.redirect('/cart'); // Redirect back to the cart page
 }); 
 
-  // Payment route
+// Payment route
 app.get('/paymentmethod', (req, res) => {
-  // Retrieve the cart from the session or initialize it
   const cart = req.session.cart || [];
 
-  // Placeholder for fetching customer details from the database
-  const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
-  const customer = {
-    id: customerId,
-    name: "John Doe", // Placeholder for customer name
-    email: "john.doe@example.com", // Placeholder for customer email
-    address: "123 Main St", // Placeholder for customer address
-  };
-
-  // Render the payment method page with cart and customer details
-  res.render('paymentmethod', { cart, customer });
+  // Fetch customer details from the database
+  connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
+    if (err || results.length === 0) {
+      console.error('Error fetching customer:', err);
+      return res.status(500).send('Customer not found');
+    }
+    const customer = results[0];
+    res.render('paymentmethod', { cart, customer });
+  });
 });
 
 // Payment options page
 app.get('/payment/options', (req, res) => {
-  // Placeholder for fetching customer details from the database
-  const customerId = req.session.customerId || 1; // Assume customer ID is stored in the session
-  const customer = {
-    id: customerId,
-    name: "John Doe", // Placeholder for customer name
-    email: "john.doe@example.com", // Placeholder for customer email
-    address: "123 Main St", // Placeholder for customer address
-  };
+  const customerId = req.session.customerId || 1; // Replace with real session logic
 
-  // Render the payment options page with customer details
-  res.render('paymentoptions', { customer });
+  // Fetch customer details from the database
+  connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
+    if (err || results.length === 0) {
+      console.error('Error fetching customer:', err);
+      return res.status(500).send('Customer not found');
+    }
+    const customer = results[0];
+    res.render('paymentoptions', { customer });
+  });
 });
 
 app.post('/payment/processing', (req, res) => {
