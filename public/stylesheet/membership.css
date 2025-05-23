@@ -5,17 +5,14 @@
   border-radius: 10px;
 }
 
-.gold {
-  background-color: #ffd700;
-  color: #3425a5;
+body.gold {
+  background-color: #fff8dc; /* light gold background */
 }
-.silver {
-  background-color: #c0c0c0;
-  color: #3425a5;
+body.silver {
+  background-color: #f5f5f5; /* light silver/gray background */
 }
-.bronze {
-  background-color: #cd7f32;
-  color: #3425a5;
+body.bronze {
+  background-color: #fbeee6; /* light bronze background */
 }
 
 /* FAQ Section */
