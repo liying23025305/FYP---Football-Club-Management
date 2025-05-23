@@ -1,13 +1,13 @@
 .store-jersey-img {
   width: auto;
-  max-width: 100px;  
-  height: 120px;     
+  max-width: 50px;  
+  height: 60px;     
   object-fit: contain;
   display: block;
   margin: 0 auto;
 }
 
 .store-card {
-  max-width: 100px;   /* Adjust as needed */
+  max-width: 50px;   /* Adjust as needed */
   margin: 0 auto;     /* Center the card */
 }
