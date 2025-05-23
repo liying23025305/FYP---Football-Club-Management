@@ -51,13 +51,6 @@ app.use((req, res, next) => {
 // Routes
 app.use(authRoutes);
 app.use(adminRoutes);
-app.use((req, res) => {
-  res.status(404).render('404', { title: 'Page Not Found' });
-});
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('error', { error: err });
-});
 
 // Home Route
 app.get('/', (req, res) => {
