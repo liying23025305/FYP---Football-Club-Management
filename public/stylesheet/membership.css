@@ -1,0 +1,179 @@
+/* Membership cards */
+.membership-card {
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.gold {
+  background-color: #ffd700;
+  color: #3425a5;
+}
+.silver {
+  background-color: #c0c0c0;
+  color: #3425a5;
+}
+.bronze {
+  background-color: #cd7f32;
+  color: #3425a5;
+}
+
+/* FAQ Section */
+.faq-header {
+  color: #d32f2f;
+  font-weight: bold;
+  margin-bottom: 40px;
+  text-align: left;
+  font-size: 3rem;
+}
+.nav-tabs {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 40px;
+  justify-content: left;
+}
+.nav-tabs .nav-link {
+  color: #333;
+  font-weight: 500;
+  border: none;
+  padding: 12px 30px;
+  margin-right: 10px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+.nav-tabs .nav-link.active {
+  color: #d32f2f;
+  border-bottom: 3px solid #d32f2f;
+  font-weight: 600;
+}
+.tab-content {
+  padding: 20px 0;
+}
+.faq-item {
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.faq-question {
+  background-color: #f5f5f5;
+  padding: 18px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+.faq-question:hover {
+  background-color: #eeeeee;
+}
+.faq-answer {
+  padding: 20px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  display: none;
+}
+.faq-icon {
+  transition: transform 0.3s ease;
+}
+.faq-question.active .faq-icon {
+  transform: rotate(180deg);
+}
+.tab-pane {
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Membership headers by tier */
+.membership-header.gold {
+  background-color: #ffd700;
+  color: white;
+}
+.membership-header.silver {
+  background-color: #c0c0c0;
+  color: white;
+}
+.membership-header.bronze {
+  background-color: #cd7f32;
+  color: white;
+}
+.membership-header {
+  padding: 40px 0;
+  text-align: center;
+  margin-bottom: 30px;
+}
+.membership-header h1 {
+  font-size: 4rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Membership benefits by tier */
+.membership-benefits.gold {
+  background-color: #ffd700;
+  color: #1a237e;
+}
+.membership-benefits.silver {
+  background-color: #c0c0c0;
+  color: #1a237e;
+}
+.membership-benefits.bronze {
+  background-color: #cd7f32;
+  color: #1a237e;
+}
+.membership-benefits {
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 30px;
+}
+.membership-benefits h3 {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* Benefit items */
+.benefit-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 5px;
+  border-left: 5px solid #1a237e;
+}
+.benefit-item h5 {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* Register button */
+.register-btn {
+  background-color: #d32f2f;
+  color: white;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.register-btn:hover {
+  background-color: #b71c1c;
+  color: white;
+  text-shadow: 1px 1px rgba(90, 84, 84, 0.162);
+}
+
+/* Tier border colors */
+.border-gold {
+  border-left: 4px solid #ffd700;
+}
+.border-silver {
+  border-left: 4px solid #c0c0c0;
+}
+.border-bronze {
+  border-left: 4px solid #cd7f32;
+}
