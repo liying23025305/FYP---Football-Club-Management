@@ -160,6 +160,7 @@ app.post('/cart/update/:id', (req, res) => {
 // Payment route
 app.get('/paymentmethod', (req, res) => {
   const cart = req.session.cart || [];
+  const customerId = req.session.customerId || 1; // Add this line
 
   // Fetch customer details from the database
   connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
