@@ -1,0 +1,7 @@
+.store-jersey-img {
+  width: 100%;         /* Fill the card's width */
+  height: 250px;       /* Set a fixed height for uniformity */
+  object-fit: contain; /* Show the whole image, keep aspect ratio */
+  display: block;
+  margin: 0 auto;
+}
