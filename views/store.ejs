@@ -16,8 +16,7 @@
 
   <div class="row">
     <% gear.forEach(function(item) { %>
-      <div class="col-md-4 mb-4">
-        <div class="card">
+      <div class="col-6 col-sm-4 col-md-3 mb-4"> <div class="card">
           <% if (item.image_url) { %>
             <img src="<%= item.image_url %>" class="card-img-top" alt="<%= item.gear_name %>">
           <% } else { %>
@@ -25,16 +24,13 @@
           <% } %>
           <div class="card-body">
             <h5 class="card-title"><%= item.gear_name %></h5>
-            <p class="card-text"><%= item.gear_desc %></p>
-            <p class="card-text"><strong>Price:</strong> $<%= item.price_per_unit.toFixed(2) %></p>
-            <form action="/cart/add/<%= item.gear_id %>" method="POST">
-              <button type="submit" class="btn btn-primary">Add to Cart</button>
-            </form>
+            <p class="card-text">Price: $<%= item.price %></p>
+            <a href="#" class="btn btn-primary">View Details</a>
           </div>
         </div>
       </div>
     <% }); %>
-  </div>
+</div>
 </main>
 
     <!-- Current Cart Section -->
