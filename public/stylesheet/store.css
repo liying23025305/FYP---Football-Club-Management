@@ -1,6 +1,6 @@
 .store-jersey-img {
   width: auto;
-  max-width: 120px;  
+  max-width: 100px;  
   height: 120px;     
   object-fit: contain;
   display: block;
@@ -8,6 +8,6 @@
 }
 
 .store-card {
-  max-width: 250px;   /* Adjust as needed */
+  max-width: 100px;   /* Adjust as needed */
   margin: 0 auto;     /* Center the card */
 }
