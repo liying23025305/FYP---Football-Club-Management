@@ -17,22 +17,21 @@
     <h1 class="text-center">Store</h1>
 
     <!-- Store Items Section -->
-    <div class="row">
-      <% gear.forEach(item => { %>
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><%= item.gear_name %></h5>
-              <p class="card-text"><%= item.gear_desc %></p>
-              <p class="card-text"><strong>Price:</strong> $<%= item.price_per_unit.toFixed(2) %></p>
-              <form action="/cart/add/<%= item.gear_id %>" method="POST">
-                <button type="submit" class="btn btn-primary">Add to Cart</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      <% }) %>
-    </div>
+    <div class="card">
+  <% if (item.image_url) { %>
+    <img src="<%= item.image_url %>" class="card-img-top" alt="<%= item.gear_name %>">
+  <% } else { %>
+    <img src="/images/default.png" class="card-img-top" alt="No image available">
+  <% } %>
+  <div class="card-body">
+    <h5 class="card-title"><%= item.gear_name %></h5>
+    <p class="card-text"><%= item.gear_desc %></p>
+    <p class="card-text"><strong>Price:</strong> $<%= item.price_per_unit.toFixed(2) %></p>
+    <form action="/cart/add/<%= item.gear_id %>" method="POST">
+      <button type="submit" class="btn btn-primary">Add to Cart</button>
+    </form>
+  </div>
+</div>
 
     <!-- Current Cart Section -->
     <h2 class="mt-5">Current Cart</h2>
