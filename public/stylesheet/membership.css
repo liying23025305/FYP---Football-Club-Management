@@ -48,11 +48,11 @@ body.bronze {
 }
 .membership-header.gold {
   background-color: #ffd700;
-  color: #fff;
+  color: #1a237e; /* dark blue for contrast */
 }
 .membership-header.silver {
   background-color: #c0c0c0;
-  color: #fff;
+  color: #1a237e;
 }
 .membership-header.bronze {
   background-color: #cd7f32;
