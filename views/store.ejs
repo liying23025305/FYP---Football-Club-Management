@@ -41,17 +41,32 @@
     </div>
 
     <!-- Current Cart Section -->
-    <h2 class="mt-4">Current Cart</h2>
-    <% if (cart && cart.length > 0) { %>
-      <table class="table table-bordered">
-        <!-- ... -->
-      </table>
-      <div class="text-end">
-        <a href="/cart" class="btn btn-success">View Cart</a>
-      </div>
-    <% } else { %>
-      <p class="text-center">Your cart is currently empty.</p>
-    <% } %>
+   <h2 class="mt-4">Current Cart</h2>
+<% if (cart && cart.length > 0) { %>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% cart.forEach(function(cartItem) { %>
+        <tr>
+          <td><%= cartItem.gear_name %></td>
+          <td><%= cartItem.quantity %></td>
+          <td>$<%= cartItem.price_per_unit ? cartItem.price_per_unit.toFixed(2) : cartItem.price.toFixed(2) %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <div class="text-end">
+    <a href="/cart" class="btn btn-success">View Cart</a>
+  </div>
+<% } else { %>
+  <p class="text-center">Your cart is currently empty.</p>
+<% } %>
   </main>
   <%- include('partials/footer') %>
 </body>
