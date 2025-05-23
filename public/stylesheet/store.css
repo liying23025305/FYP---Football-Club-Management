@@ -1,13 +1,19 @@
-.store-jersey-img {
-  width: auto;
-  max-width: 50px;  
-  height: 60px;     
-  object-fit: contain;
-  display: block;
+.store-card {
+  /* Keep the card at a reasonable size */
+  max-width: 250px; /* Or whatever appropriate size for your card */
+  width: 100%;
   margin: 0 auto;
+  padding: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: center; /* Center content within the card */
 }
 
-.store-card {
-  max-width: 50px;   /* Adjust as needed */
-  margin: 0 auto;     /* Center the card */
+.store-jersey-img {
+  /* Set a specific size for the image (e.g., for a thumbnail) */
+  width: 80px; /* Adjust this to your desired thumbnail width */
+  height: 80px; /* Make height equal to width for a square thumbnail, or adjust as needed */
+  object-fit: contain; /* Ensure the image fits within the defined area */
+  display: block; /* Important: removes extra space below the image */
+  margin: 0 auto; /* Center the image within the card */
 }
