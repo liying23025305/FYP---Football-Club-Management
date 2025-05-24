@@ -82,8 +82,6 @@ app.get('/store', (req, res) => {
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
-
-  // Fetch the item from the database
   connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
     if (err || results.length === 0) return res.status(404).send('Item not found');
     const item = results[0];
@@ -122,33 +120,22 @@ app.post('/cart/remove/:id', (req, res) => {
 
   // Remove the item from the session cart
   req.session.cart = req.session.cart.filter((item) => item.gear_id !== gearId);
-
-  res.redirect('/cart'); // Redirect back to the cart page
+  res.redirect('/cart');
 });
 
 // Update item quantity
 app.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
-
-  // Validate input
   if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
     return res.status(400).send('Invalid input');
   }
-
-  // Ensure the cart exists in the session
-  if (!req.session.cart) {
-    req.session.cart = [];
-  }
-
-  // Find the item in the session cart and update its quantity
+  if (!req.session.cart) req.session.cart = [];
   const item = req.session.cart.find((item) => item.gear_id === gearId);
-  if (item) {
-    item.quantity = newQuantity;
-  }
+  if (item) item.quantity = newQuantity;
+  res.redirect('/cart');
+});
 
-  res.redirect('/cart'); // Redirect back to the cart page
-}); 
 
 // Payment route
 // Payment route (placeholder customer)
@@ -195,17 +182,15 @@ app.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
   const savePaymentMethod = req.body.savePaymentMethod === 'true';
   const cart = req.session.cart || [];
-  const customerId = req.session.customerId || 1; // Replace with real user ID
+  const customerId = req.session.customerId;
+  if (!customerId) return res.redirect('/login');
+  if (cart.length === 0) return res.status(400).send('Cart is empty');
 
-  if (cart.length === 0) {
-    return res.status(400).send('Cart is empty');
-  }
-
-  // 1. Insert order
+  // Insert order
   const orderData = {
     user_id: customerId,
     order_date: new Date(),
-    payment_method: paymentMethod // Add this column to your order table if needed
+    payment_method: paymentMethod
   };
 
   connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
@@ -213,17 +198,13 @@ app.post('/payment/processing', (req, res) => {
       console.error('Error creating order:', err);
       return res.status(500).send('Database error');
     }
-
     const orderId = orderResult.insertId;
-
-    // 2. Insert order items
     const orderItems = cart.map(item => [
       orderId,
       item.gear_id,
       item.quantity,
       item.price_per_unit
     ]);
-
     connection.query(
       'INSERT INTO order_item (order_id, gear_id, quantity, price_per_unit) VALUES ?',
       [orderItems],
@@ -232,18 +213,13 @@ app.post('/payment/processing', (req, res) => {
           console.error('Error inserting order items:', err);
           return res.status(500).send('Database error');
         }
-
-        // 3. Clear the cart
+        // Clear cart after successful order
         req.session.cart = [];
-
-        // 4. Simulate payment processing and redirect
-        setTimeout(() => {
-          res.redirect('/payment/success');
-        }, 3000);
+        res.redirect('/payment/success');
       }
     );
   });
-}); 
+});
 
 // Payment success page
 app.get('/payment/success', (req, res) => {
