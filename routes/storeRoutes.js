@@ -3,7 +3,7 @@ const router = express.Router();
 const connection = require('../models/db');
 
 // Store Route
-app.get('/store', (req, res) => {
+router.get('/store', (req, res) => {
   connection.query('SELECT * FROM gear', (err, results) => {
     if (err) {
       console.error('Error fetching gear:', err);
@@ -20,7 +20,7 @@ app.get('/store', (req, res) => {
 });
 
 // Add item to cart
-app.post('/cart/add/:id', (req, res) => {
+router.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
   connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
@@ -43,14 +43,14 @@ app.post('/cart/add/:id', (req, res) => {
 });
 
 // View cart
-app.get('/cart', (req, res) => {
+router.get('/cart', (req, res) => {
   const isMember = req.session.user && req.session.user.role === 'member';
   const cart = req.session.cart || [];
   res.render('cart', { cart, isMember });
 });
 
 // Remove item from cart
-app.post('/cart/remove/:id', (req, res) => {
+router.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
@@ -65,7 +65,7 @@ app.post('/cart/remove/:id', (req, res) => {
 });
 
 // Update item quantity
-app.post('/cart/update/:id', (req, res) => {
+router.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
   if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
@@ -79,7 +79,7 @@ app.post('/cart/update/:id', (req, res) => {
 
 
 // Payment method page (fetch customer from DB)
-app.get('/paymentmethod', (req, res) => {
+router.get('/paymentmethod', (req, res) => {
   const cart = req.session.cart || [];
   const customerId = req.session.customerId || 1; // Replace with real session logic
 
@@ -94,7 +94,7 @@ app.get('/paymentmethod', (req, res) => {
 });
 
 // Payment options page (fetch customer from DB)
-app.get('/payment/options', (req, res) => {
+router.get('/payment/options', (req, res) => {
   const customerId = req.session.customerId || 1; // Replace with real session logic
 
   connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
@@ -107,7 +107,7 @@ app.get('/payment/options', (req, res) => {
   });
 });
 
-app.post('/payment/processing', (req, res) => {
+router.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
   const savePaymentMethod = req.body.savePaymentMethod === 'true';
   const cart = req.session.cart || [];
@@ -151,6 +151,6 @@ app.post('/payment/processing', (req, res) => {
 });
 
 // Payment success page
-app.get('/payment/success', (req, res) => {
+router.get('/payment/success', (req, res) => {
   res.render('paymentsuccess');
 });
