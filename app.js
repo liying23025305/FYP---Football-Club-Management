@@ -137,37 +137,25 @@ app.post('/cart/update/:id', (req, res) => {
 });
 
 
-// Payment route
-// Payment route (placeholder customer)
+// Payment method page (fetch customer from DB)
 app.get('/paymentmethod', (req, res) => {
   const cart = req.session.cart || [];
-  // Placeholder customer object
-  const customer = {
-    id: 1,
-    name: 'Test User',
-    email: 'test@example.com',
-    address: '123 Test Lane'
-  };
-  res.render('paymentmethod', { cart, customer });
+  const customerId = req.session.customerId || 1; // Replace with real session logic
+
+  connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
+    if (err || results.length === 0) {
+      console.error('Error fetching customer:', err);
+      return res.status(500).send('Customer not found');
+    }
+    const customer = results[0];
+    res.render('paymentmethod', { cart, customer });
+  });
 });
 
-// Payment options page (placeholder customer)
-app.get('/payment/options', (req, res) => {
-  // Placeholder customer object
-  const customer = {
-    id: 1,
-    name: 'Test User',
-    email: 'test@example.com',
-    address: '123 Test Lane'
-  };
-  res.render('paymentoptions', { customer });
-});
-
-// Payment options page
+// Payment options page (fetch customer from DB)
 app.get('/payment/options', (req, res) => {
   const customerId = req.session.customerId || 1; // Replace with real session logic
 
-  // Fetch customer details from the database
   connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
     if (err || results.length === 0) {
       console.error('Error fetching customer:', err);
