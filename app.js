@@ -20,21 +20,23 @@ connection.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
-// Set EJS as the view engine
+// Route modules
+const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
+// Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware to serve static files (like styles.css)
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Session middleware
 app.use(
   session({
-    secret: 'your-secret-key', // Replace with a strong secret
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 1 day
+    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }
   })
 );
 
@@ -47,71 +49,81 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use(authRoutes);
+app.use(adminRoutes);
+
+// Home Route
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Home Page', message: 'Welcome to my basic Express app!' });
+  res.render('index', {
+    title: 'Home Page',
+    message: 'Welcome to my basic Express app!',
+    user: req.session.user
+  });
 });
 
-// Route to login
-app.get('/login', (req, res) => {
-  res.render('login');
-});
-
-// Route to register
-app.get('/register', (req, res) => {
-  res.render('register');
-});
-
-
-// Route to store
+// Store Route
 app.get('/store', (req, res) => {
   connection.query('SELECT * FROM gear', (err, results) => {
     if (err) {
       console.error('Error fetching gear:', err);
       return res.status(500).send('Database error');
     }
+    // Convert price_per_unit to a number for each item
+    const gear = results.map(item => ({
+      ...item,
+      price_per_unit: Number(item.price_per_unit)
+    }));
     const cart = req.session.cart || [];
-    res.render('store', { gear: results, cart });
+    res.render('store', { gear, cart });
   });
 });
 
 // Add item to cart
 app.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
+  if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
   connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
-    if (err) {
-      console.error('Error fetching gear:', err);
-      return res.status(500).send('Database error');
-    }
-    if (results.length === 0) {
-      return res.status(404).send('Item not found');
-    }
+    if (err || results.length === 0) return res.status(404).send('Item not found');
     const item = results[0];
-    if (!req.session.cart) req.session.cart = [];
-    const existingItem = req.session.cart.find((c) => c.gear_id === gearId);
+    item.price_per_unit = Number(item.price_per_unit);
+
+    // Use session cart
+    const cart = req.session.cart;
+
+    const existingItem = cart.find((c) => c.gear_id === gearId);
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      req.session.cart.push({ ...item, quantity: 1 });
+      cart.push({ ...item, quantity: 1 });
     }
-    res.redirect('/store');
+
+    res.redirect('/store?success=true');
   });
 });
 
 // View cart
 app.get('/cart', (req, res) => {
+  const isMember = req.session.user && req.session.user.role === 'member';
   const cart = req.session.cart || [];
-  res.render('cart', { cart });
+  res.render('cart', { cart, isMember });
 });
 
 // Remove item from cart
 app.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  if (!req.session.cart) req.session.cart = [];
+  if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
+
+  // Ensure the cart exists in the session
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
+  // Remove the item from the session cart
   req.session.cart = req.session.cart.filter((item) => item.gear_id !== gearId);
   res.redirect('/cart');
 });
 
-// Update cart item quantity
+// Update item quantity
 app.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQuantity = parseInt(req.body.quantity, 10);
@@ -126,38 +138,46 @@ app.post('/cart/update/:id', (req, res) => {
 
 
 // Payment route
-// Payment method page
+// Payment route (placeholder customer)
 app.get('/paymentmethod', (req, res) => {
   const cart = req.session.cart || [];
-  const customerId = req.session.customerId;
-  if (!customerId) return res.redirect('/login');
+  // Placeholder customer object
+  const customer = {
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    address: '123 Test Lane'
+  };
+  res.render('paymentmethod', { cart, customer });
+});
 
-  connection.query('SELECT * FROM customer WHERE id = ?', [customerId], (err, results) => {
-    if (err) {
-      console.error('Error fetching customer:', err);
-      return res.status(500).send('Database error');
-    }
-    const customer = results[0] || null;
-    res.render('paymentmethod', { cart, customer });
-  });
+// Payment options page (placeholder customer)
+app.get('/payment/options', (req, res) => {
+  // Placeholder customer object
+  const customer = {
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    address: '123 Test Lane'
+  };
+  res.render('paymentoptions', { customer });
 });
 
 // Payment options page
 app.get('/payment/options', (req, res) => {
-  const customerId = req.session.customerId;
-  if (!customerId) return res.redirect('/login');
+  const customerId = req.session.customerId || 1; // Replace with real session logic
 
-  connection.query('SELECT * FROM customer WHERE id = ?', [customerId], (err, results) => {
-    if (err) {
+  // Fetch customer details from the database
+  connection.query('SELECT * FROM users WHERE id = ?', [customerId], (err, results) => {
+    if (err || results.length === 0) {
       console.error('Error fetching customer:', err);
-      return res.status(500).send('Database error');
+      return res.status(500).send('Customer not found');
     }
-    const customer = results[0] || null;
+    const customer = results[0];
     res.render('paymentoptions', { customer });
   });
 });
 
-// Payment processing
 app.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
   const savePaymentMethod = req.body.savePaymentMethod === 'true';
@@ -206,22 +226,46 @@ app.get('/payment/success', (req, res) => {
   res.render('paymentsuccess');
 });
 
-// Route to schedule
-app.get('/schedule', (req, res) => {
-  res.render('schedule');
+// Static routes
+app.get('/schedule', (req, res) => res.render('schedule'));
+app.get('/news', (req, res) => res.render('news'));
+app.get('/players', (req, res) => res.render('players'));
+app.get('/profile', (req, res) => res.render('profile'));
+app.get('/matches', (req, res) => res.render('matches', { title: 'Matches' }));
+app.get('/membership_tiers', (req, res) => res.render('membership_tiers', { title: 'Membership Tiers' }));
+app.get('/membership_faqs', (req, res) => res.render('membership_faqs', { title: 'Membership FAQs' }));
+
+// Membership page
+app.get('/membership', (req, res) => {
+  const user = {
+    username: 'john_doe',
+    email: 'john@example.com',
+    birthday: '1999-04-21',
+    membershipTier: 'Gold',
+    phone: '98765432',
+    favoriteTeam: 'FC Barcha',
+    joinDate: '2023-01-10'
+  };
+  res.render('membership', { user });
 });
 
-// Route to news
-app.get('/news', (req, res) => {
-  res.render('news');
+// Membership tier pages
+app.get('/membership/gold', (req, res) => {
+  res.render('gold_membership', { title: 'Gold Membership' });
+  console.log('Gold membership page requested');
 });
 
-// Route to players
-app.get('/players', (req, res) => {
-  res.render('players');
+app.get('/membership/silver', (req, res) => {
+  res.render('silver_membership', { title: 'Silver Membership' });
+  console.log('Silver membership page requested');
 });
 
-// Start the server
+app.get('/membership/bronze', (req, res) => {
+  res.render('bronze_membership', { title: 'Bronze Membership' });
+  console.log('Bronze membership page requested');
+});
+
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -1,0 +1,23 @@
+.store-card {
+  /* Keep the card at a reasonable size */
+  max-width: 150px !important; /* Or whatever appropriate size for your card */
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: center; /* Center content within the card */
+}
+
+.store-jersey-img {
+  width: 40px !important;      /* Force a very small width */
+  height: 40px !important;     /* Force a very small height */
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+}
