@@ -154,3 +154,5 @@ router.post('/payment/processing', (req, res) => {
 router.get('/payment/success', (req, res) => {
   res.render('paymentsuccess');
 });
+
+module.exports = router;
