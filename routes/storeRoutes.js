@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
 
-// Update your credentials as needed for XAMPP:
+// Update credentials for XAMPP
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -13,7 +13,10 @@ const connection = mysql.createConnection({
 // Show store page
 router.get('/store', (req, res) => {
   connection.query('SELECT * FROM gear', (err, results) => {
-    if (err) return res.status(500).send('Database error');
+    if (err) {
+      console.error('DB error in /store:', err);
+      return res.status(500).send('Database error');
+    }
     res.render('store', { gear: results, cart: req.session.cart || [] });
   });
 });
@@ -22,13 +25,14 @@ router.get('/store', (req, res) => {
 router.post('/cart/add/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
-    if (err || results.length === 0) return res.status(404).send('Item not found');
+    if (err || results.length === 0) {
+      console.error('DB error or item not found in /cart/add:', err);
+      return res.status(404).send('Item not found');
+    }
     const item = results[0];
 
-    // Initialize cart if it doesn't exist
     if (!req.session.cart) req.session.cart = [];
 
-    // Check if item already in cart
     const existing = req.session.cart.find(i => i.gear_id === gearId);
     if (existing) {
       existing.quantity += 1;
@@ -36,7 +40,7 @@ router.post('/cart/add/:id', (req, res) => {
       req.session.cart.push({
         gear_id: item.gear_id,
         gear_name: item.gear_name,
-        gear_desc: item.gear_desc, // <-- Add this line
+        gear_desc: item.gear_desc,
         price_per_unit: item.price_per_unit,
         quantity: 1
       });
@@ -78,13 +82,16 @@ router.post('/cart/remove/:id', (req, res) => {
 router.get('/payment', (req, res) => {
   const cart = req.session.cart || [];
   const customer = req.session.user;
-  if (!customer) {
-    return res.redirect('/login');
-  }
-  if (cart.length === 0) {
-    return res.redirect('/cart');
-  }
-  res.render('payment', { cart, customer });
+  if (!customer) return res.redirect('/login');
+  if (cart.length === 0) return res.redirect('/cart');
+
+  connection.query('SELECT payment_mode_id, name FROM payment_mode', (err, paymentModes) => {
+    if (err) {
+      console.error('DB error in /payment:', err);
+      return res.status(500).send('Database error');
+    }
+    res.render('payment', { cart, customer, paymentModes });
+  });
 });
 
 // Payment processing (form submit)
@@ -97,14 +104,20 @@ router.post('/payment/process', (req, res) => {
   }
 
   const account_id = user.account_id;
-
-  // 1. Find payment_mode_id
-  const paymentModeQuery = 'SELECT payment_mode_id FROM payment_mode WHERE name = ? LIMIT 1';
+  // Make query case-insensitive
+  const paymentModeQuery = 'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1';
   connection.query(paymentModeQuery, [paymentMethod], (err, pmResults) => {
-    if (err || pmResults.length === 0) return res.status(500).send('Payment mode not found.');
+    if (err) {
+      console.error('DB error in payment_mode lookup:', err);
+      return res.status(500).send('Database error.');
+    }
+    if (pmResults.length === 0) {
+      console.error(`Payment mode not found for: ${paymentMethod}`);
+      return res.status(400).send('Payment mode not found. Please select a valid payment method.');
+    }
     const payment_mode_id = pmResults[0].payment_mode_id;
 
-    // 2. Insert order
+    // Insert order
     const orderData = {
       order_date: new Date(),
       payment_ref: 'manual',
@@ -112,14 +125,16 @@ router.post('/payment/process', (req, res) => {
       payment_mode_id
     };
     connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
-      if (err) return res.status(500).send('Database error (order).');
+      if (err) {
+        console.error('DB error in order insert:', err);
+        return res.status(500).send('Database error (order).');
+      }
       const order_id = orderResult.insertId;
 
-      // 3. For each cart item, create a transaction_detail and then order_item
+      // For each cart item, create a transaction_detail and then order_item
       let completed = 0;
       let hasError = false;
       cart.forEach(item => {
-        // Insert transaction_detail
         const transactionDetail = {
           transaction_type: 'football gear purchase',
           transaction_date: new Date(),
@@ -129,13 +144,12 @@ router.post('/payment/process', (req, res) => {
           if (err) {
             if (!hasError) {
               hasError = true;
+              console.error('DB error in transaction_detail insert:', err);
               return res.status(500).send('Database error (transaction detail).');
             }
             return;
           }
           const transaction_id = tdResult.insertId;
-
-          // Insert order_item
           const orderItem = {
             quantity: item.quantity,
             order_id,
@@ -146,6 +160,7 @@ router.post('/payment/process', (req, res) => {
             if (err) {
               if (!hasError) {
                 hasError = true;
+                console.error('DB error in order_item insert:', err);
                 return res.status(500).send('Database error (order item).');
               }
               return;
@@ -171,7 +186,7 @@ router.post('/paymentsuccess', (req, res) => {
   }
 
   const account_id = user.account_id;
-  const payment_mode_id = 1; // Set a default or get from your logic
+  const payment_mode_id = 1; // Set default or get from your logic (could be improved)
   const orderData = {
     order_date: new Date(),
     payment_ref: 'paypal',
@@ -180,13 +195,15 @@ router.post('/paymentsuccess', (req, res) => {
   };
 
   connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
-    if (err) return res.status(500).json({ error: 'Database error (order).' });
+    if (err) {
+      console.error('DB error in order insert (PayPal):', err);
+      return res.status(500).json({ error: 'Database error (order).' });
+    }
 
     const order_id = orderResult.insertId;
     let completed = 0;
     let hasError = false;
     cart.forEach(item => {
-      // Insert transaction_detail
       const transactionDetail = {
         transaction_type: 'football gear purchase',
         transaction_date: new Date(),
@@ -196,13 +213,12 @@ router.post('/paymentsuccess', (req, res) => {
         if (err) {
           if (!hasError) {
             hasError = true;
+            console.error('DB error in transaction_detail insert (PayPal):', err);
             return res.status(500).json({ error: 'Database error (transaction detail).' });
           }
           return;
         }
         const transaction_id = tdResult.insertId;
-
-        // Insert order_item
         const orderItem = {
           quantity: item.quantity,
           order_id,
@@ -213,6 +229,7 @@ router.post('/paymentsuccess', (req, res) => {
           if (err) {
             if (!hasError) {
               hasError = true;
+              console.error('DB error in order_item insert (PayPal):', err);
               return res.status(500).json({ error: 'Database error (order item).' });
             }
             return;
