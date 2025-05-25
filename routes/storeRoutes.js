@@ -107,6 +107,9 @@ router.post('/payment/process', (req, res) => {
 
   // Debug output
   console.log('User selected payment method:', paymentMethod);
+  connection.query('SELECT payment_mode_id, name FROM payment_mode', (err2, rows) => {
+  console.log('Payment modes in DB:', rows);
+});
 
   // Make query case-insensitive
   const paymentModeQuery = 'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1';
