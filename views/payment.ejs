@@ -46,25 +46,27 @@
       <p><strong>Address:</strong> <%= customer.address || '' %></p>
     </div>
     <div class="mt-4">
-      <h3>Choose Payment Method</h3>
-      <form action="/payment/process" method="POST">
-        <div class="mb-3">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="Credit Card" required>
-            <label class="form-check-label" for="creditCard">Credit Card</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" id="fpx" value="FPX">
-            <label class="form-check-label" for="fpx">FPX</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" id="ewallet" value="E-wallet">
-            <label class="form-check-label" for="ewallet">E-wallet</label>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-success">Pay</button>
-      </form>
+        <h3>Choose Payment Method</h3>
+        <form action="/payment/process" method="POST">
+            <div class="mb-3">
+                <% paymentModes.forEach(function(mode, idx) { %>
+                    <div class="form-check">
+                        <input 
+                        class="form-check-input" 
+                        type="radio" 
+                        name="paymentMethod" 
+                        id="pm<%= idx %>" 
+                        value="<%= mode.name %>" 
+                        <%= idx === 0 ? 'required' : '' %>>
+                        <label class="form-check-label" for="pm<%= idx %>">
+                            <%= mode.name %>
+                        </label>
+            </div>
+        <% }); %>
     </div>
+    <button type="submit" class="btn btn-success">Pay</button>
+  </form>
+</div>
   </main>
 </body>
 </html>
