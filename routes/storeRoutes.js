@@ -104,6 +104,10 @@ router.post('/payment/process', (req, res) => {
   }
 
   const account_id = user.account_id;
+
+  // Debug output
+  console.log('User selected payment method:', paymentMethod);
+
   // Make query case-insensitive
   const paymentModeQuery = 'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1';
   connection.query(paymentModeQuery, [paymentMethod], (err, pmResults) => {
@@ -112,8 +116,12 @@ router.post('/payment/process', (req, res) => {
       return res.status(500).send('Database error.');
     }
     if (pmResults.length === 0) {
-      console.error(`Payment mode not found for: ${paymentMethod}`);
-      return res.status(400).send('Payment mode not found. Please select a valid payment method.');
+      // Print all payment modes for debug
+      connection.query('SELECT payment_mode_id, name FROM payment_mode', (err2, rows) => {
+        console.log('Payment modes in DB:', rows);
+        return res.status(400).send('Payment mode not found. Please select a valid payment method.');
+      });
+      return;
     }
     const payment_mode_id = pmResults[0].payment_mode_id;
 
