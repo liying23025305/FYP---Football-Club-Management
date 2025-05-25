@@ -10,6 +10,14 @@ const connection = mysql.createConnection({
   database: 'mydb'
 });
 
+// Show store page
+router.get('/store', (req, res) => {
+  connection.query('SELECT * FROM gear', (err, results) => {
+    if (err) return res.status(500).send('Database error');
+    res.render('store', { gear: results, cart: req.session.cart || [] });
+  });
+});
+
 // Payment processing (form submit)
 router.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
