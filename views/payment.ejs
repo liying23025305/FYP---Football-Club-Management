@@ -41,9 +41,9 @@
     </div>
     <div class="mt-4">
       <h3>Customer Details</h3>
-      <p><strong>Name:</strong> <%= customer.name %></p>
+      <p><strong>Name:</strong> <%= customer.first_name %> <%= customer.surname %></p>
       <p><strong>Email:</strong> <%= customer.email %></p>
-      <p><strong>Address:</strong> <%= customer.address %></p>
+      <p><strong>Address:</strong> <%= customer.address || '' %></p>
     </div>
     <div class="mt-4">
       <h3>Choose Payment Method</h3>

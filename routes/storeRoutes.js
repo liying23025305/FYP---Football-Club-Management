@@ -36,6 +36,7 @@ router.post('/cart/add/:id', (req, res) => {
       req.session.cart.push({
         gear_id: item.gear_id,
         gear_name: item.gear_name,
+        gear_desc: item.gear_desc, // <-- Add this line
         price_per_unit: item.price_per_unit,
         quantity: 1
       });
