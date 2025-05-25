@@ -73,8 +73,18 @@ router.post('/cart/remove/:id', (req, res) => {
   res.redirect('/cart');
 });
 
+// Checkout page (combined)
+router.get('/payment', (req, res) => {
+  const cart = req.session.cart || [];
+  const customer = req.session.user;
+  if (!customer || cart.length === 0) {
+    return res.redirect('/cart');
+  }
+  res.render('payment', { cart, customer });
+});
+
 // Payment processing (form submit)
-router.post('/payment/processing', (req, res) => {
+router.post('/payment/process', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
   const cart = req.session.cart || [];
   const user = req.session.user;
@@ -121,7 +131,7 @@ router.post('/payment/processing', (req, res) => {
           }
           const transaction_id = tdResult.insertId;
 
-          // Insert order_item (order_item_id needs to be generated if not AUTO_INCREMENT)
+          // Insert order_item
           const orderItem = {
             quantity: item.quantity,
             order_id,
