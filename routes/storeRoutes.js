@@ -77,7 +77,10 @@ router.post('/cart/remove/:id', (req, res) => {
 router.get('/payment', (req, res) => {
   const cart = req.session.cart || [];
   const customer = req.session.user;
-  if (!customer || cart.length === 0) {
+  if (!customer) {
+    return res.redirect('/login');
+  }
+  if (cart.length === 0) {
     return res.redirect('/cart');
   }
   res.render('payment', { cart, customer });
