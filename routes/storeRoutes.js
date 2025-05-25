@@ -46,7 +46,11 @@ router.post('/cart/add/:id', (req, res) => {
 
 // View cart
 router.get('/cart', (req, res) => {
-  res.render('cart', { cart: req.session.cart || [] });
+  let isMember = false;
+  if (req.session.user && req.session.user.role === 'member') {
+    isMember = true;
+  }
+  res.render('cart', { cart: req.session.cart || [], isMember });
 });
 
 // Update cart item quantity
