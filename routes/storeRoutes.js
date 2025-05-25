@@ -120,48 +120,82 @@ router.get('/payment/options', async (req, res) => {
 });
 
 // Payment processing
-router.post('/payment/processing', async (req, res) => {
+router.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
-  const savePaymentMethod = req.body.savePaymentMethod === 'true';
   const cart = req.session.cart || [];
-  const customerId = req.session.customerId;
+  const userId = req.session.customerId || (req.session.user && req.session.user.id);
 
-  if (!customerId) return res.redirect('/login');
-  if (cart.length === 0) return res.status(400).send('Cart is empty');
+  if (!userId || cart.length === 0) {
+    return res.status(400).send('Missing user or cart data.');
+  }
 
   const orderData = {
-    user_id: customerId,
+    user_id: userId,
     order_date: new Date(),
     payment_method: paymentMethod
   };
 
-  try {
-    const [orderResult] = await connection.query('INSERT INTO `order` SET ?', orderData);
-    const orderId = orderResult.insertId;
+  connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
+    if (err) return res.status(500).send('Database error (order).');
 
+    const orderId = orderResult.insertId;
     const orderItems = cart.map(item => [
       orderId,
       item.gear_id,
       item.quantity,
-      item.price_per_unit
+      item.price_per_unit || item.price
     ]);
 
-    await connection.query(
+    connection.query(
       'INSERT INTO order_item (order_id, gear_id, quantity, price_per_unit) VALUES ?',
-      [orderItems]
+      [orderItems],
+      (err) => {
+        if (err) return res.status(500).send('Database error (order items).');
+        req.session.cart = [];
+        res.redirect('/paymentsuccess');
+      }
     );
-
-    req.session.cart = [];
-    res.redirect('/payment/success');
-  } catch (err) {
-    console.error('Error processing payment:', err);
-    res.status(500).send('Database error');
-  }
+  });
 });
 
 // Payment success page
-router.get('/payment/success', (req, res) => {
-  res.render('paymentsuccess');
+// Save order after payment success
+router.post('/paymentsuccess', (req, res) => {
+  const { cart } = req.body;
+  const userId = req.session.customerId || (req.session.user && req.session.user.id);
+
+  if (!userId || !cart || cart.length === 0) {
+    return res.status(400).json({ error: 'Missing user or cart data.' });
+  }
+
+  // Insert order
+  const orderData = {
+    user_id: userId,
+    order_date: new Date(),
+    payment_method: 'paypal'
+  };
+
+  connection.query('INSERT INTO `order` SET ?', orderData, (err, orderResult) => {
+    if (err) return res.status(500).json({ error: 'Database error (order).' });
+
+    const orderId = orderResult.insertId;
+    const orderItems = cart.map(item => [
+      orderId,
+      item.gear_id,
+      item.quantity,
+      item.price_per_unit || item.price
+    ]);
+
+    connection.query(
+      'INSERT INTO order_item (order_id, gear_id, quantity, price_per_unit) VALUES ?',
+      [orderItems],
+      (err) => {
+        if (err) return res.status(500).json({ error: 'Database error (order items).' });
+        // Optionally clear cart here: req.session.cart = [];
+        res.json({ success: true });
+      }
+    );
+  });
 });
 
 module.exports = router;
