@@ -18,6 +18,57 @@ router.get('/store', (req, res) => {
   });
 });
 
+// Add item to cart
+router.post('/cart/add/:id', (req, res) => {
+  const gearId = parseInt(req.params.id, 10);
+  connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId], (err, results) => {
+    if (err || results.length === 0) return res.status(404).send('Item not found');
+    const item = results[0];
+
+    // Initialize cart if it doesn't exist
+    if (!req.session.cart) req.session.cart = [];
+
+    // Check if item already in cart
+    const existing = req.session.cart.find(i => i.gear_id === gearId);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      req.session.cart.push({
+        gear_id: item.gear_id,
+        gear_name: item.gear_name,
+        price_per_unit: item.price_per_unit,
+        quantity: 1
+      });
+    }
+    res.redirect('/store');
+  });
+});
+
+// View cart
+router.get('/cart', (req, res) => {
+  res.render('cart', { cart: req.session.cart || [] });
+});
+
+// Update cart item quantity
+router.post('/cart/update/:id', (req, res) => {
+  const gearId = parseInt(req.params.id, 10);
+  const newQty = parseInt(req.body.quantity, 10);
+  if (!req.session.cart) req.session.cart = [];
+  const item = req.session.cart.find(i => i.gear_id === gearId);
+  if (item && newQty > 0) {
+    item.quantity = newQty;
+  }
+  res.redirect('/cart');
+});
+
+// Remove item from cart
+router.post('/cart/remove/:id', (req, res) => {
+  const gearId = parseInt(req.params.id, 10);
+  if (!req.session.cart) req.session.cart = [];
+  req.session.cart = req.session.cart.filter(i => i.gear_id !== gearId);
+  res.redirect('/cart');
+});
+
 // Payment processing (form submit)
 router.post('/payment/processing', (req, res) => {
   const paymentMethod = req.body.paymentMethod;
