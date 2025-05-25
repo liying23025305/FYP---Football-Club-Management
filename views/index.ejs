@@ -14,51 +14,91 @@
   <%- include('partials/navbar') %>
 
   <main class="container mt-4">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <h1>WELCOME TO FOOTBALL CLUB</h1>
-      <p class="lead">Join our community of passionate football players and fans</p>
-      <div class="mt-4">
-        <a href="/register" class="btn btn-light me-2">Join Now</a>
-        <a href="/login" class="btn btn-outline-light">Member Login</a>
+    <!-- Blue Lock Club Section (Slideshow placeholder) -->
+    <section class="bluelock-section mb-3">
+      <h1 class="text-center mb-4">Blue Lock Club</h1>
+      <div class="slideshow-container">
+        <div class="slideshow-placeholder">
+          <p class="text-center text-muted">Slideshow of character pics</p>
+          <!-- Slideshow dots indicator -->
+          <div class="slideshow-dots text-center mt-3">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Feature Boxes -->
-    <section class="row mb-4">
-      <!-- Membership Benefits -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-users feature-icon"></i>
-          <h3>MEMBERSHIP BENEFITS</h3>
-          <p>Enjoy exclusive discounts and cashback rewards with our tiered membership program.</p>
-          <a href="/membership_tiers" class="btn btn-outline-light">Learn More</a>
-        </div>
+    <!-- Shop Section -->
+    <section class="shop-section mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>SHOP NOW</h2>
+        <a href="/store" class="text-decoration-none">
+          <span class="text-primary">View Store</span>
+        </a>
       </div>
 
-      <!-- Worldwide Store -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-store feature-icon"></i>
-          <h3>WORLDWIDE STORE</h3>
-          <p>Get the latest football gear and club merchandise with member discounts.</p>
-          <a href="/store" class="btn btn-outline-light">Visit Shop</a>
-        </div>
-      </div>
+      <!-- Shop items with scroll arrows -->
+      <div class="shop-scroll-wrapper position-relative">
+        <!-- Left Arrow -->
+        <button class="shop-arrow shop-arrow-left" onclick="scrollShopLeft()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
 
-      <!-- Events & Training -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-calendar-alt feature-icon"></i>
-          <h3>EVENTS & TRAINING</h3>
-          <p>Stay updated with club matches, training sessions, and special events.</p>
-          <a href="/schedule" class="btn btn-outline-light">View Calendar</a>
+        <!-- Shop items container -->
+        <div class="shop-scroll-container" id="shopContainer">
+          <div class="shop-scroll-items">
+            <!-- Shop Item 1 -->
+            <div class="shop-item">
+              <div class="shop-item-image">
+                <span>item</span>
+              </div>
+              <h6 class="mt-2">Jersey</h6>
+              <p class="fw-bold">$146.00</p>
+              <button class="btn btn-danger btn-sm w-100">BUY NOW</button>
+            </div>
+
+            <!-- Shop Item 2 -->
+            <div class="shop-item">
+              <div class="shop-item-image">
+                <span>item</span>
+              </div>
+              <h6 class="mt-2">Boots</h6>
+              <p class="fw-bold">$111.00</p>
+              <button class="btn btn-danger btn-sm w-100">BUY NOW</button>
+            </div>
+
+            <!-- Shop Item 3 -->
+            <div class="shop-item">
+              <div class="shop-item-image">
+                <span>item</span>
+              </div>
+              <h6 class="mt-2">Training Ball</h6>
+              <p class="fw-bold">$25.00</p>
+              <button class="btn btn-danger btn-sm w-100">BUY NOW</button>
+            </div>
+
+            <!-- Shop Item 4 -->
+            <div class="shop-item">
+              <div class="shop-item-image">
+                <span>item</span>
+              </div>
+              <h6 class="mt-2">Scarf</h6>
+              <p class="fw-bold">$18.00</p>
+              <button class="btn btn-danger btn-sm w-100">BUY NOW</button>
+            </div>
+          </div>
         </div>
+
+        <!-- Right Arrow -->
+        <button class="shop-arrow shop-arrow-right" onclick="scrollShopRight()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </section>
 
     <!-- Upcoming Matches Section -->
-    <section class="events-section">
+    <section class="matches-section mb-3">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>UPCOMING MATCHES</h2>
         <div class="countdown">
@@ -67,8 +107,8 @@
           <span id="mins">00</span> MINS
           <span id="secs">00</span> SECS
         </div>
-        <a href="#" class="btn btn-outline-light btn-sm">
-          <i class="fas fa-sync"></i> Sync Schedules to Calendar
+        <a href="#" class="text-decoration-none">
+          <i class="fas fa-sync"></i> Sync to calendar
         </a>
       </div>
 
@@ -77,7 +117,7 @@
           <!-- Previous Games -->
           <div class="match-card previous-game">
             <h4>PREVIOUS GAMES</h4>
-            <a href="/matches" class="text-white">See all the results ></a>
+            <a href="/matches" class="text-white">See all the results</a>
           </div>
 
           <!-- Match 1 -->
@@ -90,7 +130,7 @@
             <h5>Barcelona vs Real Madrid</h5>
             <p class="mb-1">Sunday, April 27, 14:00 CET</p>
             <p class="mb-1">Copa Del Rey, Estadio Olímpico de la Cartuja</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
+            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a> <!-- Direct user to stadium location -->
           </div>
 
           <!-- Match 2 -->
@@ -106,92 +146,52 @@
             <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
           </div>
 
-          <!-- Match 3 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">2</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">1</div>
-            </div>
-            <h5>Crystal Palace vs Nottingham Forest</h5>
-            <p class="mb-1">Tuesday, May 7, 20:00 CET</p>
-            <p class="mb-1">UEFA Champions League, Allianz Arena</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
-          <!-- Match 4 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">1</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">1</div>
-            </div>
-            <h5>Brentford vs Manutd</h5>
-            <p class="mb-1">Saturday, May 11, 16:00 CET</p>
-            <p class="mb-1">La Liga, Wanda Metropolitano</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
           <!-- Next Game -->
           <div class="match-card next-game">
             <h4>NEXT GAME</h4>
-            <a href="/matches" class="text-white">See all the results ></a>
+            <a href="/matches" class="text-white">See all the results</a>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Trending Section -->
-    <section class="trending-section mt-4">
-      <h2>TRENDING</h2>
+    <section class="trending-section mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>TRENDING</h2>
+        <a href="/trending" class="text-decoration-none">
+        </a>
+      </div>
       <div class="trending-scroll-container">
         <div class="trending-scroll-wrapper">
           <div class="trending-item">
             <span class="trending-badge badge-live">LIVE</span>
             <div class="position-absolute bottom-0 p-2">
-              <h6>Watch U18s Football</h6>
+              <h5>Watch U18s Football</h5>
             </div>
           </div>
           <div class="trending-item">
             <span class="trending-badge badge-live">LIVE</span>
             <div class="position-absolute bottom-0 p-2">
-              <h6>Friendly Games U20</h6>
+              <h5>Friendly Games U20</h5>
             </div>
           </div>
           <div class="trending-item">
             <span class="trending-badge badge-new">NEW</span>
             <div class="position-absolute bottom-0 p-2">
-              <h6>Premier League News</h6>
+              <h5>Rising Stars</h5>
             </div>
           </div>
           <div class="trending-item">
             <span class="trending-badge badge-new">NEW</span>
             <div class="position-absolute bottom-0 p-2">
-              <h6>Exclusive Clips</h6>
+              <h5>Exclusive Clips</h5>
             </div>
           </div>
           <div class="trending-item">
             <span class="trending-badge badge-new">NEW</span>
             <div class="position-absolute bottom-0 p-2">
-              <h6>Youngest to 100 games</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Best Moment of April</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>HIGHLIGHTS | Final</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Matchday Challenge</h6>
+              <h5>HIGHLIGHTS | FINALS</h5>
             </div>
           </div>
         </div>
@@ -199,90 +199,74 @@
     </section>
 
     <!-- News Section -->
-    <section class="news-section mt-4">
-      <h2 class="mb-3">NEWS</h2>
+    <section class="news-section mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>NEWS</h2>
+      </div>
+
+      <!-- Featured News Article -->
+      <div class="featured-news-card mb-3">
+        <div class="featured-news-content">
+          <h3>Premier League Golden Awards</h3>
+          <p>Who will win the Premier League Golden Awards?</p>
+        </div>
+      </div>
+
+      <!-- Secondary News Articles -->
       <div class="row">
         <!-- News Item 1 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Premier League news conferences</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FOOTBALL</span>
-              <span class="news-time">11 hrs ago</span>
+        <div class="col-md-4 mb-3">
+          <div class="secondary-news-card">
+            <div class="secondary-news-content">
+              <h6>A1</h6>
             </div>
           </div>
         </div>
 
         <!-- News Item 2 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Seven reasons for optimism</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">16 hrs ago</span>
+        <div class="col-md-4 mb-3">
+          <div class="secondary-news-card">
+            <div class="secondary-news-content">
+              <h6>A2</h6>
             </div>
           </div>
         </div>
 
         <!-- News Item 3 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Vote for the best moment of the month</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">17 hrs ago</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- News Item 4 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Kounde injury news</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">19 hrs ago</span>
+        <div class="col-md-4 mb-3">
+          <div class="secondary-news-card">
+            <div class="secondary-news-content">
+              <h6>A3</h6>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- See More Button -->
       <div class="text-center mt-3">
-        <a href="/news" class="btn btn-outline-light">View All News</a>
+        <a href="/news" class="btn btn-danger">View All News</a>
       </div>
     </section>
   </main>
 
-  <!-- Countdown Timer Script -->
+<!-- Javascript Functions -->
   <script>
-    // Set the date we're counting down to (next match date)
-    const countDownDate = new Date("May 1, 2025 15:00:00").getTime();
+    // Shop scroll functionality
+    function scrollShopLeft() {
+      const container = document.getElementById('shopContainer');
+      container.scrollBy({
+        left: -300, // Scroll left by 300px
+        behavior: 'smooth'
+      });
+    }
 
-    // Update the countdown every 1 second
-    const x = setInterval(function() {
-      // Get today's date and time
-      const now = new Date().getTime();
-
-      // Find the distance between now and the count down date
-      const distance = countDownDate - now;
-
-      // Time calculations for days, hours, minutes and seconds
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      // Display the result
-      document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
-      document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
-      document.getElementById("mins").innerHTML = minutes.toString().padStart(2, '0');
-      document.getElementById("secs").innerHTML = seconds.toString().padStart(2, '0');
-
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("countdown").innerHTML = "MATCH DAY!";
-      }
-    }, 1000);
+    function scrollShopRight() {
+      const container = document.getElementById('shopContainer');
+      container.scrollBy({
+        left: 300, // Scroll right by 300px
+        behavior: 'smooth'
+      });
+    }
   </script>
 
   <%- include('partials/footer') %>

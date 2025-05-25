@@ -12,10 +12,61 @@
   <!-- Navbar -->
   <%- include('partials/navbar') %>
 
-  <main class="container mt-5">
-    <h1 class="text-center">Matches</h1>
-    <p class="text-center">This page is under construction.</p>
+  <main class="container-fluid p-0">
+    <!-- Red Header Section -->
+    <div class="matches-header">
+      <div class="container">
+        <h1 class="matches-title">Matches</h1>
+      </div>
+
+      <!-- Tab Navigation at bottom of red container -->
+      <div class="matches-tabs-container">
+        <div class="container">
+          <div class="matches-tabs">
+            <button class="tab-btn active" onclick="showTab('results', event)">Results</button>
+            <button class="tab-btn" onclick="showTab('tickets', event)">Tickets</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="container mt-4">
+      <!-- Results Tab Content -->
+      <div id="results-tab" class="tab-content active">
+        <div class="content-placeholder">
+          <p class="text-center text-muted">Score Results</p>
+        </div>
+      </div>
+
+      <!-- Tickets Tab Content -->
+      <div id="tickets-tab" class="tab-content">
+        <div class="content-placeholder">
+          <p class="text-center text-muted">User can buy tickets matches here</p>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <!-- JavaScript for Tab Functionality -->
+  <script>
+    // Simple tab switching function
+    function showTab(tabName, event) {
+      // Hide all tab contents
+      const allTabs = document.querySelectorAll('.tab-content');
+      allTabs.forEach(tab => tab.classList.remove('active'));
+
+      // Remove active class from all tab buttons
+      const allButtons = document.querySelectorAll('.tab-btn');
+      allButtons.forEach(btn => btn.classList.remove('active'));
+
+      // Show selected tab content
+      document.getElementById(tabName + '-tab').classList.add('active');
+
+      // Add active class to clicked button
+      event.target.classList.add('active');
+    }
+  </script>
 
   <%- include('partials/footer') %>
 </body>
