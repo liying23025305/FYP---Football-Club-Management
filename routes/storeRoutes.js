@@ -191,6 +191,11 @@ router.post('/payment/process', (req, res) => {
   });
 });
 
+// Payment success page (GET)
+router.get('/paymentsuccess', (req, res) => {
+  res.render('paymentsuccess'); // Make sure you have a paymentsuccess.ejs view
+});
+
 // Payment success page (AJAX/PayPal flow)
 router.post('/paymentsuccess', (req, res) => {
   const { cart } = req.body;
