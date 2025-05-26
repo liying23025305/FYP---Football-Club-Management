@@ -105,13 +105,7 @@ router.post('/payment/process', (req, res) => {
 
   const account_id = user.account_id;
 
-  // Debug output
-  console.log('User selected payment method:', paymentMethod);
-  connection.query('SELECT payment_mode_id, name FROM payment_mode', (err2, rows) => {
-  console.log('Payment modes in DB:', rows);
-});
-
-  // Make query case-insensitive
+  // Find payment_mode_id
   const paymentModeQuery = 'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1';
   connection.query(paymentModeQuery, [paymentMethod], (err, pmResults) => {
     if (err) {
@@ -119,12 +113,7 @@ router.post('/payment/process', (req, res) => {
       return res.status(500).send('Database error.');
     }
     if (pmResults.length === 0) {
-      // Print all payment modes for debug
-      connection.query('SELECT payment_mode_id, name FROM payment_mode', (err2, rows) => {
-        console.log('Payment modes in DB:', rows);
-        return res.status(400).send('Payment mode not found. Please select a valid payment method.');
-      });
-      return;
+      return res.status(400).send('Payment mode not found. Please select a valid payment method.');
     }
     const payment_mode_id = pmResults[0].payment_mode_id;
 
@@ -141,6 +130,9 @@ router.post('/payment/process', (req, res) => {
         return res.status(500).send('Database error (order).');
       }
       const order_id = orderResult.insertId;
+
+      // Calculate order total for updating payment_mode
+      const orderTotal = cart.reduce((sum, item) => sum + item.price_per_unit * item.quantity, 0);
 
       // For each cart item, create a transaction_detail and then order_item
       let completed = 0;
@@ -178,8 +170,19 @@ router.post('/payment/process', (req, res) => {
             }
             completed++;
             if (completed === cart.length && !hasError) {
-              req.session.cart = [];
-              res.redirect('/paymentsuccess');
+              // Update total_amount in payment_mode
+              connection.query(
+                'UPDATE payment_mode SET total_amount = IFNULL(total_amount,0) + ? WHERE payment_mode_id = ?',
+                [orderTotal, payment_mode_id],
+                (err) => {
+                  if (err) {
+                    console.error('DB error updating total_amount:', err);
+                    // Optionally still redirect or show error
+                  }
+                  req.session.cart = [];
+                  res.redirect('/paymentsuccess');
+                }
+              );
             }
           });
         });
