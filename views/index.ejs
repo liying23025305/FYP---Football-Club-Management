@@ -14,64 +14,61 @@
   <%- include('partials/navbar') %>
 
   <main class="container mt-4">
-    <!-- Blue Lock Club Section (Slideshow placeholder) -->
-    <section class="bluelock-section mb-3">
-      <h1 class="text-center mb-4">Blue Lock Club</h1>
-      <div class="slideshow-container">
-        <div class="slideshow-placeholder">
-          <p class="text-center text-muted">Slideshow of character pics</p>
-          <!-- Slideshow dots indicator -->
-          <div class="slideshow-dots text-center mt-3">
-            <span class="dot active"></span>
-            <span class="dot"></span>
+    <!-- Hero Section (Slideshow placeholder) -->
+    <section class="hero bg-primary text-white text-center py-5 rounded-custom mb-5">
+      <div class="container custom-container-bg p-0" style="max-width: 700px;">
+        <h1 class="display-4 mb-3 custom-hero-title" style="color: #e6e0e0;">Blue Lock</h1>
+        <p class="lead mb-4">Slideshow of character pics</p>
+        <% if(!user) { %>
+          <div class="d-flex justify-content-center gap-3">
+            <a href="/register" class="btn btn-light btn-lg">Join Now</a>
+            <a href="/login" class="btn btn-outline-light btn-lg">Member Login</a>
           </div>
-        </div>
+        <% } %>
       </div>
     </section>
 
     <!-- Shop Section -->
-    <section class="shop-section mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>SHOP NOW</h2>
+    <section class="shop-section mb-5" style="max-width: 1100px; margin: 0 auto;">
+      <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <h2 class="mb-0">SHOP NOW</h2>
         <a href="/store" class="text-decoration-none">
           <span class="text-primary">View Store</span>
         </a>
       </div>
-
       <!-- Shop items with scroll arrows -->
       <div class="shop-scroll-wrapper position-relative">
         <!-- Left Arrow -->
         <button class="shop-arrow shop-arrow-left" onclick="scrollShopLeft()">
           <i class="fas fa-chevron-left"></i>
         </button>
-
         <!-- Shop items container -->
         <div class="shop-scroll-container" id="shopContainer">
           <div class="shop-scroll-items">
             <!-- Shop Item 1 -->
             <div class="shop-item">
               <div class="shop-item-image">
-                <span>item</span>
+                <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               <h6 class="mt-2">Jersey</h6>
-              <p class="fw-bold">$146.00</p>
+              <p class="fw-bold">$50.00</p>
               <button class="btn btn-danger btn-sm w-50">BUY NOW</button>
             </div>
 
             <!-- Shop Item 2 -->
             <div class="shop-item">
               <div class="shop-item-image">
-                <span>item</span>
+                <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               <h6 class="mt-2">Boots</h6>
-              <p class="fw-bold">$111.00</p>
+              <p class="fw-bold">$90.00</p>
               <button class="btn btn-danger btn-sm w-50">BUY NOW</button>
             </div>
 
             <!-- Shop Item 3 -->
             <div class="shop-item">
               <div class="shop-item-image">
-                <span>item</span>
+                <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               <h6 class="mt-2">Training Ball</h6>
               <p class="fw-bold">$25.00</p>
@@ -81,7 +78,7 @@
             <!-- Shop Item 4 -->
             <div class="shop-item">
               <div class="shop-item-image">
-                <span>item</span>
+                <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               <h6 class="mt-2">Scarf</h6>
               <p class="fw-bold">$18.00</p>
@@ -89,7 +86,6 @@
             </div>
           </div>
         </div>
-
         <!-- Right Arrow -->
         <button class="shop-arrow shop-arrow-right" onclick="scrollShopRight()">
           <i class="fas fa-chevron-right"></i>
@@ -98,10 +94,10 @@
     </section>
 
     <!-- Upcoming Matches Section -->
-    <section class="matches-section mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>UPCOMING MATCHES</h2>
-        <div class="countdown">
+    <section class="matches-section mb-5" style="max-width: 1100px; margin: 0 auto;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 px-2">
+        <h2 class="mb-2 mb-md-0">UPCOMING MATCHES</h2>
+        <div class="countdown mb-2 mb-md-0">
           <span id="days">00</span> DAYS
           <span id="hours">00</span> HOURS
           <span id="mins">00</span> MINS
@@ -111,7 +107,6 @@
           <i class="fas fa-sync"></i> Sync to calendar
         </a>
       </div>
-
       <div class="match-scroll-container">
         <div class="match-scroll-wrapper">
           <!-- Previous Games -->
@@ -156,11 +151,10 @@
     </section>
 
     <!-- Trending Section -->
-    <section class="trending-section mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>TRENDING</h2>
-        <a href="/trending" class="text-decoration-none">
-        </a>
+    <section class="trending-section mb-5" style="max-width: 1100px; margin: 0 auto;">
+      <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <h2 class="mb-0">TRENDING</h2>
+        <a href="/trending" class="text-decoration-none"></a>
       </div>
       <div class="trending-scroll-container">
         <div class="trending-scroll-wrapper">
@@ -199,11 +193,10 @@
     </section>
 
     <!-- News Section -->
-    <section class="news-section mb-3">
-      <div class="mb-3">
-        <h2>NEWS</h2>
+    <section class="news-section mb-5" style="max-width: 1100px; margin: 0 auto;">
+      <div class="mb-3 px-2">
+        <h2 class="mb-0">NEWS</h2>
       </div>
-
       <!-- Featured News Article -->
       <div class="featured-news-card mb-3">
         <div class="featured-news-content">
@@ -211,7 +204,6 @@
           <p>Who will win the Premier League Golden Awards?</p>
         </div>
       </div>
-
       <!-- Secondary News Articles -->
       <div class="row">
         <!-- News Item 1 -->
@@ -241,7 +233,6 @@
           </div>
         </div>
       </div>
-
       <!-- See More Button -->
       <div class="text-center mt-3">
         <a href="/news" class="btn btn-danger">View All News</a>
@@ -268,7 +259,6 @@
       });
     }
   </script>
-
   <%- include('partials/footer') %>
 </body>
 </html>

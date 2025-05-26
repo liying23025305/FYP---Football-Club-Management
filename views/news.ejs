@@ -10,9 +10,67 @@
   <!-- Navbar -->
   <%- include('partials/navbar') %>
 
-  <main class="container mt-5 text-center">
-    <h1>Club News</h1>
-    <p>Show the latest news updates & announcements.</p>
+  <main class="container mt-4">
+    <!-- Latest News Title -->
+    <h2 class="mb-4">Latest News</h2>
+
+    <!-- Featured News Card (large image and text) -->
+    <div class="row mb-4">
+      <div class="col-md-7">
+        <div style="background:#eee; border-radius:12px; min-height:260px; width:100%; display:flex; align-items:center; justify-content:center;">
+          <!-- Placeholder for image -->
+          <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+      <div class="col-md-5 d-flex align-items-center">
+        <div class="card w-100 p-3" style="min-height: 260px;"
+          <h5 class="fw-bold">Featured news headline goes here</h5>
+          <p class="mb-2">A short summary of the featured news article. API will be integrated later.</p>
+          <div class="text-muted" style="font-size:0.95rem;">Source • 10 minutes ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Cards Row -->
+    <div class="row">
+      <div class="col-md-3 mb-3">
+        <div class="card h-100">
+          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
+          <div class="card-body">
+            <h6 class="card-title">News title 1</h6>
+            <div class="text-muted" style="font-size:0.9rem;">Source • 20 min ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card h-100">
+          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
+          <div class="card-body">
+            <h6 class="card-title">News title 2</h6>
+            <div class="text-muted" style="font-size:0.9rem;">Source • 30 min ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card h-100">
+          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
+          <div class="card-body">
+            <h6 class="card-title">News title 3</h6>
+            <div class="text-muted" style="font-size:0.9rem;">Source • 40 min ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card h-100">
+          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
+          <div class="card-body">
+            <h6 class="card-title">News title 4</h6>
+            <div class="text-muted" style="font-size:0.9rem;">Source • 50 min ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add more news cards as needed in the future -->
   </main>
 </body>
 <%- include('partials/footer') %>
