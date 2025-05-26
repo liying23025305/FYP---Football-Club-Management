@@ -1,0 +1,63 @@
+/*footer*/
+html, body {
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
+
+
+
+
+
+
+/* News section */
+.news-section {
+  background-color: #1a237e;
+  color: #ffd700;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.news-card {
+  background-color: #1a237e;
+  border: 1px solid #3949ab;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  height: 150px;
+  position: relative;
+  color: white;
+}
+
+.news-category {
+  color: #f44336;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.news-time {
+  color: #9e9e9e;
+  font-size: 0.8rem;
+}
+
+/* Adjust the logo size */
+.navbar .logo {
+    height: 50px; /* Set a fixed height */
+    width: auto; /* Maintain aspect ratio */
+    max-width: 150px; /* Optional: Limit the maximum width */
+    object-fit: contain; /* Ensure the image fits within the specified dimensions */
+    margin-right: 10px; /* Add spacing if needed */
+}
+
+/* Ensure the navbar background color is consistent */
+.navbar {
+    background-color: #212529 !important; /* Dark background */
+}
