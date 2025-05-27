@@ -7,6 +7,7 @@ const db = require('./models/db');
 // Route modules
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const newsRoutes = require('./routes/newsRoutes');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -36,6 +37,7 @@ let cart = [];
 // Routes
 app.use(authRoutes);
 app.use(adminRoutes);
+app.use('/news', newsRoutes);
 
 // Home Route
 app.get('/', (req, res) => {
@@ -124,7 +126,6 @@ app.post('/payment/process', (req, res) => {
 
 // Static routes
 app.get('/schedule', (req, res) => res.render('schedule'));
-app.get('/news', (req, res) => res.render('news'));
 app.get('/players', (req, res) => res.render('players'));
 app.get('/profile', (req, res) => res.render('profile'));
 app.get('/matches', (req, res) => res.render('matches', { title: 'Matches' }));
