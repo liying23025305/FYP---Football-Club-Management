@@ -7,8 +7,8 @@ router.get('/', (req, res) => {
 });
 
 // Featured news detail page
-router.get('/featured', (req, res) => {
+router.get('/featured', (req, res) => {  // renders the news_detail.ejs for a specific featured news story
   res.render('news_detail');
 });
 
-module.exports = router; 
+module.exports = router;

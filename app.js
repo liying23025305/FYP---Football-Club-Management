@@ -7,6 +7,9 @@ const db = require('./models/db');
 // Route modules
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const memberRoutes = require('./routes/memberRoutes');
+const apiRoutes = require('./routes/apiRoutes');
+const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 
 // Middleware
@@ -37,6 +40,9 @@ let cart = [];
 // Routes
 app.use(authRoutes);
 app.use(adminRoutes);
+app.use(memberRoutes);
+app.use(apiRoutes);
+app.use(storeRoutes);
 app.use('/news', newsRoutes);
 
 // Home Route
