@@ -40,9 +40,6 @@ let cart = [];
 // Routes
 app.use(authRoutes);
 app.use(adminRoutes);
-app.use(memberRoutes);
-app.use(apiRoutes);
-app.use(storeRoutes);
 app.use('/news', newsRoutes);
 
 // Home Route
