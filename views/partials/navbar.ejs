@@ -1,0 +1,53 @@
+<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+  <div class="container-fluid">
+    <!-- Left Logo Text -->
+    <a class="navbar-brand text-white ms-2" href="/">
+      <img src="/images/logo.png" alt="Football Club Logo" class="logo">
+    </a>
+    <!-- Hamburger Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Right Links -->
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/news">News</a>
+        </li><li class="nav-item">
+          <a class="nav-link" href="/store">Store</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/schedule">Schedule</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/tickets">Tickets</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/players">Players</a>
+        </li>
+      </ul>
+
+      <!-- Login Button -->
+      <% if (user) { %>
+        <div class="dropdown ms-3 position-relative">
+          <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <%= user.username %>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+          </ul>
+        </div>
+        <% } else { %>
+          <a href="/login" class="btn btn-outline-light ms-3">Login</a>
+          <% } %>
+
+    </div>
+  </div>
+</nav>
