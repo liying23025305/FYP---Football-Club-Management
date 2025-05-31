@@ -1,4 +1,3 @@
-
 /*footer*/
 html, body {
     height: 100%;
@@ -245,28 +244,6 @@ html, body {
   font-size: 0.8rem;
 }
 
-/* Membership cards */
-.membership-card {
-  padding: 20px;
-  text-align: center;
-  border-radius: 10px;
-}
-
-.gold {
-  background-color: #ffd700;
-  color: #3425a5;
-}
-
-.silver {
-  background-color: #c0c0c0;
-  color: #3425a5;
-}
-
-.bronze {
-  background-color: #cd7f32;
-  color: #3425a5;
-}
-
 /* Adjust the logo size */
 .navbar .logo {
     height: 50px; /* Set a fixed height */
@@ -279,44 +256,4 @@ html, body {
 /* Ensure the navbar background color is consistent */
 .navbar {
     background-color: #212529 !important; /* Dark background */
-}
-
-/* Players EJS */
-.player-card {
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.3s;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.player-card:hover {
-  transform: scale(1.05);
-}
-
-.player-info {
-  position: absolute;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  width: 100%;
-  padding: 8px;
-  transform: translateY(100%);
-  transition: transform 0.3s ease-in-out;
-  font-weight: bold;
-}
-
-.player-card:hover .player-info {
-  transform: translateY(0);
-}
-
-.player-img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-h2 {
-  margin-top: 40px;
-  margin-bottom: 20px;
 }

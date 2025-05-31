@@ -11,31 +11,45 @@
   <!-- Navbar -->
   <%- include('partials/navbar') %>
   
-
-
   <main class="container mt-5">
     <h1 class="text-center">Store</h1>
 
-    <!-- Store Items Section -->
-    <div class="row">
-      <% gear.forEach(item => { %>
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><%= item.gear_name %></h5>
-              <p class="card-text"><%= item.gear_desc %></p>
-              <p class="card-text"><strong>Price:</strong> $<%= item.price_per_unit.toFixed(2) %></p>
-              <form action="/cart/add/<%= item.gear_id %>" method="POST">
-                <button type="submit" class="btn btn-primary">Add to Cart</button>
-              </form>
+    <div class="row justify-content-center">
+      <% gear.forEach(function(item) { %>
+        <div class="col-6 col-sm-4 col-md-3 mb-4">
+          <div class="card h-100">
+            <% if (item.gear_image) { %>
+              <img src="/images/<%= item.gear_image %>" class="card-img-top" alt="<%= item.gear_name %>">
+            <% } else { %>
+              <img src="/images/jersey.png" class="card-img-top" alt="Jersey">
+            <% } %>
+            <div class="card-body d-flex flex-column justify-content-between">
+              <div>
+                <h5 class="card-title"><%= item.gear_name %></h5>
+                <p class="card-text">
+                  Price: $
+                  <% if (item.price) { %>
+                    <%= Number(item.price).toFixed(2) %>
+                  <% } else if (item.price_per_unit) { %>
+                    <%= Number(item.price_per_unit).toFixed(2) %>
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </p>
+              </div>
+              <div>
+                <form action="/cart/add/<%= item.gear_id %>" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-success mb-2">Add to Cart</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      <% }) %>
+      <% }); %>
     </div>
 
     <!-- Current Cart Section -->
-    <h2 class="mt-5">Current Cart</h2>
+    <h2 class="mt-4">Current Cart</h2>
     <% if (cart && cart.length > 0) { %>
       <table class="table table-bordered">
         <thead>
@@ -46,13 +60,15 @@
           </tr>
         </thead>
         <tbody>
-          <% cart.forEach(item => { %>
+          <% cart.forEach(function(cartItem) { %>
             <tr>
-              <td><%= item.gear_name %></td>
-              <td><%= item.quantity || 1 %></td>
-              <td>$<%= (item.price_per_unit * (item.quantity || 1)).toFixed(2) %></td>
+              <td><%= cartItem.gear_name %></td>
+              <td><%= cartItem.quantity %></td>
+              <td>
+                $<%= cartItem.price_per_unit ? Number(cartItem.price_per_unit).toFixed(2) : (cartItem.price ? Number(cartItem.price).toFixed(2) : 'N/A') %>
+              </td>
             </tr>
-          <% }) %>
+          <% }); %>
         </tbody>
       </table>
       <div class="text-end">
@@ -62,6 +78,6 @@
       <p class="text-center">Your cart is currently empty.</p>
     <% } %>
   </main>
+  <%- include('partials/footer') %>
 </body>
-<%- include('partials/footer') %>
 </html>
