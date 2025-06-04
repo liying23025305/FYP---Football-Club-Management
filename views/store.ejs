@@ -18,25 +18,15 @@
       <% gear.forEach(function(item) { %>
         <div class="col-6 col-sm-4 col-md-3 mb-4">
           <div class="card h-100">
-            <% if (item.gear_image) { %>
-              <img src="/images/<%= item.gear_image %>" class="card-img-top" alt="<%= item.gear_name %>">
+            <% if (item.image_url) { %>
+              <img src="<%= item.image_url %>" class="card-img-top" alt="<%= item.gear_name %>">
             <% } else { %>
               <img src="/images/jersey.png" class="card-img-top" alt="Jersey">
             <% } %>
             <div class="card-body d-flex flex-column justify-content-between">
               <div>
                 <h5 class="card-title"><%= item.gear_name %></h5>
-                <p class="card-text">
-                  Price: $
-                  <% if (item.price) { %>
-                    <%= Number(item.price).toFixed(2) %>
-                  <% } else if (item.price_per_unit) { %>
-                    <%= Number(item.price_per_unit).toFixed(2) %>
-                  <% } else { %>
-                    N/A
-                  <% } %>
-                </p>
-              </div>
+                <p class="card-text">Price: $<%= item.price ? item.price.toFixed(2) : (item.price_per_unit ? item.price_per_unit.toFixed(2) : '') %></p>              </div>
               <div>
                 <form action="/cart/add/<%= item.gear_id %>" method="POST" style="display:inline;">
                   <button type="submit" class="btn btn-success mb-2">Add to Cart</button>
@@ -49,34 +39,32 @@
     </div>
 
     <!-- Current Cart Section -->
-    <h2 class="mt-4">Current Cart</h2>
-    <% if (cart && cart.length > 0) { %>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% cart.forEach(function(cartItem) { %>
-            <tr>
-              <td><%= cartItem.gear_name %></td>
-              <td><%= cartItem.quantity %></td>
-              <td>
-                $<%= cartItem.price_per_unit ? Number(cartItem.price_per_unit).toFixed(2) : (cartItem.price ? Number(cartItem.price).toFixed(2) : 'N/A') %>
-              </td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
-      <div class="text-end">
-        <a href="/cart" class="btn btn-success">View Cart</a>
-      </div>
-    <% } else { %>
-      <p class="text-center">Your cart is currently empty.</p>
-    <% } %>
+   <h2 class="mt-4">Current Cart</h2>
+<% if (cart && cart.length > 0) { %>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% cart.forEach(function(cartItem) { %>
+        <tr>
+          <td><%= cartItem.gear_name %></td>
+          <td><%= cartItem.quantity %></td>
+          <td>$<%= cartItem.price_per_unit ? cartItem.price_per_unit.toFixed(2) : cartItem.price.toFixed(2) %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <div class="text-end">
+    <a href="/cart" class="btn btn-success">View Cart</a>
+  </div>
+<% } else { %>
+  <p class="text-center">Your cart is currently empty.</p>
+<% } %>
   </main>
   <%- include('partials/footer') %>
 </body>

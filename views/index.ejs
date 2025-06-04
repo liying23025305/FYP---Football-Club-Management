@@ -8,283 +8,241 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="/stylesheet/style.css" />
+  <link rel="stylesheet" href="/stylesheet/home.css" />
 </head>
 <body>
   <!-- Navbar -->
   <%- include('partials/navbar') %>
 
   <main class="container mt-4">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <h1>WELCOME TO FOOTBALL CLUB</h1>
-      <p class="lead">Join our community of passionate football players and fans</p>
-      <div class="mt-4">
-        <a href="/register" class="btn btn-light me-2">Join Now</a>
-        <a href="/login" class="btn btn-outline-light">Member Login</a>
-      </div>
-    </section>
+<!-- Hero Section -->
+<section class="hero-section container d-flex align-items-center justify-content-between">
+  <!-- Left: Text Box -->
+  <div class="hero-text-box">
+    <h1>WELCOME TO BLUELOCK CLUB</h1>
+    <p class="lead">Join our community of passionate bluelock players and fans</p>
+    <div class="mt-4">
+      <a href="/register" class="btn btn-light me-2">Join Now</a>
+      <a href="/login" class="btn btn-outline-light">Member Login</a>
+    </div>
+  </div>
 
-    <!-- Feature Boxes -->
-    <section class="row mb-4">
-      <!-- Membership Benefits -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-users feature-icon"></i>
-          <h3>MEMBERSHIP BENEFITS</h3>
-          <p>Enjoy exclusive discounts and cashback rewards with our tiered membership program.</p>
-          <a href="/membership_tiers" class="btn btn-outline-light">Learn More</a>
-        </div>
-      </div>
+  <!-- Right: Slideshow Box -->
+  <div class="hero-slideshow-box">
+    <div class="slideshow">
+      <img src="/images/slideshow1.png" class="slide active" alt="Slide 1">
+      <img src="/images/slideshow2.png" class="slide" alt="Slide 2">
+      <img src="/images/slideshow3.png" class="slide" alt="Slide 3">
+    </div>
+  </div>
+</section>
 
-      <!-- Worldwide Store -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-store feature-icon"></i>
-          <h3>WORLDWIDE STORE</h3>
-          <p>Get the latest football gear and club merchandise with member discounts.</p>
-          <a href="/store" class="btn btn-outline-light">Visit Shop</a>
-        </div>
-      </div>
-
-      <!-- Events & Training -->
-      <div class="col-md-4 mb-4">
-        <div class="feature-box">
-          <i class="fas fa-calendar-alt feature-icon"></i>
-          <h3>EVENTS & TRAINING</h3>
-          <p>Stay updated with club matches, training sessions, and special events.</p>
-          <a href="/schedule" class="btn btn-outline-light">View Calendar</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Upcoming Matches Section -->
-    <section class="events-section">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>UPCOMING MATCHES</h2>
-        <div class="countdown">
-          <span id="days">00</span> DAYS
-          <span id="hours">00</span> HOURS
-          <span id="mins">00</span> MINS
-          <span id="secs">00</span> SECS
-        </div>
-        <a href="#" class="btn btn-outline-light btn-sm">
-          <i class="fas fa-sync"></i> Sync Schedules to Calendar
-        </a>
-      </div>
-
-      <div class="match-scroll-container">
-        <div class="match-scroll-wrapper">
-          <!-- Previous Games -->
-          <div class="match-card previous-game">
-            <h4>PREVIOUS GAMES</h4>
-            <a href="/matches" class="text-white">See all the results ></a>
-          </div>
-
-          <!-- Match 1 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">3</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">2</div>
-            </div>
-            <h5>Barcelona vs Real Madrid</h5>
-            <p class="mb-1">Sunday, April 27, 14:00 CET</p>
-            <p class="mb-1">Copa Del Rey, Estadio Olímpico de la Cartuja</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
-          <!-- Match 2 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">3</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">3</div>
-            </div>
-            <h5>Girona vs Mallorca</h5>
-            <p class="mb-1">Thursday, May 1, 3:00 CET</p>
-            <p class="mb-1">UEFA Champions League, Estadi Olímpic Lluís Companys</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
-          <!-- Match 3 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">2</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">1</div>
-            </div>
-            <h5>Crystal Palace vs Nottingham Forest</h5>
-            <p class="mb-1">Tuesday, May 7, 20:00 CET</p>
-            <p class="mb-1">UEFA Champions League, Allianz Arena</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
-          <!-- Match 4 -->
-          <div class="match-card">
-            <div class="d-flex justify-content-between mb-2">
-              <div class="score">1</div>
-              <div><i class="fas fa-trophy text-warning"></i></div>
-              <div class="score">1</div>
-            </div>
-            <h5>Brentford vs Manutd</h5>
-            <p class="mb-1">Saturday, May 11, 16:00 CET</p>
-            <p class="mb-1">La Liga, Wanda Metropolitano</p>
-            <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
-          </div>
-
-          <!-- Next Game -->
-          <div class="match-card next-game">
-            <h4>NEXT GAME</h4>
-            <a href="/matches" class="text-white">See all the results ></a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Trending Section -->
-    <section class="trending-section mt-4">
-      <h2>TRENDING</h2>
-      <div class="trending-scroll-container">
-        <div class="trending-scroll-wrapper">
-          <div class="trending-item">
-            <span class="trending-badge badge-live">LIVE</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Watch U18s Football</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-live">LIVE</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Friendly Games U20</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Premier League News</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Exclusive Clips</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Youngest to 100 games</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Best Moment of April</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>HIGHLIGHTS | Final</h6>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-badge badge-new">NEW</span>
-            <div class="position-absolute bottom-0 p-2">
-              <h6>Matchday Challenge</h6>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- News Section -->
-    <section class="news-section mt-4">
-      <h2 class="mb-3">NEWS</h2>
-      <div class="row">
-        <!-- News Item 1 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Premier League news conferences</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FOOTBALL</span>
-              <span class="news-time">11 hrs ago</span>
-            </div>
-          </div>
-        </div>
+  <section class="section">
+  <div class="section-title">News</div>
 
-        <!-- News Item 2 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Seven reasons for optimism</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">16 hrs ago</span>
-            </div>
-          </div>
-        </div>
+  <!-- Main News Card -->
+<div class="main-news-card mb-3">
+  <a href="/news">
+    <img src="/images/news.png" alt="Main News" class="img-fluid w-100" />
+  </a>
+</div>
 
-        <!-- News Item 3 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Vote for the best moment of the month</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">17 hrs ago</span>
-            </div>
-          </div>
-        </div>
+<!-- Horizontal Mini Cards -->
+<div class="d-flex justify-content-center gap-2 flex-wrap">
+  <div class="news-thumbnail">
+    <a href="/news">
+      <img src="/images/news1.png" alt="News 1" />
+    </a>
+  </div>
+  <div class="news-thumbnail">
+    <a href="/news">
+      <img src="/images/news2.png" alt="News 2" />
+    </a>
+  </div>
+  <div class="news-thumbnail">
+    <a href="/news">
+      <img src="/images/news3.png" alt="News 3" />
+    </a>
+  </div>
+  <div class="news-thumbnail">
+    <a href="/news">
+      <img src="/images/news4.png" alt="News 4" />
+    </a>
+  </div>
+</div>
 
-        <!-- News Item 4 -->
-        <div class="col-md-3 col-6 mb-3">
-          <div class="news-card">
-            <h6>Kounde injury news</h6>
-            <div class="position-absolute bottom-0 p-2">
-              <span class="news-category">FIRST TEAM</span>
-              <span class="news-time">19 hrs ago</span>
-            </div>
-          </div>
+
+<!-- Shop Cards Section -->
+<section class="section">
+  <h2 class="section-title">Shop</h2>
+  <div class="image-cards d-flex justify-content-center gap-4">
+    <div class="image-card">
+      <a href="/store">
+        <img src="/images/jersey.png" alt="Card 1">
+      </a>
+    </div>
+    <div class="image-card">
+      <a href="/store">
+        <img src="/images/shoes.png" alt="Card 2">
+      </a>
+    </div>
+    <div class="image-card">
+      <a href="/store">
+        <img src="/images/socks.png" alt="Card 3">
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Matches Section -->
+<section class="events-section">
+  <h2 class="section-title">MATCHES</h2>
+
+  <div class="match-scroll-container">
+    <div class="match-scroll-wrapper">
+      <!-- Previous Games -->
+      <div class="match-card previous-game">
+        <h4>PREVIOUS GAMES</h4>
+        <a href="/matches" class="text-white">See all the results ></a>
+      </div>
+
+      <!-- Match 1 -->
+      <div class="match-card">
+        <div class="d-flex justify-content-between mb-2">
+          <div class="score">4</div>
+          <div><i class="fas fa-trophy text-warning"></i></div>
+          <div class="score">3</div>
+        </div>
+        <h5>Bastard München vs Manshine City</h5>
+        <p class="mb-1">Sunday, May 26, 18:00 JST</p>
+        <p class="mb-1">NEO EGOIST LEAGUE, Kaiser Arena</p>
+        <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
+      </div>
+
+      <!-- Match 2 -->
+      <div class="match-card">
+        <div class="d-flex justify-content-between mb-2">
+          <div class="score">2</div>
+          <div><i class="fas fa-trophy text-warning"></i></div>
+          <div class="score">2</div>
+        </div>
+        <h5>PXG vs Ubers</h5>
+        <p class="mb-1">Wednesday, May 29, 20:00 JST</p>
+        <p class="mb-1">NEO EGOIST LEAGUE, Paris Dome</p>
+        <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
+      </div>
+
+      <!-- Match 3 -->
+      <div class="match-card">
+        <div class="d-flex justify-content-between mb-2">
+          <div class="score">1</div>
+          <div><i class="fas fa-trophy text-warning"></i></div>
+          <div class="score">3</div>
+        </div>
+        <h5>FC Barcha vs Bastard München</h5>
+        <p class="mb-1">Saturday, June 1, 15:00 JST</p>
+        <p class="mb-1">NEO EGOIST LEAGUE, Blue Arena</p>
+        <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
+      </div>
+
+      <!-- Match 4 -->
+      <div class="match-card">
+        <div class="d-flex justify-content-between mb-2">
+          <div class="score">2</div>
+          <div><i class="fas fa-trophy text-warning"></i></div>
+          <div class="score">2</div>
+        </div>
+        <h5>Ubers vs Manshine City</h5>
+        <p class="mb-1">Monday, June 3, 19:30 JST</p>
+        <p class="mb-1">NEO EGOIST LEAGUE, Ubers Stadium</p>
+        <a href="#" class="btn btn-sm btn-outline-primary">Match Center</a>
+      </div>
+
+      <!-- Next Game -->
+      <div class="match-card next-game">
+        <h4>NEXT GAME</h4>
+        <a href="/matches" class="text-white">See all the results ></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+    <!-- Trending Section -->
+<section class="trending-section mt-4">
+  <h2>TRENDING</h2>
+  <div class="trending-scroll-container">
+    <div class="trending-scroll-wrapper">
+      <div class="trending-item">
+        <span class="trending-badge badge-live">LIVE</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Kaiser vs Isagi - NEL Showdown</h6>
         </div>
       </div>
-      <div class="text-center mt-3">
-        <a href="/news" class="btn btn-outline-light">View All News</a>
+
+      <div class="trending-item">
+        <span class="trending-badge badge-live">LIVE</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Reo & Nagi’s Combo Play</h6>
+        </div>
       </div>
-    </section>
-  </main>
 
-  <!-- Countdown Timer Script -->
-  <script>
-    // Set the date we're counting down to (next match date)
-    const countDownDate = new Date("May 1, 2025 15:00:00").getTime();
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Bachira’s Dribbling Frenzy</h6>
+        </div>
+      </div>
 
-    // Update the countdown every 1 second
-    const x = setInterval(function() {
-      // Get today's date and time
-      const now = new Date().getTime();
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Shidou's Ruthless Finish</h6>
+        </div>
+      </div>
 
-      // Find the distance between now and the count down date
-      const distance = countDownDate - now;
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Yoichi Isagi's Direct Shot</h6>
+        </div>
+      </div>
 
-      // Time calculations for days, hours, minutes and seconds
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Top 5 Egoist Moments</h6>
+        </div>
+      </div>
 
-      // Display the result
-      document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
-      document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
-      document.getElementById("mins").innerHTML = minutes.toString().padStart(2, '0');
-      document.getElementById("secs").innerHTML = seconds.toString().padStart(2, '0');
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>NEL Highlights | Week 5</h6>
+        </div>
+      </div>
 
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("countdown").innerHTML = "MATCH DAY!";
-      }
-    }, 1000);
-  </script>
+      <div class="trending-item">
+        <span class="trending-badge badge-new">NEW</span>
+        <div class="position-absolute bottom-0 p-2">
+          <h6>Barou’s King Goal Compilation</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <%- include('partials/footer') %>
+<script src="/slideshow.js"></script>
+
+<footer class="social-footer">
+  <a href="#" class="fa-brands fa-facebook-f"></a>
+  <a href="#" class="fa-brands fa-twitter"></a>
+  <a href="#" class="fa-brands fa-instagram"></a>
+  
+</footer>
 </body>
 </html>
+

@@ -12,7 +12,7 @@
   <%- include('partials/navbar') %>
 
   <main class="container mt-5">
-    <h1 class="text-center">Select Payment Method</h1>
+    <h1 class="text-center">Payment Options</h1>
 
     <!-- Customer Details -->
     <div class="mt-4">
@@ -22,31 +22,29 @@
       <p><strong>Address:</strong> <%= customer.address %></p>
     </div>
 
-    <!-- Payment Options -->
+    <!-- Payment Method Form -->
     <div class="mt-4">
-      <h3>Choose a Payment Method</h3>
+      <h3>Select Payment Method</h3>
       <form action="/payment/processing" method="POST">
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="Credit Card" required>
-          <label class="form-check-label" for="creditCard">Credit Card</label>
+          <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="creditCard" checked>
+          <label class="form-check-label" for="creditCard">
+            Credit Card
+          </label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="paymentMethod" id="paypal" value="PayPal">
-          <label class="form-check-label" for="paypal">PayPal</label>
+          <input class="form-check-input" type="radio" name="paymentMethod" id="paypal" value="paypal">
+          <label class="form-check-label" for="paypal">
+            PayPal
+          </label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="Bank Transfer">
-          <label class="form-check-label" for="bankTransfer">Bank Transfer</label>
+          <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="bankTransfer">
+          <label class="form-check-label" for="bankTransfer">
+            Bank Transfer
+          </label>
         </div>
-
-        <!-- Save Payment Method Checkbox -->
-        <div class="form-check mt-3">
-          <input class="form-check-input" type="checkbox" name="savePaymentMethod" id="savePaymentMethod" value="true">
-          <label class="form-check-label" for="savePaymentMethod">Save payment method for future purchases</label>
-        </div>
-
-        <!-- Confirm Payment Button -->
-        <button type="submit" class="btn btn-success mt-4">Confirm Payment</button>
+        <button type="submit" class="btn btn-primary mt-3">Proceed to Payment</button>
       </form>
     </div>
   </main>
