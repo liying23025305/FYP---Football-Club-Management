@@ -18,15 +18,22 @@
       <% gear.forEach(function(item) { %>
         <div class="col-6 col-sm-4 col-md-3 mb-4">
           <div class="card h-100">
-            <% if (item.image_url) { %>
-              <img src="<%= item.image_url %>" class="card-img-top" alt="<%= item.gear_name %>">
+            <% if (item.gear_image) { %>
+              <img src="/images/<%= item.gear_image %>" class="card-img-top" alt="<%= item.gear_name %>">
             <% } else { %>
               <img src="/images/jersey.png" class="card-img-top" alt="Jersey">
             <% } %>
             <div class="card-body d-flex flex-column justify-content-between">
               <div>
                 <h5 class="card-title"><%= item.gear_name %></h5>
-                <p class="card-text">Price: $<%= item.price ? item.price.toFixed(2) : (item.price_per_unit ? item.price_per_unit.toFixed(2) : '') %></p>              </div>
+                <p class="card-text">Price: $
+                  <%= (item.price && !isNaN(Number(item.price)))
+                        ? Number(item.price).toFixed(2)
+                        : (item.price_per_unit && !isNaN(Number(item.price_per_unit)))
+                            ? Number(item.price_per_unit).toFixed(2)
+                            : '' %>
+                </p>
+              </div>
               <div>
                 <form action="/cart/add/<%= item.gear_id %>" method="POST" style="display:inline;">
                   <button type="submit" class="btn btn-success mb-2">Add to Cart</button>
@@ -54,7 +61,7 @@
         <tr>
           <td><%= cartItem.gear_name %></td>
           <td><%= cartItem.quantity %></td>
-          <td>$<%= cartItem.price_per_unit ? cartItem.price_per_unit.toFixed(2) : cartItem.price.toFixed(2) %></td>
+          <td>$<%= cartItem.price_per_unit ? Number(cartItem.price_per_unit).toFixed(2) : Number(cartItem.price).toFixed(2) %></td>
         </tr>
       <% }); %>
     </tbody>
