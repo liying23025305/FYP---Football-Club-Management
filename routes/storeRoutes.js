@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const connection = require('../models/db');
+const mysql = require('mysql2');
+
+// Update credentials for XAMPP
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '', // default for XAMPP
+  database: 'mydb'
+});
 
 // Ensure session cart exists
 function ensureCartSession(req) {
@@ -9,10 +17,10 @@ function ensureCartSession(req) {
   }
 }
 
-// Store Route
+// Show store page
 router.get('/store', async (req, res) => {
   try {
-    const [results] = await connection.query('SELECT * FROM gear');
+    const [results] = await connection.promise().query('SELECT * FROM gear');
     const gear = results.map(item => ({
       ...item,
       price_per_unit: Number(item.price_per_unit)
@@ -31,7 +39,7 @@ router.post('/cart/add/:id', async (req, res) => {
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
   try {
-    const [results] = await connection.query('SELECT * FROM gear WHERE gear_id = ?', [gearId]);
+    const [results] = await connection.promise().query('SELECT * FROM gear WHERE gear_id = ?', [gearId]);
     if (results.length === 0) return res.status(404).send('Item not found');
 
     const item = {
@@ -58,109 +66,108 @@ router.post('/cart/add/:id', async (req, res) => {
 
 // View cart
 router.get('/cart', (req, res) => {
-  const isMember = req.session.user && req.session.user.role === 'member';
+  let isMember = false;
+  if (req.session.user && req.session.user.role === 'member') {
+    isMember = true;
+  }
+  res.render('cart', { cart: req.session.cart || [], isMember });
+});
+
+// Update cart item quantity
+router.post('/cart/update/:id', (req, res) => {
+  const gearId = parseInt(req.params.id, 10);
+  const newQty = parseInt(req.body.quantity, 10);
   ensureCartSession(req);
-  res.render('cart', { cart: req.session.cart, isMember });
+  const item = req.session.cart.find(i => i.gear_id === gearId);
+  if (item && newQty > 0) {
+    item.quantity = newQty;
+  }
+  res.redirect('/cart');
 });
 
 // Remove item from cart
 router.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
-  if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
-
   ensureCartSession(req);
-  req.session.cart = req.session.cart.filter(item => item.gear_id !== gearId);
+  req.session.cart = req.session.cart.filter(i => i.gear_id !== gearId);
   res.redirect('/cart');
 });
 
-// Update item quantity
-router.post('/cart/update/:id', (req, res) => {
-  const gearId = parseInt(req.params.id, 10);
-  const newQuantity = parseInt(req.body.quantity, 10);
-  if (isNaN(gearId) || isNaN(newQuantity) || newQuantity <= 0) {
-    return res.status(400).send('Invalid input');
-  }
-
-  ensureCartSession(req);
-  const item = req.session.cart.find(item => item.gear_id === gearId);
-  if (item) item.quantity = newQuantity;
-  res.redirect('/cart');
-});
-
-// Payment method page
-router.get('/paymentmethod', async (req, res) => {
-  const customerId = req.session.customerId;
-  if (!customerId) return res.redirect('/login');
-
-  try {
-    const [results] = await connection.query('SELECT * FROM users WHERE id = ?', [customerId]);
-    if (results.length === 0) return res.status(404).send('Customer not found');
-
-    res.render('paymentmethod', { cart: req.session.cart || [], customer: results[0] });
-  } catch (err) {
-    console.error('Error fetching customer:', err);
-    res.status(500).send('Database error');
-  }
-});
-
-// Payment options page
-router.get('/payment/options', async (req, res) => {
-  const customerId = req.session.customerId;
-  if (!customerId) return res.redirect('/login');
-
-  try {
-    const [results] = await connection.query('SELECT * FROM users WHERE id = ?', [customerId]);
-    if (results.length === 0) return res.status(404).send('Customer not found');
-
-    res.render('paymentoptions', { customer: results[0] });
-  } catch (err) {
-    console.error('Error fetching customer:', err);
-    res.status(500).send('Database error');
-  }
-});
-
-// Payment processing
-router.post('/payment/processing', async (req, res) => {
-  const paymentMethod = req.body.paymentMethod;
-  const savePaymentMethod = req.body.savePaymentMethod === 'true';
+// Checkout page
+router.get('/payment', (req, res) => {
   const cart = req.session.cart || [];
-  const customerId = req.session.customerId;
+  const customer = req.session.user;
+  if (!customer) return res.redirect('/login');
+  if (cart.length === 0) return res.redirect('/cart');
 
-  if (!customerId) return res.redirect('/login');
-  if (cart.length === 0) return res.status(400).send('Cart is empty');
+  connection.query('SELECT payment_mode_id, name FROM payment_mode', (err, paymentModes) => {
+    if (err) {
+      console.error('DB error in /payment:', err);
+      return res.status(500).send('Database error');
+    }
+    res.render('payment', { cart, customer, paymentModes });
+  });
+});
 
-  const orderData = {
-    user_id: customerId,
-    order_date: new Date(),
-    payment_method: paymentMethod
-  };
+// Payment processing (form submit)
+router.post('/payment/process', async (req, res) => {
+  const paymentMethod = req.body.paymentMethod;
+  const cart = req.session.cart || [];
+  const user = req.session.user;
+  if (!user || cart.length === 0) {
+    return res.status(400).send('Missing user or cart data.');
+  }
+
+  const account_id = user.account_id;
 
   try {
-    const [orderResult] = await connection.query('INSERT INTO `order` SET ?', orderData);
-    const orderId = orderResult.insertId;
+    // Find payment_mode_id
+    const [pmResults] = await connection.promise().query(
+      'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1',
+      [paymentMethod]
+    );
+    if (pmResults.length === 0) {
+      return res.status(400).send('Payment mode not found. Please select a valid payment method.');
+    }
+    const payment_mode_id = pmResults[0].payment_mode_id;
 
-    const orderItems = cart.map(item => [
-      orderId,
-      item.gear_id,
-      item.quantity,
-      item.price_per_unit
-    ]);
+    // Insert order
+    const [orderResult] = await connection.promise().query(
+      'INSERT INTO `order` (order_date, payment_ref, account_id, payment_mode_id) VALUES (?, ?, ?, ?)',
+      [new Date(), 'manual', account_id, payment_mode_id]
+    );
+    const order_id = orderResult.insertId;
 
-    await connection.query(
-      'INSERT INTO order_item (order_id, gear_id, quantity, price_per_unit) VALUES ?',
-      [orderItems]
+    // For each cart item, create a transaction_detail and then order_item
+    for (const item of cart) {
+      const [tdResult] = await connection.promise().query(
+        'INSERT INTO transaction_detail (transaction_type, transaction_date, amount) VALUES (?, ?, ?)',
+        ['football gear purchase', new Date(), item.price_per_unit * item.quantity]
+      );
+      const transaction_id = tdResult.insertId;
+      await connection.promise().query(
+        'INSERT INTO order_item (quantity, order_id, gear_id, transaction_id) VALUES (?, ?, ?, ?)',
+        [item.quantity, order_id, item.gear_id, transaction_id]
+      );
+    }
+
+    // Update total_amount in payment_mode
+    const orderTotal = cart.reduce((sum, item) => sum + item.price_per_unit * item.quantity, 0);
+    await connection.promise().query(
+      'UPDATE payment_mode SET total_amount = IFNULL(total_amount,0) + ? WHERE payment_mode_id = ?',
+      [orderTotal, payment_mode_id]
     );
 
     req.session.cart = [];
-    res.redirect('/payment/success');
+    res.redirect('/paymentsuccess');
   } catch (err) {
-    console.error('Error processing payment:', err);
-    res.status(500).send('Database error');
+    console.error('DB error in payment processing:', err);
+    res.status(500).send('Database error (order).');
   }
 });
 
 // Payment success page
-router.get('/payment/success', (req, res) => {
+router.get('/paymentsuccess', (req, res) => {
   res.render('paymentsuccess');
 });
 
