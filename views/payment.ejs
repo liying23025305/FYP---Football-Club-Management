@@ -28,7 +28,7 @@
             <tr>
               <td><%= item.gear_name %></td>
               <td><%= item.gear_desc %></td>
-              <td>$<%= item.price_per_unit %></td>
+              <td>$<%= Number(item.price_per_unit).toFixed(2) %></td>
               <td><%= item.quantity || 1 %></td>
             </tr>
             <% totalAmount += parseFloat(item.price_per_unit) * (item.quantity || 1); %>
@@ -43,7 +43,7 @@
       <h3>Customer Details</h3>
       <p><strong>Name:</strong> <%= customer.first_name %> <%= customer.surname %></p>
       <p><strong>Email:</strong> <%= customer.email %></p>
-      <p><strong>Address:</strong> <%= customer.address || '' %></p>
+      <p><strong>Address:</strong> <%= customer.address ? customer.address : '' %></p>
     </div>
     <div class="mt-4">
       <h3>Choose Payment Method</h3>
@@ -71,4 +71,3 @@
 </body>
 </html>
     <%- include('partials/footer') %>
-    

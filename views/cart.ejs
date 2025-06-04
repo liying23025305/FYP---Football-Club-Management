@@ -31,7 +31,7 @@
             <tr>
               <td><%= item.gear_name %></td>
               <td><%= item.gear_desc %></td>
-              <td>$<%= item.price_per_unit %></td>
+              <td>$<%= Number(item.price_per_unit).toFixed(2) %></td>
               <td>
                 <form action="/cart/update/<%= item.gear_id %>" method="POST" style="display: inline;">
                   <input type="number" name="quantity" value="<%= item.quantity || 1 %>" min="1" class="form-control form-control-sm d-inline-block" style="width: 60px;">
@@ -55,11 +55,7 @@
       </div>
       <div class="text-end mt-3">
         <a href="/store" class="btn btn-secondary">Add More to Cart</a>
-<<<<<<< HEAD
         <a href="/payment" class="btn btn-success">Pay Now</a>
-=======
-        <a href="/paymentmethod" class="btn btn-success">Pay Now</a>
->>>>>>> 2e3885d00580b9610447a4e0850ac5c60840c201
       </div>
     <% } else { %>
       <p class="text-center">Your cart is empty.</p>

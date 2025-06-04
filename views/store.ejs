@@ -61,7 +61,7 @@
         <tr>
           <td><%= cartItem.gear_name %></td>
           <td><%= cartItem.quantity %></td>
-          <td>$<%= cartItem.price_per_unit ? cartItem.price_per_unit.toFixed(2) : cartItem.price.toFixed(2) %></td>
+          <td>$<%= cartItem.price_per_unit ? Number(cartItem.price_per_unit).toFixed(2) : Number(cartItem.price).toFixed(2) %></td>
         </tr>
       <% }); %>
     </tbody>
