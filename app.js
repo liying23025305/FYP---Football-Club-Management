@@ -24,6 +24,7 @@ connection.connect((err) => {
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const storeRoutes = require('./routes/storeRoutes');
+const paypalRoutes = require('./routes/paypalRoutes');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 app.use(authRoutes);
 app.use(adminRoutes);
 app.use('/', storeRoutes);
+app.use(paypalRoutes);
 
 // Home Route
 app.get('/', (req, res) => {
