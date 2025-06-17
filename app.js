@@ -2,23 +2,8 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const app = express();
-const mysql = require('mysql2');
-
-// MySQL connection configuration
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'mydb'
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-    return;
-  }
-  console.log('Connected to MySQL database');
-});
+// Use the shared db connection
+const connection = require('./models/db');
 
 // Route modules
 const authRoutes = require('./routes/authRoutes');
