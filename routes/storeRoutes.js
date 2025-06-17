@@ -100,7 +100,7 @@ router.get('/payment', (req, res) => {
   if (!customer) return res.redirect('/login');
   if (cart.length === 0) return res.redirect('/cart');
 
-  connection.query('SELECT payment_mode_id, name FROM payment_mode', (err, paymentModes) => {
+  connection.query('SELECT payment_method_id, method_name FROM payment_methods', (err, paymentModes) => {
     if (err) {
       console.error('DB error in /payment:', err);
       return res.status(500).send('Database error');
@@ -121,15 +121,15 @@ router.post('/payment/process', async (req, res) => {
   const account_id = user.account_id;
 
   try {
-    // Find payment_mode_id
+    // Find payment_method_id
     const [pmResults] = await connection.promise().query(
-      'SELECT payment_mode_id FROM payment_mode WHERE LOWER(name) = LOWER(?) LIMIT 1',
+      'SELECT payment_method_id FROM payment_methods WHERE LOWER(method_name) = LOWER(?) LIMIT 1',
       [paymentMethod]
     );
     if (pmResults.length === 0) {
-      return res.status(400).send('Payment mode not found. Please select a valid payment method.');
+      return res.status(400).send('Payment method not found. Please select a valid payment method.');
     }
-    const payment_mode_id = pmResults[0].payment_mode_id;
+    const payment_method_id = pmResults[0].payment_method_id;
 
     // Insert order
     const [orderResult] = await connection.promise().query(
