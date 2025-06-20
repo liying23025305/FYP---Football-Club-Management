@@ -1,78 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Store</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/stylesheet/style.css" />
+  <link rel ="stylesheet" href="/stylesheet/style.css" />
+  <link rel="stylesheet" href="/stylesheet/store.css" />
 </head>
 <body>
-  <!-- Navbar -->
   <%- include('partials/navbar') %>
-  
-  <main class="container mt-5">
-    <h1 class="text-center">Store</h1>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Store</h1>
+    <div class="row mb-4">
+      <form action="/store" method="GET" class="d-flex flex-wrap justify-content-center align-items-center gap-2">
+        <select name="category" class="form-select w-auto">
+          <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
+          <option value="Jersey" <%= selectedCategory === 'Jersey' ? 'selected' : '' %>>Jersey</option>
+          <option value="Shoes" <%= selectedCategory === 'Shoes' ? 'selected' : '' %>>Shoes</option>
+          <option value="Accessories" <%= selectedCategory === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+        </select>
+        <input type="search" name="search" placeholder="Search by name..." class="form-control w-auto" value="<%= searchQuery || '' %>"/>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
 
-    <div class="row justify-content-center">
-      <% gear.forEach(function(item) { %>
-        <div class="col-6 col-sm-4 col-md-3 mb-4">
-          <div class="card h-100">
-            <% if (item.gear_image) { %>
-              <img src="/images/<%= item.gear_image %>" class="card-img-top" alt="<%= item.gear_name %>">
-            <% } else { %>
-              <img src="/images/jersey.png" class="card-img-top" alt="Jersey">
-            <% } %>
-            <div class="card-body d-flex flex-column justify-content-between">
-              <div>
-                <h5 class="card-title"><%= item.gear_name %></h5>
-                <p class="card-text">Price: $
-                  <%= (item.price && !isNaN(Number(item.price)))
-                        ? Number(item.price).toFixed(2)
-                        : (item.price_per_unit && !isNaN(Number(item.price_per_unit)))
-                            ? Number(item.price_per_unit).toFixed(2)
-                            : '' %>
-                </p>
-              </div>
-              <div>
-                <form action="/cart/add/<%= item.gear_id %>" method="POST" style="display:inline;">
-                  <button type="submit" class="btn btn-success mb-2">Add to Cart</button>
+    <% if (mostPopular) { %>
+      <h2 class="section-title">Most Popular</h2>
+      <div class="row justify-content-center mb-4">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+          <div class="card h-100 border-primary shadow highlight">
+            <img src="/images/<%= mostPopular.image %>" class="card-img-top" alt="<%= mostPopular.name %>"/>
+            <div class="card-body text-center">
+              <h5 class="card-title"><%= mostPopular.name %></h5>
+              <p class="card-text">Price: $<%= mostPopular.price %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (products && products.length) { %>
+      <h2 class="section-title">Products</h2>
+      <div class="row product-grid">
+        <% products.forEach(product => { %>
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 shadow">
+              <img src="/images/<%= product.image %>" class="card-img-top" alt="<%= product.name %>"/>
+              <div class="card-body text-center d-flex flex-column justify-content-between">
+                <h5 class="card-title"><%= product.name %></h5>
+                <p class="card-text">Price: $<%= product.price %></p>
+                <form action="/add-to-cart" method="POST">
+                  <input type="hidden" name="productId" value="<%= product.id %>">
+                  <button class="btn btn-success w-100 mt-2">Add to Cart</button>
                 </form>
               </div>
             </div>
           </div>
-        </div>
-      <% }); %>
-    </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-center">No products found.</p>
+    <% } %>
 
-    <!-- Current Cart Section -->
-   <h2 class="mt-4">Current Cart</h2>
-<% if (cart && cart.length > 0) { %>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Price</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% cart.forEach(function(cartItem) { %>
-        <tr>
-          <td><%= cartItem.gear_name %></td>
-          <td><%= cartItem.quantity %></td>
-          <td>$<%= cartItem.price_per_unit ? Number(cartItem.price_per_unit).toFixed(2) : Number(cartItem.price).toFixed(2) %></td>
-        </tr>
-      <% }); %>
-    </tbody>
-  </table>
-  <div class="text-end">
-    <a href="/cart" class="btn btn-success">View Cart</a>
+    <div class="cart-box card mt-5 p-3">
+      <h5>Current Cart</h5>
+      <% if (cart && cart.length) { %>
+        <ul class="list-group list-group-flush">
+          <% cart.forEach(item => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><%= item.name %></span>
+              <span class="badge bg-primary rounded-pill">x <%= item.quantity %></span>
+            </li>
+          <% }) %>
+        </ul>
+        <div class="text-end mt-2">
+          <a href="/cart" class="btn btn-success">View Cart</a>
+        </div>
+      <% } else { %>
+        <p>Your cart is currently empty.</p>
+      <% } %>
+    </div>
   </div>
-<% } else { %>
-  <p class="text-center">Your cart is currently empty.</p>
-<% } %>
-  </main>
   <%- include('partials/footer') %>
 </body>
 </html>

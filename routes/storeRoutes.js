@@ -17,16 +17,41 @@ function ensureCartSession(req) {
   }
 }
 
-// Show store page
+// Show store page with category and search filtering
 router.get('/store', async (req, res) => {
   try {
-    const [results] = await connection.promise().query('SELECT * FROM gear');
-    const gear = results.map(item => ({
-      ...item,
-      price_per_unit: Number(item.price_per_unit)
+    const category = req.query.category;
+    const search = req.query.search;
+    let sql = 'SELECT * FROM gear';
+    let params = [];
+    if (category && category !== 'All') {
+      sql += ' WHERE category = ?';
+      params.push(category);
+    }
+    const [results] = await connection.promise().query(sql, params);
+    let products = results.map(item => ({
+      id: item.gear_id,
+      name: item.gear_name,
+      image: item.gear_image,
+      price: Number(item.price_per_unit).toFixed(2),
+      category: item.category
     }));
+    if (search) {
+      products = products.filter(item => item.name && item.name.toLowerCase().includes(search.toLowerCase()));
+    }
+    // Find most popular (example: highest price, or you can use your own logic)
+    let mostPopular = null;
+    if (products.length > 0 && (!category || category === 'All') && !search) {
+      mostPopular = products.reduce((a, b) => (parseFloat(a.price) > parseFloat(b.price) ? a : b));
+    }
     ensureCartSession(req);
-    res.render('store', { gear, cart: req.session.cart });
+    res.render('store', {
+      products,
+      mostPopular,
+      cart: req.session.cart,
+      selectedCategory: category || 'All',
+      searchQuery: search
+    });
   } catch (err) {
     console.error('Error fetching gear:', err);
     res.status(500).send('Database error');
