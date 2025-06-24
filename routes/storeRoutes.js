@@ -23,12 +23,47 @@ router.get('/store', async (req, res) => {
     const category = req.query.category;
     const search = req.query.search;
     const priceRange = req.query.priceRange ? Number(req.query.priceRange) : 1000;
-    let sql = 'SELECT * FROM gear';
+    const size = req.query.size && req.query.size !== 'All' ? req.query.size : null;
+    const sizeKids = req.query.sizeKids && req.query.sizeKids !== 'All' ? req.query.sizeKids : null;
+    const sortBy = req.query.sortBy || 'featured';
+
+    // Get all unique categories from gear table
+    const [catResults] = await connection.promise().query('SELECT DISTINCT category FROM gear WHERE category IS NOT NULL AND category != ""');
+    const categories = catResults.map(row => row.category).filter(Boolean);
+
+    // Build SQL query with filters
+    let sql = 'SELECT * FROM gear WHERE 1=1';
     let params = [];
     if (category && category !== 'All') {
-      sql += ' WHERE category = ?';
+      sql += ' AND category = ?';
       params.push(category);
     }
+    if (size) {
+      sql += ' AND (size = ? OR size IS NULL OR size = "")'; // If you have size column, otherwise skip
+      params.push(size);
+    }
+    if (sizeKids) {
+      sql += ' AND (size_kids = ? OR size_kids IS NULL OR size_kids = "")'; // If you have size_kids column
+      params.push(sizeKids);
+    }
+    if (search) {
+      sql += ' AND gear_name LIKE ?';
+      params.push(`%${search}%`);
+    }
+    sql += ' AND price_per_unit <= ?';
+    params.push(priceRange);
+
+    // Sorting
+    if (sortBy === 'priceLow') {
+      sql += ' ORDER BY price_per_unit ASC';
+    } else if (sortBy === 'priceHigh') {
+      sql += ' ORDER BY price_per_unit DESC';
+    } else if (sortBy === 'name') {
+      sql += ' ORDER BY gear_name ASC';
+    } else {
+      sql += ' ORDER BY gear_id DESC'; // featured or default
+    }
+
     const [results] = await connection.promise().query(sql, params);
     let products = results.map(item => ({
       id: item.gear_id,
@@ -37,11 +72,7 @@ router.get('/store', async (req, res) => {
       price: Number(item.price_per_unit).toFixed(2),
       category: item.category
     }));
-    if (search) {
-      products = products.filter(item => item.name && item.name.toLowerCase().includes(search.toLowerCase()));
-    }
-    // Filter by price range
-    products = products.filter(item => parseFloat(item.price) <= priceRange);
+
     // Find most popular (example: highest price, or you can use your own logic)
     let mostPopular = null;
     if (products.length > 0 && (!category || category === 'All') && !search) {
@@ -52,19 +83,42 @@ router.get('/store', async (req, res) => {
       products,
       mostPopular,
       cart: req.session.cart,
-      selectedCategory: category || 'All',
-      searchQuery: search,
-      priceRange
+      selectedCategory: typeof category !== 'undefined' ? category : 'All',
+      searchQuery: typeof search !== 'undefined' ? search : '',
+      priceRange: typeof priceRange !== 'undefined' ? priceRange : 1000,
+      categories,
+      selectedSize: typeof req.query.size !== 'undefined' ? req.query.size : 'All',
+      selectedSizeKids: typeof req.query.sizeKids !== 'undefined' ? req.query.sizeKids : 'All',
+      sortBy: typeof sortBy !== 'undefined' ? sortBy : 'featured'
     });
   } catch (err) {
     console.error('Error fetching gear:', err);
-    res.status(500).send('Database error');
+    // Ensure categories is always defined, even on error
+    let categories = [];
+    try {
+      const [catResults] = await connection.promise().query('SELECT DISTINCT category FROM gear WHERE category IS NOT NULL AND category != ""');
+      categories = catResults.map(row => row.category).filter(Boolean);
+    } catch (e) {}
+    res.render('store', {
+      products: [],
+      mostPopular: null,
+      cart: req.session.cart,
+      selectedCategory: 'All',
+      searchQuery: '',
+      priceRange: 1000,
+      categories,
+      selectedSize: 'All',
+      selectedSizeKids: 'All',
+      sortBy: 'featured'
+    });
   }
 });
 
 // Add item to cart
 router.post('/cart/add/:id', async (req, res) => {
   const gearId = parseInt(req.params.id, 10);
+  const quantity = parseInt(req.body.quantity, 10) || 1;
+  const size = req.body.size || null;
   if (isNaN(gearId)) return res.status(400).send('Invalid gear ID');
 
   try {
@@ -73,17 +127,18 @@ router.post('/cart/add/:id', async (req, res) => {
 
     const item = {
       ...results[0],
-      price_per_unit: Number(results[0].price_per_unit)
+      price_per_unit: Number(results[0].price_per_unit),
+      size: size
     };
 
     ensureCartSession(req);
     const cart = req.session.cart;
-    const existingItem = cart.find((c) => c.gear_id === gearId);
+    const existingItem = cart.find((c) => c.gear_id === gearId && c.size === size);
 
     if (existingItem) {
-      existingItem.quantity += 1;
+      existingItem.quantity += quantity;
     } else {
-      cart.push({ ...item, quantity: 1 });
+      cart.push({ ...item, quantity });
     }
 
     res.redirect('/store?success=true');
@@ -106,8 +161,9 @@ router.get('/cart', (req, res) => {
 router.post('/cart/update/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
   const newQty = parseInt(req.body.quantity, 10);
+  const size = req.body.size || null;
   ensureCartSession(req);
-  const item = req.session.cart.find(i => i.gear_id === gearId);
+  const item = req.session.cart.find(i => i.gear_id === gearId && i.size === size);
   if (item && newQty > 0) {
     item.quantity = newQty;
   }
@@ -117,8 +173,9 @@ router.post('/cart/update/:id', (req, res) => {
 // Remove item from cart
 router.post('/cart/remove/:id', (req, res) => {
   const gearId = parseInt(req.params.id, 10);
+  const size = req.body.size || null;
   ensureCartSession(req);
-  req.session.cart = req.session.cart.filter(i => i.gear_id !== gearId);
+  req.session.cart = req.session.cart.filter(i => !(i.gear_id === gearId && i.size === size));
   res.redirect('/cart');
 });
 
@@ -222,6 +279,18 @@ router.get('/thankyou', async (req, res) => {
     console.error('Error fetching order:', err);
     res.status(500).send('Database error');
   }
+});
+
+// View cart summary (AJAX for sidebar)
+router.get('/cart/summary', (req, res) => {
+  ensureCartSession(req);
+  // Only send minimal info for summary
+  const summary = (req.session.cart || []).map(item => ({
+    name: item.gear_name || item.name,
+    quantity: item.quantity,
+    size: item.size
+  }));
+  res.json(summary);
 });
 
 module.exports = router;
