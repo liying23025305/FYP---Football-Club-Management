@@ -22,6 +22,7 @@ router.get('/store', async (req, res) => {
   try {
     const category = req.query.category;
     const search = req.query.search;
+    const priceRange = req.query.priceRange ? Number(req.query.priceRange) : 1000;
     let sql = 'SELECT * FROM gear';
     let params = [];
     if (category && category !== 'All') {
@@ -39,6 +40,8 @@ router.get('/store', async (req, res) => {
     if (search) {
       products = products.filter(item => item.name && item.name.toLowerCase().includes(search.toLowerCase()));
     }
+    // Filter by price range
+    products = products.filter(item => parseFloat(item.price) <= priceRange);
     // Find most popular (example: highest price, or you can use your own logic)
     let mostPopular = null;
     if (products.length > 0 && (!category || category === 'All') && !search) {
@@ -50,7 +53,8 @@ router.get('/store', async (req, res) => {
       mostPopular,
       cart: req.session.cart,
       selectedCategory: category || 'All',
-      searchQuery: search
+      searchQuery: search,
+      priceRange
     });
   } catch (err) {
     console.error('Error fetching gear:', err);
@@ -144,6 +148,8 @@ router.post('/payment/process', async (req, res) => {
   }
 
   const account_id = user.account_id;
+  const user_id = user.user_id; // for payments/orders
+  const shipping_address = user.address || '';
 
   try {
     // Find payment_method_id
@@ -156,44 +162,66 @@ router.post('/payment/process', async (req, res) => {
     }
     const payment_method_id = pmResults[0].payment_method_id;
 
+    // Calculate totals
+    const total_amount = cart.reduce((sum, item) => sum + item.price_per_unit * item.quantity, 0);
+    const discount_applied = 0.00; // Add logic if you have discounts
+    const final_amount = total_amount - discount_applied;
+
     // Insert order
     const [orderResult] = await connection.promise().query(
-      'INSERT INTO `order` (order_date, payment_ref, account_id, payment_mode_id) VALUES (?, ?, ?, ?)',
-      [new Date(), 'manual', account_id, payment_mode_id]
+      'INSERT INTO orders (order_date, total_amount, discount_applied, final_amount, status, shipping_address, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [new Date(), total_amount, discount_applied, final_amount, 'pending', shipping_address, user_id]
     );
     const order_id = orderResult.insertId;
 
-    // For each cart item, create a transaction_detail and then order_item
+    // Insert order_items and update gear inventory
     for (const item of cart) {
-      const [tdResult] = await connection.promise().query(
-        'INSERT INTO transaction_detail (transaction_type, transaction_date, amount) VALUES (?, ?, ?)',
-        ['football gear purchase', new Date(), item.price_per_unit * item.quantity]
-      );
-      const transaction_id = tdResult.insertId;
       await connection.promise().query(
-        'INSERT INTO order_item (quantity, order_id, gear_id, transaction_id) VALUES (?, ?, ?, ?)',
-        [item.quantity, order_id, item.gear_id, transaction_id]
+        'INSERT INTO order_items (quantity, unit_price, total_price, order_id, gear_id) VALUES (?, ?, ?, ?, ?)',
+        [item.quantity, item.price_per_unit, item.price_per_unit * item.quantity, order_id, item.gear_id]
+      );
+      // Optionally update inventory
+      await connection.promise().query(
+        'UPDATE gear SET gear_quantity = GREATEST(gear_quantity - ?, 0) WHERE gear_id = ?',
+        [item.quantity, item.gear_id]
       );
     }
 
-    // Update total_amount in payment_mode
-    const orderTotal = cart.reduce((sum, item) => sum + item.price_per_unit * item.quantity, 0);
+    // Insert payment record
     await connection.promise().query(
-      'UPDATE payment_mode SET total_amount = IFNULL(total_amount,0) + ? WHERE payment_mode_id = ?',
-      [orderTotal, payment_mode_id]
+      'INSERT INTO payments (amount, payment_type, payment_status, transaction_reference, user_id, payment_method_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [final_amount, 'online', 'completed', `order-${order_id}`, user_id, payment_method_id]
     );
 
+    // Clear cart on successful payment
     req.session.cart = [];
-    res.redirect('/paymentsuccess');
+
+    res.redirect(`/thankyou?order_id=${order_id}`);
   } catch (err) {
-    console.error('DB error in payment processing:', err);
-    res.status(500).send('Database error (order).');
+    console.error('Error processing payment:', err);
+    res.status(500).send('Payment processing error');
   }
 });
 
-// Payment success page
-router.get('/paymentsuccess', (req, res) => {
-  res.render('paymentsuccess');
+// Thank you page
+router.get('/thankyou', async (req, res) => {
+  const orderId = req.query.order_id;
+  if (!orderId) return res.redirect('/');
+
+  try {
+    const [orderResults] = await connection.promise().query(
+      'SELECT * FROM orders WHERE order_id = ?',
+      [orderId]
+    );
+    const order = orderResults[0];
+
+    if (!order) return res.redirect('/');
+
+    res.render('thankyou', { order });
+  } catch (err) {
+    console.error('Error fetching order:', err);
+    res.status(500).send('Database error');
+  }
 });
 
 module.exports = router;

@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`users` (
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
-  UNIQUE INDEX `username_UNIQUE` (`username` ASC))
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) ,
+  UNIQUE INDEX `username_UNIQUE` (`username` ASC) )
 ENGINE = InnoDB;
 
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`membership_tiers` (
   `active` TINYINT NULL DEFAULT 1,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`tier_id`),
-  UNIQUE INDEX `tier_name_UNIQUE` (`tier_name` ASC))
+  UNIQUE INDEX `tier_name_UNIQUE` (`tier_name` ASC) )
 ENGINE = InnoDB;
 
 
@@ -86,6 +86,78 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `mydb`.`schedules`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`schedules` (
+  `schedule_id` INT NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(100) NULL,
+  `description` TEXT NULL,
+  `start_time` DATETIME NULL,
+  `end_time` DATETIME NULL,
+  `location` VARCHAR(100) NULL,
+  `schedule_type` ENUM('training', 'match', 'meeting', 'event') NULL,
+  `team` VARCHAR(50) NULL,
+  `status` ENUM('scheduled', 'completed', 'cancelled') NULL DEFAULT 'scheduled',
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_ad` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`schedule_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`players`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`players` (
+  `player_id` INT NOT NULL AUTO_INCREMENT,
+  `player_name` VARCHAR(100) NULL,
+  `position` VARCHAR(50) NULL,
+  `jersey_number` INT NULL,
+  `player_image` VARCHAR(225) NULL,
+  `status` ENUM('active', 'injured', 'suspended', 'inactive') NULL DEFAULT 'active',
+  `date_joined` DATE NULL,
+  `biography` TEXT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`player_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`matches`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`matches` (
+  `match_id` INT NOT NULL AUTO_INCREMENT,
+  `home_team` VARCHAR(100) NULL,
+  `away_team` VARCHAR(100) NULL,
+  `home_score` INT NULL DEFAULT 0,
+  `away_score` INT NULL DEFAULT 0,
+  `season` VARCHAR(45) NULL,
+  `competition` VARCHAR(100) NULL,
+  `match_date` DATETIME NULL,
+  `venue` VARCHAR(100) NULL,
+  `status` ENUM('scheduled', 'live', 'completed', 'postponed', 'cancelled') NULL DEFAULT 'scheduled',
+  `result` ENUM('win', 'loss', 'draw') NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `schedule_id` INT NOT NULL,
+  `player_id` INT NOT NULL,
+  PRIMARY KEY (`match_id`),
+  INDEX `fk_matches_schedules1_idx` (`schedule_id` ASC) ,
+  INDEX `fk_matches_players1_idx` (`player_id` ASC) ,
+  CONSTRAINT `fk_matches_schedules1`
+    FOREIGN KEY (`schedule_id`)
+    REFERENCES `mydb`.`schedules` (`schedule_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_matches_players1`
+    FOREIGN KEY (`player_id`)
+    REFERENCES `mydb`.`players` (`player_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `mydb`.`events`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`events` (
@@ -102,7 +174,14 @@ CREATE TABLE IF NOT EXISTS `mydb`.`events` (
   `status` ENUM('upcoming', 'ongoing', 'completed', 'cancelled') NULL DEFAULT 'upcoming',
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`event_id`))
+  `match_id` INT NULL,
+  PRIMARY KEY (`event_id`),
+  INDEX `fk_events_matches1_idx` (`match_id` ASC) ,
+  CONSTRAINT `fk_events_matches1`
+    FOREIGN KEY (`match_id`)
+    REFERENCES `mydb`.`matches` (`match_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -293,78 +372,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`players`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`players` (
-  `player_id` INT NOT NULL AUTO_INCREMENT,
-  `player_name` VARCHAR(100) NULL,
-  `position` VARCHAR(50) NULL,
-  `jersey_number` INT NULL,
-  `player_image` VARCHAR(225) NULL,
-  `status` ENUM('active', 'injured', 'suspended', 'inactive') NULL DEFAULT 'active',
-  `date_joined` DATE NULL,
-  `biography` TEXT NULL,
-  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`player_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`schedules`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`schedules` (
-  `schedule_id` INT NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(100) NULL,
-  `description` TEXT NULL,
-  `start_time` DATETIME NULL,
-  `end_time` DATETIME NULL,
-  `location` VARCHAR(100) NULL,
-  `schedule_type` ENUM('training', 'match', 'meeting', 'event') NULL,
-  `team` VARCHAR(50) NULL,
-  `status` ENUM('scheduled', 'completed', 'cancelled') NULL DEFAULT 'scheduled',
-  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `user_id` INT NOT NULL,
-  PRIMARY KEY (`schedule_id`),
-  INDEX `fk_schedules_users1_idx` (`user_id` ASC) ,
-  CONSTRAINT `fk_schedules_users1`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `mydb`.`users` (`user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`matches`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`matches` (
-  `match_id` INT NOT NULL AUTO_INCREMENT,
-  `home_team` VARCHAR(100) NULL,
-  `away_team` VARCHAR(100) NULL,
-  `home_score` INT NULL DEFAULT 0,
-  `away_score` INT NULL DEFAULT 0,
-  `season` VARCHAR(45) NULL,
-  `competition` VARCHAR(100) NULL,
-  `match_date` DATETIME NULL,
-  `venue` VARCHAR(100) NULL,
-  `status` ENUM('scheduled', 'live', 'completed', 'postponed', 'cancelled') NULL DEFAULT 'scheduled',
-  `result` ENUM('win', 'loss', 'draw') NULL,
-  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `schedule_id` INT NOT NULL,
-  PRIMARY KEY (`match_id`),
-  INDEX `fk_matches_schedules1_idx` (`schedule_id` ASC) ,
-  CONSTRAINT `fk_matches_schedules1`
-    FOREIGN KEY (`schedule_id`)
-    REFERENCES `mydb`.`schedules` (`schedule_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `mydb`.`user_bookmarks`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`user_bookmarks` (
@@ -389,22 +396,29 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`matches_players`
+-- Table `mydb`.`shopping_cart`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`matches_players` (
-  `match_id` INT NOT NULL,
-  `player_id` INT NOT NULL,
-  PRIMARY KEY (`match_id`, `player_id`),
-  INDEX `fk_matches_has_players_players1_idx` (`player_id` ASC) ,
-  INDEX `fk_matches_has_players_matches1_idx` (`match_id` ASC) ,
-  CONSTRAINT `fk_matches_has_players_matches1`
-    FOREIGN KEY (`match_id`)
-    REFERENCES `mydb`.`matches` (`match_id`)
+CREATE TABLE IF NOT EXISTS `mydb`.`shopping_cart` (
+  `cart_id` INT NOT NULL AUTO_INCREMENT,
+  `session_id` VARCHAR(45) NULL,
+  `quantity` INT NOT NULL DEFAULT 1,
+  `size` VARCHAR(45) NULL,
+  `color` VARCHAR(45) NULL,
+  `added_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` TIMESTAMP NULL,
+  `gear_id` INT NOT NULL,
+  `user_id` INT NULL,
+  PRIMARY KEY (`cart_id`),
+  INDEX `fk_shopping_cart_gear1_idx` (`gear_id` ASC) ,
+  INDEX `fk_shopping_cart_users1_idx` (`user_id` ASC) ,
+  CONSTRAINT `fk_shopping_cart_gear1`
+    FOREIGN KEY (`gear_id`)
+    REFERENCES `mydb`.`gear` (`gear_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_matches_has_players_players1`
-    FOREIGN KEY (`player_id`)
-    REFERENCES `mydb`.`players` (`player_id`)
+  CONSTRAINT `fk_shopping_cart_users1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `mydb`.`users` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -413,4 +427,3 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-CREATE TABLE IF NOT EXISTS `mydb`.`users` (   `user_id` INT NOT NULL AUTO_INCREMENT,   `email` VARCHAR(255) NOT NULL,   `username` VARCHAR(225) NOT NULL,   `password` VARCHAR(225) NOT NULL,   `first_name` VARCHAR(100) NULL,   `surname` VARCHAR(100) NULL,   `dob` DATE NULL,   `country` VARCHAR(100) NULL,   `phone` VARCHAR(20) NULL,   `role` ENUM('admin', 'user') NULL DEFAULT 'user',   `marketing_consent` TINYINT NULL DEFAULT 0,   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,   `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,   PRIMARY KEY (`user_id`),   UNIQUE INDEX `email_UNIQUE` (`email` ASC) ,   UNIQUE INDEX `username_UNIQUE` (`username` ASC) ) ENGINE = InnoDB
