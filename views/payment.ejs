@@ -51,8 +51,32 @@
       <div id="result-message" class="mt-3"></div>
     </div>
   </main>
-  <script src="https://www.paypal.com/sdk/js?client-id=AS2gJGCXH97Twxgp-Q_pZI1pGdSToXtvvHj3iJ7iGObV7_jCJTXM1Kq0iNLTMUFMMSbGkxT-H1hYHSVS"></script>
-  <script src="/paypal.js"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AS2gJGCXH97Twxgp-Q_pZI1pGdSToXtvvHj3iJ7iGObV7_jCJTXM1Kq0iNLTMUFMMSbGkxT-H1hYHSVS&currency=USD"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: '<%= totalAmount.toFixed(2) %>'
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            document.getElementById('result-message').innerHTML = '<div class="alert alert-success">Payment completed by ' + details.payer.name.given_name + '!</div>';
+            // Optionally, send details to your server for further processing
+          });
+        },
+        onError: function(err) {
+          document.getElementById('result-message').innerHTML = '<div class="alert alert-danger">Payment could not be completed. Please try again.</div>';
+        }
+      }).render('#paypal-button-container');
+    });
+  </script>
+  <!-- <script src="/paypal.js"></script> -->
 </body>
 </html>
-    <%- include('partials/footer') %>
+<%- include('partials/footer') %>

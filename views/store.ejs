@@ -7,79 +7,166 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel ="stylesheet" href="/stylesheet/style.css" />
   <link rel="stylesheet" href="/stylesheet/store.css" />
+  <style>
+    .filter-bar {
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-bottom: 1rem;
+    }
+    .filter-chip {
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      margin-right: 0.5rem;
+      border-radius: 20px;
+      background: #f2f2f2;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .filter-chip.active {
+      background: #e0e0e0;
+      border-color: #007bff;
+      color: #007bff;
+    }
+    .sidebar {
+      min-width: 220px;
+      max-width: 260px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 1.5rem 1rem;
+      margin-bottom: 2rem;
+    }
+    .product-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem 1.5rem;
+    }
+    .product-card {
+      min-width: 220px;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    .sort-dropdown {
+      min-width: 150px;
+    }
+    @media (max-width: 991px) {
+      .sidebar { max-width: 100%; min-width: 100%; margin-bottom: 1rem; }
+    }
+  </style>
 </head>
 <body>
   <%- include('partials/navbar') %>
-  <div class="container mt-5">
-    <h1 class="text-center mb-4">Store</h1>
-    <div class="row mb-4">
-      <form action="/store" method="GET" class="d-flex flex-wrap justify-content-center align-items-center gap-2">
-        <select name="category" class="form-select w-auto">
-          <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
-          <option value="Jersey" <%= selectedCategory === 'Jersey' ? 'selected' : '' %>>Jersey</option>
-          <option value="Shoes" <%= selectedCategory === 'Shoes' ? 'selected' : '' %>>Shoes</option>
-          <option value="Accessories" <%= selectedCategory === 'Accessories' ? 'selected' : '' %>>Accessories</option>
-        </select>
-        <input type="search" name="search" placeholder="Search by name..." class="form-control w-auto" value="<%= searchQuery || '' %>"/>
-        <button type="submit" class="btn btn-primary">Search</button>
-      </form>
-    </div>
-
-    <% if (mostPopular) { %>
-      <h2 class="section-title">Most Popular</h2>
-      <div class="row justify-content-center mb-4">
-        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-          <div class="card h-100 border-primary shadow highlight">
-            <img src="/images/<%= mostPopular.image %>" class="card-img-top" alt="<%= mostPopular.name %>"/>
-            <div class="card-body text-center">
-              <h5 class="card-title"><%= mostPopular.name %></h5>
-              <p class="card-text">Price: $<%= mostPopular.price %></p>
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <!-- Sidebar Filters -->
+      <div class="col-lg-2 mb-4">
+        <div class="sidebar">
+          <form action="/store" method="GET">
+            <div class="mb-3">
+              <label for="size" class="form-label">size</label>
+              <select id="size" name="size" class="form-select">
+                <option value="All">All size</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
             </div>
-          </div>
+            <div class="mb-3">
+              <label for="sizeKids" class="form-label">Size (Kids)</label>
+              <select id="sizeKids" name="sizeKids" class="form-select">
+                <option value="All">All Size (Kids)</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Price Range</label>
+              <input type="range" class="form-range" min="80" max="1000" step="10" id="priceRange" name="priceRange" value="<%= priceRange || 1000 %>">
+              <div class="d-flex justify-content-between">
+                <span>S$ 80.00</span>
+                <span>S$ 1,000.00</span>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+          </form>
         </div>
       </div>
-    <% } %>
-
-    <% if (products && products.length) { %>
-      <h2 class="section-title">Products</h2>
-      <div class="row product-grid">
-        <% products.forEach(product => { %>
-          <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-            <div class="card h-100 shadow">
+      <!-- Main Content -->
+      <div class="col-lg-10">
+        <!-- Filter Chips Bar -->
+        <div class="filter-bar mb-3">
+          <span class="filter-chip active">Best Sellers</span>
+          <span class="filter-chip">Discounted</span>
+          <span class="filter-chip">Evo</span>
+          <span class="filter-chip">Ghost</span>
+          <span class="filter-chip">Ignita</span>
+          <span class="filter-chip">Kids</span>
+          <span class="filter-chip">Special Edition</span>
+        </div>
+        <!-- Search and Sort Row -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+          <form action="/store" method="GET" class="flex-grow-1 me-2">
+            <input type="search" name="search" placeholder="Search..." class="form-control" value="<%= searchQuery || '' %>"/>
+          </form>
+          <div>
+            <label for="sortBy" class="me-2">Sort By:</label>
+            <select id="sortBy" name="sortBy" class="form-select sort-dropdown d-inline-block w-auto">
+              <option value="featured">Featured</option>
+              <option value="priceLow">Price: Low to High</option>
+              <option value="priceHigh">Price: High to Low</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+        <!-- Product Grid -->
+        <% if (products && products.length) { %>
+        <div class="product-grid">
+          <% products.forEach(product => { %>
+            <div class="card product-card">
               <img src="/images/<%= product.image %>" class="card-img-top" alt="<%= product.name %>"/>
               <div class="card-body text-center d-flex flex-column justify-content-between">
                 <h5 class="card-title"><%= product.name %></h5>
-                <p class="card-text">Price: $<%= product.price %></p>
+                <p class="card-text">S$ <%= product.price %>.00</p>
                 <form action="/add-to-cart" method="POST">
                   <input type="hidden" name="productId" value="<%= product.id %>">
                   <button class="btn btn-success w-100 mt-2">Add to Cart</button>
                 </form>
               </div>
             </div>
-          </div>
-        <% }) %>
-      </div>
-    <% } else { %>
-      <p class="text-center">No products found.</p>
-    <% } %>
-
-    <div class="cart-box card mt-5 p-3">
-      <h5>Current Cart</h5>
-      <% if (cart && cart.length) { %>
-        <ul class="list-group list-group-flush">
-          <% cart.forEach(item => { %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><%= item.name %></span>
-              <span class="badge bg-primary rounded-pill">x <%= item.quantity %></span>
-            </li>
           <% }) %>
-        </ul>
-        <div class="text-end mt-2">
-          <a href="/cart" class="btn btn-success">View Cart</a>
         </div>
-      <% } else { %>
-        <p>Your cart is currently empty.</p>
-      <% } %>
+        <% } else { %>
+          <p class="text-center">No products found.</p>
+        <% } %>
+      </div>
+    </div>
+    <!-- Cart Box at the bottom -->
+    <div class="row mt-5">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="cart-box card p-3">
+          <h5>Current Cart</h5>
+          <% if (cart && cart.length) { %>
+            <ul class="list-group list-group-flush">
+              <% cart.forEach(item => { %>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><%= item.name %></span>
+                  <span class="badge bg-primary rounded-pill">x <%= item.quantity %></span>
+                </li>
+              <% }) %>
+            </ul>
+            <div class="text-end mt-2">
+              <a href="/cart" class="btn btn-success">View Cart</a>
+            </div>
+          <% } else { %>
+            <p>Your cart is currently empty.</p>
+          <% } %>
+        </div>
+      </div>
     </div>
   </div>
   <%- include('partials/footer') %>
