@@ -1,96 +1,197 @@
-const paypalButtons = window.paypal.Buttons({
-    style: {
-        shape: "rect",
-        layout: "vertical",
-        color: "gold",
-        label: "paypal",
+import express from "express";
+import "dotenv/config";
+import {
+    ApiError,
+    CheckoutPaymentIntent,
+    Client,
+    Environment,
+    LogLevel,
+    OrdersController,
+    PaymentsController,
+    PaypalExperienceLandingPage,
+    PaypalExperienceUserAction,
+    ShippingPreference,
+} from "@paypal/paypal-server-sdk";
+import bodyParser from "body-parser";
+
+const app = express();
+app.use(bodyParser.json());
+
+const {
+    PAYPAL_CLIENT_ID,
+    PAYPAL_CLIENT_SECRET,
+    PORT = 8080,
+} = process.env;
+
+const client = new Client({
+    clientCredentialsAuthCredentials: {
+        oAuthClientId: PAYPAL_CLIENT_ID,
+        oAuthClientSecret: PAYPAL_CLIENT_SECRET,
     },
-    async createOrder() {
-        try {
-            const response = await fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    cart: [
-                        {
-                            id: "YOUR_PRODUCT_ID",
-                            quantity: "YOUR_PRODUCT_QUANTITY",
-                        },
-                    ],
-                }),
-            });
-
-            const orderData = await response.json();
-
-            if (orderData.id) {
-                return orderData.id;
-            }
-            const errorDetail = orderData?.details?.[0];
-            const errorMessage = errorDetail
-                ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
-                : JSON.stringify(orderData);
-
-            throw new Error(errorMessage);
-        } catch (error) {
-            console.error(error);
-        }
-    },
-    async onApprove(data, actions) {
-        try {
-            const response = await fetch(
-                `/api/orders/${data.orderID}/capture`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            const orderData = await response.json();
-
-            const errorDetail = orderData?.details?.[0];
-
-            if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
-                return actions.restart();
-            } else if (errorDetail) {
-                throw new Error(
-                    `${errorDetail.description} (${orderData.debug_id})`
-                );
-            } else if (!orderData.purchase_units) {
-                throw new Error(JSON.stringify(orderData));
-            } else {
-                const transaction =
-                    orderData?.purchase_units?.[0]?.payments?.captures?.[0] ||
-                    orderData?.purchase_units?.[0]?.payments
-                        ?.authorizations?.[0];
-                resultMessage(
-                    `Transaction ${transaction.status}: ${transaction.id}<br>
-          <br>See console for all available details`
-                );
-                console.log(
-                    "Capture result",
-                    orderData,
-                    JSON.stringify(orderData, null, 2)
-                );
-            }
-        } catch (error) {
-            console.error(error);
-            resultMessage(
-                `Sorry, your transaction could not be processed...<br><br>${error}`
-            );
-        }
+    timeout: 0,
+    environment: Environment.Sandbox,
+    logging: {
+        logLevel: LogLevel.Info,
+        logRequest: { logBody: true },
+        logResponse: { logHeaders: true },
     },
 });
 
-paypalButtons.render("#paypal-button-container");
+const ordersController = new OrdersController(client);
+const paymentsController = new PaymentsController(client);
 
-// Example function to show a result to the user.
-function resultMessage(message) {
-    const container = document.querySelector("#result-message");
-    if (container) {
-        container.innerHTML = message;
+
+/**
+ * Create an order to start the transaction.
+ * @see https://developer.paypal.com/docs/api/orders/v2/#orders_create
+ */
+const createOrder = async (cart) => {
+   const collect = {
+        body: {
+            intent: "CAPTURE",
+            purchaseUnits: [
+                {
+                    amount: {
+                        currencyCode: "USD",
+                        value: "100",
+                        breakdown: {
+                            itemTotal: {
+                                currencyCode: "USD",
+                                value: "100",
+                            },
+                        },
+                    },
+                    // lookup item details in `cart` from database
+                    items: [
+                        {
+                            name: "T-Shirt",
+                            unitAmount: {
+                                currencyCode: "USD",
+                                value: "100",
+                            },
+                            quantity: "1",
+                            description: "Super Fresh Shirt",
+                            sku: "sku01",
+                        },
+                    ],
+                },
+            ],
+        },
+        prefer: "return=minimal",
+    };
+   
+
+    try {
+        const { body, ...httpResponse } = await ordersController.createOrder(
+            collect
+        );
+        // Get more response info...
+        // const { statusCode, headers } = httpResponse;
+        return {
+            jsonResponse: JSON.parse(body),
+            httpStatusCode: httpResponse.statusCode,
+        };
+    } catch (error) {
+        if (error instanceof ApiError) {
+            // const { statusCode, headers } = error;
+            throw new Error(error.message);
+        }
     }
-}
+};
+
+// createOrder route
+app.post("/api/orders", async (req, res) => {
+    try {
+        // use the cart information passed from the front-end to calculate the order amount detals
+        const { cart } = req.body;
+        const { jsonResponse, httpStatusCode } = await createOrder(cart);
+        res.status(httpStatusCode).json(jsonResponse);
+    } catch (error) {
+        console.error("Failed to create order:", error);
+        res.status(500).json({ error: "Failed to create order." });
+    }
+});
+
+
+/**
+ * Capture payment for the created order to complete the transaction.
+ * @see https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+ */
+const captureOrder = async (orderID) => {
+    const collect = {
+        id: orderID,
+        prefer: "return=minimal",
+    };
+
+    try {
+        const { body, ...httpResponse } = await ordersController.captureOrder(
+            collect
+        );
+        // Get more response info...
+        // const { statusCode, headers } = httpResponse;
+        return {
+            jsonResponse: JSON.parse(body),
+            httpStatusCode: httpResponse.statusCode,
+        };
+    } catch (error) {
+        if (error instanceof ApiError) {
+            // const { statusCode, headers } = error;
+            throw new Error(error.message);
+        }
+    }
+};
+
+// captureOrder route
+app.post("/api/orders/:orderID/capture", async (req, res) => {
+    try {
+        const { orderID } = req.params;
+        const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
+        res.status(httpStatusCode).json(jsonResponse);
+    } catch (error) {
+        console.error("Failed to create order:", error);
+        res.status(500).json({ error: "Failed to capture order." });
+    }
+});
+
+
+
+const refundCapturedPayment = async (capturedPaymentId) => {
+    const collect = {
+        captureId: capturedPaymentId,
+        prefer: "return=minimal",
+    };
+
+    try {
+        const { body, ...httpResponse } =
+            await paymentsController.refundCapturedPayment(collect);
+        // Get more response info...
+        // const { statusCode, headers } = httpResponse;
+        return {
+            jsonResponse: JSON.parse(body),
+            httpStatusCode: httpResponse.statusCode,
+        };
+    } catch (error) {
+        if (error instanceof ApiError) {
+            // const { statusCode, headers } = error;
+            throw new Error(error.message);
+        }
+    }
+};
+
+// refundCapturedPayment route
+app.post("/api/payments/refund", async (req, res) => {
+    try {
+        const { capturedPaymentId } = req.body;
+        const { jsonResponse, httpStatusCode } = await refundCapturedPayment(
+            capturedPaymentId
+        );
+        res.status(httpStatusCode).json(jsonResponse);
+    } catch (error) {
+        console.error("Failed refund captured payment:", error);
+        res.status(500).json({ error: "Failed refund captured payment." });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Node server listening at http://localhost:${PORT}/`);
+});

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const connection = require('../models/db');
 const paypal = require('@paypal/checkout-server-sdk');
 
 // Set up PayPal environment (use your sandbox credentials)
@@ -13,13 +12,23 @@ const client = new paypal.core.PayPalHttpClient(environment);
 router.post('/api/orders', async (req, res) => {
   try {
     const { cart } = req.body;
+    // Calculate total from cart (you may want to validate items/prices here)
     let total = 0;
+    let items = [];
     for (const item of cart) {
-      const [rows] = await connection.execute('SELECT price_per_unit FROM gear WHERE gear_id = ?', [item.id]);
-      if (!rows.length) return res.status(400).json({ error: 'Invalid gear ID' });
-      total += parseFloat(rows[0].price_per_unit) * (item.quantity || 1);
+      // You can fetch item details from DB if needed
+      items.push({
+        name: item.name,
+        unit_amount: {
+          currency_code: 'USD',
+          value: Number(item.price).toFixed(2)
+        },
+        quantity: String(item.quantity || 1),
+        description: item.description || '',
+        sku: item.sku || ''
+      });
+      total += Number(item.price) * (item.quantity || 1);
     }
-    // Create PayPal order
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer('return=representation');
     request.requestBody({
@@ -27,15 +36,22 @@ router.post('/api/orders', async (req, res) => {
       purchase_units: [{
         amount: {
           currency_code: 'USD',
-          value: total.toFixed(2)
-        }
+          value: total.toFixed(2),
+          breakdown: {
+            item_total: {
+              currency_code: 'USD',
+              value: total.toFixed(2)
+            }
+          }
+        },
+        items
       }]
     });
     const order = await client.execute(request);
-    res.json({ id: order.result.id, total });
+    res.status(201).json({ id: order.result.id, total });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Order creation failed' });
+    console.error('Failed to create order:', err);
+    res.status(500).json({ error: 'Failed to create order.' });
   }
 });
 
@@ -46,11 +62,10 @@ router.post('/api/orders/:orderID/capture', async (req, res) => {
     const request = new paypal.orders.OrdersCaptureRequest(orderID);
     request.requestBody({});
     const capture = await client.execute(request);
-    // TODO: Insert order into DB (orders, order_items) after successful capture
-    res.json(capture.result);
+    res.status(200).json(capture.result);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Order capture failed' });
+    console.error('Failed to capture order:', err);
+    res.status(500).json({ error: 'Failed to capture order.' });
   }
 });
 

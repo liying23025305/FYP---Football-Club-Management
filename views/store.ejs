@@ -86,10 +86,10 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Price Range</label>
-              <input type="range" class="form-range" min="80" max="1000" step="10" id="priceRange" name="priceRange" value="<%= priceRange || 1000 %>">
-              <div class="d-flex justify-content-between">
-                <span>S$ 80.00</span>
-                <span>S$ 1,000.00</span>
+              <div class="d-flex align-items-center gap-2">
+                <span>S$ <span id="priceMin">15.00</span></span>
+                <input type="range" class="form-range flex-grow-1" min="15" max="300" step="1" id="priceRange" name="priceRange" value="<%= priceRange || 300 %>" oninput="document.getElementById('priceRangeValue').textContent = this.value"/>
+                <span>S$ <span id="priceRangeValue"><%= priceRange || 300 %></span></span>
               </div>
             </div>
             <input type="hidden" name="category" value="<%= selectedCategory %>">
@@ -352,6 +352,17 @@
         updateMiniCart();
       };
     }
+    // Set price range value on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      var priceRange = document.getElementById('priceRange');
+      var priceRangeValue = document.getElementById('priceRangeValue');
+      if (priceRange && priceRangeValue) {
+        priceRangeValue.textContent = priceRange.value;
+        priceRange.addEventListener('input', function() {
+          priceRangeValue.textContent = this.value;
+        });
+      }
+    });
   </script>
   <%- include('partials/footer') %>
 </body>
