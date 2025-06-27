@@ -1,0 +1,333 @@
+/* Make the main news image smaller and centered */
+.main-news-card img {
+  max-width: 80%;      /* Adjust this value as needed */
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Example: Add some spacing to the news section */
+.section-title {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.news-thumbnail {
+  width: 100px;
+  height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.d-flex.justify-content-start.gap-2.flex-wrap {
+  justify-content: center !important; /* Center the mini cards */
+  gap: 1.5rem !important;             /* Increase gap between cards */
+}
+
+.news-thumbnail {
+  width: 240px;        /* Make thumbnails bigger */
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.news-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* Shop section styles */
+.image-card {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  overflow: hidden;
+}
+
+.image-card img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s;
+}
+
+.image-card img:hover {
+  transform: scale(1.05);
+}
+
+
+
+/* Matches section wrapper */
+.events-section {
+  background-color: #f5faff; /* Light subtle blue background */
+  color: #003366;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+/* Horizontal scrolling */
+.match-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+}
+
+.match-scroll-wrapper {
+  display: flex;
+  gap: 15px;
+  padding: 5px 0;
+  min-width: min-content;
+}
+
+/* Match card base */
+.match-card {
+  background-color: #ffffff;
+  border: 1px solid #cce4f6; /* Subtle blue border */
+  border-radius: 8px;
+  padding: 15px;
+  min-width: 280px;
+  flex: 0 0 auto;
+  color: #000000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.match-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Score styling */
+.match-card .score {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Special cards (Next/Previous Game) */
+.match-card.next-game,
+.match-card.previous-game {
+  background-color: #e6f2ff; /* Light blue tone */
+  color: #003366;
+  text-align: center;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #b3d9ff;
+}
+
+/* Titles inside special cards */
+.match-card.next-game h4,
+.match-card.previous-game h4 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+/* Link inside special cards */
+.match-card.next-game a,
+.match-card.previous-game a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #005bb5;
+}
+
+.match-card.next-game a:hover,
+.match-card.previous-game a:hover {
+  text-decoration: underline;
+}
+
+/* Optional: custom scrollbar */
+.match-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.match-scroll-container::-webkit-scrollbar-track {
+  background: #eaeff5;
+  border-radius: 10px;
+}
+
+.match-scroll-container::-webkit-scrollbar-thumb {
+  background: #1a4f9e;
+  border-radius: 10px;
+}
+
+.match-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #1a237e;
+}
+
+
+
+/* Trending section */
+.trending-section {
+  margin-bottom: 30px;
+}
+
+/* Scrollable trending container */
+.trending-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+  direction: rtl;
+}
+
+/* Custom scrollbar styling for webkit browsers */
+.trending-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.trending-scroll-container::-webkit-scrollbar-track {
+  background: #e0f0ff; /* very light blue */
+  border-radius: 10px;
+}
+
+.trending-scroll-container::-webkit-scrollbar-thumb {
+  background: #155183; /* soft blue */
+  border-radius: 10px;
+}
+
+.trending-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #1a237e;
+}
+
+.trending-scroll-wrapper {
+  display: flex;
+  gap: 15px;
+  padding: 5px 0;
+  min-width: min-content;
+  direction: ltr;
+}
+
+.trending-item {
+  background-color: #e3f2fd; /* light blue background */
+  border-radius: 8px;
+  padding: 10px;
+  height: 120px;
+  position: relative;
+  color: #0d47a1; /* deep blue text */
+  min-width: 200px;
+  flex: 0 0 auto;
+}
+
+/* Badge styling */
+.trending-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Softer badge colors */
+.badge-live {
+  background-color: #bbdefb; /* soft blue */
+  color: #0d47a1;
+}
+
+.badge-new {
+  background-color: #c5cae9; /* pale indigo */
+  color: #1a237e;
+}
+
+/* Hero section styles */
+
+.hero-section {
+  margin-top: 20px;
+  background-color: #13377f;
+  padding: 40px;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.hero-text-box {
+  flex: 1;
+  max-width: 40%;
+  color: #ffffff;
+}
+
+.hero-text-box h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.hero-text-box .lead {
+  font-size: 1.1rem;
+}
+
+.hero-slideshow-box {
+  flex: 2;
+  max-width: 60%;
+}
+
+.slideshow {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.slideshow .slide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slideshow .slide.active {
+  opacity: 1;
+}
+
+
+/* footer  */
+.social-footer {
+  background-color: #1a237e;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.social-footer a {
+  color: white;
+  margin: 0 1rem;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
+.social-footer a:hover {
+  color: #7478ce;
+}
