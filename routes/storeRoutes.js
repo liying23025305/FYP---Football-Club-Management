@@ -114,6 +114,56 @@ router.get('/store', async (req, res) => {
   }
 });
 
+// Hospitality Packages: Show only events as products
+router.get('/store/hospitality', async (req, res) => {
+  try {
+    // Fetch all unique categories for sidebar/chips (for UI consistency)
+    const [catResults] = await connection.promise().query('SELECT DISTINCT category FROM gear WHERE category IS NOT NULL AND category != ""');
+    const categories = catResults.map(row => row.category).filter(Boolean);
+
+    // Fetch events from the events table (assuming table name is 'events')
+    const [eventResults] = await connection.promise().query('SELECT * FROM events');
+    // Map events to product-like objects for the store grid
+    const products = eventResults.map(event => ({
+      id: event.event_id,
+      name: event.event_name,
+      image: event.event_image || 'news.png', // fallback image
+      price: Number(event.price || event.ticket_price || 0).toFixed(2),
+      category: 'Hospitality'
+    }));
+
+    ensureCartSession(req);
+    res.render('store', {
+      products,
+      mostPopular: null,
+      cart: req.session.cart,
+      selectedCategory: 'Hospitality',
+      searchQuery: '',
+      priceRange: 300,
+      categories,
+      selectedSize: 'All',
+      selectedSizeKids: 'All',
+      sortBy: 'featured',
+      isHospitality: true // for UI logic if needed
+    });
+  } catch (err) {
+    console.error('Error fetching hospitality packages:', err);
+    res.render('store', {
+      products: [],
+      mostPopular: null,
+      cart: req.session.cart,
+      selectedCategory: 'Hospitality',
+      searchQuery: '',
+      priceRange: 300,
+      categories: [],
+      selectedSize: 'All',
+      selectedSizeKids: 'All',
+      sortBy: 'featured',
+      isHospitality: true
+    });
+  }
+});
+
 // Add item to cart
 router.post('/cart/add/:id', async (req, res) => {
   const gearId = parseInt(req.params.id, 10);
