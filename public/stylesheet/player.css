@@ -1,3 +1,26 @@
+/*footer*/
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Navbar logo size */
+.navbar .logo {
+  height: 50px;
+  width: auto;
+  max-width: 150px;
+  object-fit: contain; /* Ensure image fits within the specified dimensions */
+  margin-right: 10px; /* Add spacing if needed */
+}
+
 /* Players EJS */
 .player-card {
   position: relative;

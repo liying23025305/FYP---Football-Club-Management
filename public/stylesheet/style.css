@@ -410,25 +410,3 @@ html, body {
   color: #9e9e9e;
   font-size: 0.8rem;
 }
-
-/* Membership cards */
-.membership-card {
-  padding: 20px;
-  text-align: center;
-  border-radius: 10px;
-}
-
-.gold {
-  background-color: #ffd700;
-  color: #3425a5;
-}
-
-.silver {
-  background-color: #c0c0c0;
-  color: #3425a5;
-}
-
-.bronze {
-  background-color: #cd7f32;
-  color: #3425a5;
-}
