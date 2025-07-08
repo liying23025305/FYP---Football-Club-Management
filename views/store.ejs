@@ -112,6 +112,7 @@
             <% ['All', ...categories].forEach(cat => { %>
               <button type="submit" name="category" value="<%= cat %>" class="filter-chip<%= selectedCategory === cat ? ' active' : '' %>"><%= cat %></button>
             <% }) %>
+            <a href="/store/hospitality" class="filter-chip btn btn-link p-0 ms-2" style="text-decoration:none;vertical-align:middle;">Hospitality Packages</a>
           </form>
         </div>
         <!-- Search and Sort Row -->
@@ -269,52 +270,29 @@
         <% } %>
       </div>
     </div>
-    <!-- Cart Box at the bottom -->
-    <div class="row mt-5">
-      <div class="col-lg-8 offset-lg-2">
-        <div class="cart-box card p-3">
-          <h5>Current Cart</h5>
-          <% if (cart && cart.length) { %>
-            <ul class="list-group list-group-flush" id="cartSummaryList">
-              <% cart.forEach(item => { %>
+    <!-- Mini Cart Floating Button -->
+    <div id="miniCartBtn" style="position:fixed;bottom:32px;right:32px;z-index:1050;">
+      <button class="btn btn-success shadow-lg d-flex align-items-center" style="border-radius:50px;padding:0.75rem 1.5rem;font-size:1.2rem;" onclick="window.location.href='/cart'">
+        <span class="me-2">🛒</span>
+        <span id="miniCartCount"><%= cart && cart.length ? cart.reduce((sum, i) => sum + (i.quantity || 1), 0) : 0 %></span>
+        <span class="ms-2 d-none d-md-inline">View Cart</span>
+      </button>
+      <div id="miniCartPreview" class="card mt-2 shadow-sm" style="display:none;min-width:260px;">
+        <div class="card-body p-2">
+          <h6 class="mb-2">Recently Added</h6>
+          <ul class="list-group list-group-flush" id="miniCartList">
+            <% if (cart && cart.length) { %>
+              <% cart.slice(-3).reverse().forEach(item => { %>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <span><%= item.name %><% if (item.size) { %> <span class="badge bg-secondary ms-2">Size: <%= item.size %></span><% } %></span>
+                  <span><%= item.name || item.gear_name %><% if (item.size) { %> <span class="badge bg-secondary ms-2">Size: <%= item.size %></span><% } %></span>
                   <span class="badge bg-primary rounded-pill">x <%= item.quantity %></span>
                 </li>
               <% }) %>
-            </ul>
-            <div class="text-end mt-2">
-              <a href="/cart" class="btn btn-success">View Cart</a>
-            </div>
-          <% } else { %>
-            <p id="cartSummaryEmpty">Your cart is currently empty.</p>
-          <% } %>
+            <% } else { %>
+              <li class="list-group-item text-muted">Cart is empty.</li>
+            <% } %>
+          </ul>
         </div>
-      </div>
-    </div>
-  </div>
-  <!-- Mini Cart Floating Button -->
-  <div id="miniCartBtn" style="position:fixed;bottom:32px;right:32px;z-index:1050;">
-    <button class="btn btn-success shadow-lg d-flex align-items-center" style="border-radius:50px;padding:0.75rem 1.5rem;font-size:1.2rem;" onclick="window.location.href='/cart'">
-      <span class="me-2">🛒</span>
-      <span id="miniCartCount"><%= cart && cart.length ? cart.reduce((sum, i) => sum + (i.quantity || 1), 0) : 0 %></span>
-      <span class="ms-2 d-none d-md-inline">View Cart</span>
-    </button>
-    <div id="miniCartPreview" class="card mt-2 shadow-sm" style="display:none;min-width:260px;">
-      <div class="card-body p-2">
-        <h6 class="mb-2">Recently Added</h6>
-        <ul class="list-group list-group-flush" id="miniCartList">
-          <% if (cart && cart.length) { %>
-            <% cart.slice(-3).reverse().forEach(item => { %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span><%= item.name || item.gear_name %><% if (item.size) { %> <span class="badge bg-secondary ms-2">Size: <%= item.size %></span><% } %></span>
-                <span class="badge bg-primary rounded-pill">x <%= item.quantity %></span>
-              </li>
-            <% }) %>
-          <% } else { %>
-            <li class="list-group-item text-muted">Cart is empty.</li>
-          <% } %>
-        </ul>
       </div>
     </div>
   </div>
