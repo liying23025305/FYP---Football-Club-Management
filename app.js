@@ -133,7 +133,7 @@ app.get('/players', (req, res) => res.render('players'));
 app.get('/profile', (req, res) => res.render('profile'));
 app.get('/matches', (req, res) => res.render('matches', { title: 'Matches' }));
 app.get('/membership_tiers', (req, res) => res.render('membership_tiers', { title: 'Membership Tiers' }));
-app.get('/membership_faqs', (req, res) => res.render('membership_faqs', { title: 'Membership FAQs' }));
+app.get('/faqs', (req, res) => res.render('faqs', { title: 'FAQs' }));
 
 // Membership page
 app.get('/membership', (req, res) => {
