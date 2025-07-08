@@ -21,4 +21,57 @@ html, body {
     margin-right: 10px; /* Add spacing if needed */
 }
 
+/* -- NEWS EJS -- */
 /* News section */
+.card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 12px;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.bookmark-btn {
+  float: right;
+  font-size: 0.95rem;
+}
+
+/* Featured News */
+.featured-news-img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 12px 0 0 12px;
+}
+
+/* Responsive grid for news cards */
+@media (max-width: 991px) {
+  .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+@media (max-width: 575px) {
+  .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* Bookmarks section */
+#my-bookmarks .card {
+  border: 1.5px solid #ffe066;
+}
+#my-bookmarks .bookmark-btn {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+#my-bookmarks .bookmark-btn[data-bookmarked] {
+  background: #fffbe6;
+}

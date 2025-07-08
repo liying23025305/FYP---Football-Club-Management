@@ -21,7 +21,7 @@ main {
   margin-right: 10px; /* Add spacing if needed */
 }
 
-/* Players EJS */
+/* -- Players EJS -- */
 .player-card {
   position: relative;
   overflow: hidden;

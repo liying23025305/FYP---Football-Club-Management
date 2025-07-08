@@ -5,76 +5,110 @@
   <title>Club News</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/stylesheet/style.css" />
+  <link rel="stylesheet" href="/stylesheet/news.css" />
 </head>
 <body>
   <!-- Navbar -->
-  <%- include('partials/navbar') %>
+  <%- include('partials/navbar', { user: user }) %>
 
   <main class="container mt-4">
-    <!-- Latest News Title -->
     <h2 class="mb-4">Latest News</h2>
 
-    <!-- Featured News Card (large image and text) -->
-    <a href="/news/featured" style="text-decoration: none; color: inherit;">
+    <!-- Category Filter & Search -->
+    <form class="row mb-3" method="get" action="/news">
+      <div class="col-md-3 mb-2">
+        <select class="form-select" name="category" onchange="this.form.submit()">
+          <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
+          <% categories.forEach(function(cat) { %>
+            <option value="<%= cat %>" <%= selectedCategory === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-5 mb-2">
+        <input type="text" class="form-control" name="search" placeholder="Search news..." value="<%= search %>">  <!-- TODO: Make Search news functional -->
+      </div>
+      <div class="col-md-2 mb-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+      </div>
+    </form>
+
+    <!-- Featured News Card -->
+    <% if (featured) { %>
+    <a href="/news/<%= featured.news_id %>" style="text-decoration: none; color: inherit;">
       <div class="row mb-4">
         <div class="col-md-7">
           <div style="background:#eee; border-radius:12px; min-height:260px; width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-            <img src="https://resources.premierleague.pulselive.com/photo-resources/2025/05/25/f5c0c71a-7d0f-468d-9bd8-7e73525f1ae2/GettyImages-2216995141.jpg?width=1400&height=800" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="<%= featured.featured_image %>" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
         </div>
         <div class="col-md-5 d-flex align-items-center">
           <div class="card w-100 p-3" style="min-height: 260px;">
-            <h5 class="fw-bold">Featured news headline</h5>
-            <p class="mb-2">A short summary of the featured news article. API will be integrated later.</p>
-            <div class="text-muted" style="font-size:0.95rem;">Source • 10 minutes ago</div>
+            <h5 class="fw-bold"><%= featured.title %></h5>
+            <p class="mb-2"><%= featured.summary ? featured.summary.substring(0, 500) : '' %></p>
+            <div class="text-muted" style="font-size:0.95rem;">
+              <%= featured.category %> • <%= featured.author_name %> • <%= featured.published_at ? new Date(featured.published_at).toLocaleString() : '' %>
+            </div>
+            <% if (user) { %>
+              <button class="btn btn-sm btn-outline-warning mt-2 bookmark-btn" data-id="<%= featured.news_id %>" <%= bookmarks.includes(featured.news_id) ? 'data-bookmarked="true"' : '' %>>
+                <i class="bi <%= bookmarks.includes(featured.news_id) ? 'bi-bookmark-fill' : 'bi-bookmark' %>"></i> Bookmark
+              </button>
+            <% } %>
           </div>
         </div>
       </div>
     </a>
+    <% } %>
 
     <!-- News Cards Row -->
     <div class="row">
-      <div class="col-md-3 mb-3">
-        <div class="card h-100">
-          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;">
-            <img src="#" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="card-body">
-            <h6 class="card-title">News title 1</h6>
-            <div class="text-muted" style="font-size:0.9rem;">Source • 20 min ago</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card h-100">
-          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
-          <div class="card-body">
-            <h6 class="card-title">News title 2</h6>
-            <div class="text-muted" style="font-size:0.9rem;">Source • 30 min ago</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card h-100">
-          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
-          <div class="card-body">
-            <h6 class="card-title">News title 3</h6>
-            <div class="text-muted" style="font-size:0.9rem;">Source • 40 min ago</div>
+      <% articles.forEach(function(article) { %>
+        <div class="col-md-3 mb-3">
+          <div class="card h-100">
+            <a href="/news/<%= article.news_id %>" style="text-decoration: none; color: inherit;">
+              <div style="background:#eee; height:120px; border-radius:8px 8px 0 0; overflow:hidden;">
+                <img src="<%= article.featured_image %>" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div class="card-body">
+                <h6 class="card-title"><%= article.title %></h6>
+                <div class="text-muted" style="font-size:0.9rem;">
+                  <%= article.category %> • <%= article.author_name %> • <%= article.published_at ? new Date(article.published_at).toLocaleString() : '' %>
+                </div>
+              </div>
+            </a>
+            <% if (user) { %>
+              <button class="btn btn-sm btn-outline-warning bookmark-btn m-2" data-id="<%= article.news_id %>" <%= bookmarks.includes(article.news_id) ? 'data-bookmarked="true"' : '' %>>
+                <i class="bi <%= bookmarks.includes(article.news_id) ? 'bi-bookmark-fill' : 'bi-bookmark' %>"></i> Bookmark
+              </button>
+            <% } %>
           </div>
         </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card h-100">
-          <div style="background:#eee; height:120px; border-radius:8px 8px 0 0;"></div>
-          <div class="card-body">
-            <h6 class="card-title">News title 4</h6>
-            <div class="text-muted" style="font-size:0.9rem;">Source • 50 min ago</div>
-          </div>
-        </div>
-      </div>
+      <% }) %>
     </div>
-    <!-- Add more news cards as needed in the future (API) -->
+
+    <!-- Pagination -->  <!-- TODO: Make New Page have pages or Scrollable ? -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= i === page ? 'active' : '' %>">
+            <a class="page-link" href="/news?page=<%= i %>&category=<%= selectedCategory %>&search=<%= search %>"><%= i %></a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+
+    <!-- My News Bookmarks (for logged-in users) -->
+    <% if (user) { %>
+    <section class="mt-5">
+      <h4>My News Bookmarks</h4>
+      <div id="my-bookmarks" class="row"></div>
+      <div id="bookmarks-loading" class="text-muted">Loading bookmarks...</div>
+    </section>
+    <% } %>
   </main>
+
+  <%- include('partials/footer') %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/news.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </body>
-<%- include('partials/footer') %>
 </html>

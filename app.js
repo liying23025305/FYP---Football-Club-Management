@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const app = express();
+const methodOverride = require('method-override'); // edit news
 const db = require('./models/db');
 
 // Route modules
@@ -11,12 +12,14 @@ const memberRoutes = require('./routes/memberRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
+const adminNewsRoutes = require('./routes/admin/news');
 
 // Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
 
 // Session middleware
 app.use(
@@ -41,6 +44,7 @@ let cart = [];
 app.use(authRoutes);
 app.use(adminRoutes);
 app.use('/news', newsRoutes);
+app.use('/admin/news', adminNewsRoutes);
 
 // Home Route
 app.get('/', (req, res) => {

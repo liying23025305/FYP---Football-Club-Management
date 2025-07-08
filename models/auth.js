@@ -1,15 +1,9 @@
 // Middleware function to check user authentication status
 const isAuthenticated = (req, res, next) => {
-    if (req.session.loggedIn) {
+    if (req.session.user) {
         next();
-
     } else {
-        if (req.originalUrl === '/login' || req.originalUrl === '/register') {
-            next();
-
-        } else {
-            res.redirect('/login');
-        }
+        res.redirect('/login');
     }
 };
 

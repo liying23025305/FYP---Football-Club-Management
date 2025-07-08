@@ -9,7 +9,7 @@ router.get('/admin/dashboard', (req, res) => {
   res.render('admin_dashboard', { user: req.session.user });
 });
 
-// Admin Info Page
+// Admin Info Page *
 router.get('/admin', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.redirect('/');
@@ -19,7 +19,7 @@ router.get('/admin', (req, res) => {
   const adminData = {
     username: data.username,
     email: data.email,
-    phone: '91234567',
+    phone: data.phone,
     joinDate: data.dob
   };
 
