@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../models/db');
 const { isAuthenticated } = require('../models/auth');
 
-// Helper: sanitize input (basic)
+// Helper: sanitize input (basic)   --- DELETE JS ???
 function sanitize(str) {
   return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

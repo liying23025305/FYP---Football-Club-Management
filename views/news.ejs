@@ -32,7 +32,7 @@
       </div>
     </form>
 
-    <!-- Featured News Card -->
+    <!-- Featured News Card -->  <!-- TODO: Ensure Featured News is the latest published article-->
     <% if (featured) { %>
     <a href="/news/<%= featured.news_id %>" style="text-decoration: none; color: inherit;">
       <div class="row mb-4">
@@ -96,7 +96,7 @@
       </ul>
     </nav>
 
-    <!-- My News Bookmarks (for logged-in users) -->
+    <!-- My News Bookmarks (for logged-in users) -->  <!-- TODO: Fix Bookmark feature & fix UI/UX -->
     <% if (user) { %>
     <section class="mt-5">
       <h4>My News Bookmarks</h4>

@@ -21,84 +21,59 @@ main {
   margin-right: 10px; /* Add spacing if needed */
 }
 
-/* -- FAQS EJS -- */
-.faq-header {
-color: #d32f2f;
-font-weight: bold;
-margin-bottom: 40px;
-text-align: left;
-font-size: 3rem;
+/* -- FAQS EJS --*/
+
+/* public/stylesheet/faq.css */
+/* FAQ Card Styles */
+#faq-list .card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+#faq-list .card-header {
+  background: #f8f9fa;
+  font-size: 1.1rem;
+}
+#faq-list .card-body {
+  font-size: 1rem;
 }
 
-.nav-tabs {
-border-bottom: 1px solid #dee2e6;
-margin-bottom: 40px;
-justify-content: left;
+/* FAQ Form Styles */
+#faq-question-form textarea {
+  resize: vertical;
+}
+#faq-form-message {
+  min-height: 1.5em;
 }
 
-.nav-tabs .nav-link {
-color: #333;
-font-weight: 500;
-border: none;
-padding: 12px 30px;
-margin-right: 10px;
-font-size: 1.1rem;
-transition: all 0.3s ease;
+/* Admin Table Styles */
+#faq-admin-table td, #faq-admin-table th {
+  vertical-align: middle;
+}
+#faq-admin-table .faq-order-input {
+  width: 70px;
 }
 
-.nav-tabs .nav-link.active {
-color: #d32f2f;
-border-bottom: 3px solid #d32f2f;
-font-weight: 600;
+/* FAQ Category Badge */
+#faq-list .badge,
+#faq-admin-table .badge {
+  font-size: 0.95em;
+  vertical-align: middle;
 }
 
-.tab-content {
-padding: 20px 0;
+/* Category dropdown spacing */
+#faq-category-filter,
+#faq-category-filter-admin {
+  min-width: 150px;
 }
 
-.faq-item {
-margin-bottom: 15px;
-border-radius: 8px;
-overflow: hidden;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.faq-question {
-background-color: #f5f5f5;
-padding: 18px 20px;
-font-weight: 600;
-cursor: pointer;
-display: flex;
-justify-content: space-between;
-align-items: center;
-transition: all 0.3s ease;
-}
-
-.faq-question:hover {
-background-color: #eeeeee;
-}
-
-.faq-answer {
-padding: 20px;
-background-color: #fff;
-border-top: 1px solid #eee;
-display: none;
-}
-
-.faq-icon {
-transition: transform 0.3s ease;
-}
-
-.faq-question.active .faq-icon {
-transform: rotate(180deg);
-}
-
-.tab-pane {
-animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-from { opacity: 0; }
-to { opacity: 1; }
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  #faq-list .card-header, #faq-list .card-body {
+    font-size: 0.95rem;
+  }
+  #faq-admin-table th, #faq-admin-table td {
+    font-size: 0.95rem;
+    padding: 0.4rem;
+  }
 }
 

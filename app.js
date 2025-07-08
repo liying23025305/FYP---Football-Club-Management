@@ -13,6 +13,7 @@ const apiRoutes = require('./routes/apiRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const adminNewsRoutes = require('./routes/admin/news');
+const faqRoutes = require('./routes/faq');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -45,6 +46,7 @@ app.use(authRoutes);
 app.use(adminRoutes);
 app.use('/news', newsRoutes);
 app.use('/admin/news', adminNewsRoutes);
+app.use(faqRoutes);
 
 // Home Route
 app.get('/', (req, res) => {
