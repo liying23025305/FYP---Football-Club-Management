@@ -8,129 +8,123 @@
   <link rel="stylesheet" href="/stylesheet/news.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
-    .admin-sidebar {
-      min-height: 100vh;
-      background: #f8f9fa;
-      border-right: 1.5px solid #e0e0e0;
-    }
-    .admin-sidebar .nav-link.active {
-      background: #e0f7fa;
-      font-weight: bold;
-      color: #00796b !important;
-    }
-    .admin-sidebar .nav-link {
-      color: #333;
-    }
-    .admin-content {
-      padding: 2rem 2rem 2rem 2rem;
-    }
     .table-actions .btn {
       margin-right: 0.3rem;
     }
   </style>
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="row">
-      <!-- Sidebar -->
-      <nav class="col-md-2 d-none d-md-block admin-sidebar sidebar">
-        <div class="position-sticky pt-3">
-          <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link active" href="/admin/news"><i class="bi bi-newspaper me-2"></i>News</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/store"><i class="bi bi-shop me-2"></i>Store</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/faqs"><i class="bi bi-question-circle me-2"></i>FAQs</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/schedule"><i class="bi bi-calendar-event me-2"></i>Schedule</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/members"><i class="bi bi-people me-2"></i>Members</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/events"><i class="bi bi-trophy me-2"></i>Events</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
-          </ul>
-        </div>
-      </nav>
-      <!-- Main Content -->
-      <main class="col-md-10 ms-sm-auto admin-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2>News Management</h2>
-          <a href="/admin/news/create" class="btn btn-success"><i class="bi bi-plus-lg"></i> Create News</a>
-        </div>
-        <!-- Placeholder for stats -->
-        <div class="row mb-4">
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h5 class="card-title">Total News</h5>
-                <p class="display-6"><%= stats ? stats.total : '-' %></p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h5 class="card-title">Published</h5>
-                <p class="display-6"><%= stats ? stats.published : '-' %></p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h5 class="card-title">Drafts</h5>
-                <p class="display-6"><%= stats ? stats.draft : '-' %></p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h5 class="card-title">Archived</h5>
-                <p class="display-6"><%= stats ? stats.archived : '-' %></p>
-              </div>
-            </div>
+  <%- include('../partials/navbar') %>
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>News Management</h2>
+      <div>
+        <a href="/admin/news" class="btn btn-primary me-2">Manage News</a>
+        <a href="/admin/faq" class="btn btn-secondary">Manage FAQ</a>
+        <a href="/admin/news/create" class="btn btn-success ms-2"><i class="bi bi-plus-lg"></i> Create News</a>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-3 mb-2">
+        <select class="form-select" id="admin-news-status-filter">
+          <option value="">All Statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+      <div class="col-md-3 mb-2">
+        <select class="form-select" id="admin-news-category-filter">
+          <option value="">All Categories</option>
+          <% const cats = Array.from(new Set(news.map(n => n.category).filter(Boolean))); cats.forEach(function(cat) { %>
+            <option value="<%= cat %>"><%= cat %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4 mb-2">
+        <input type="text" class="form-control" id="admin-news-search-input" placeholder="Search news...">
+      </div>
+      <div class="col-md-2 mb-2">
+        <button type="button" class="btn btn-outline-primary w-100" id="admin-news-search-btn">Search</button>
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total News</h5>
+            <p class="display-6"><%= stats ? stats.total : '-' %></p>
           </div>
         </div>
-        <!-- News Table -->
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Author</th>
-                <th>Published</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% news.forEach(function(article) { %>
-                <tr>
-                  <td><%= article.title %></td>
-                  <td><%= article.category %></td>
-                  <td><span class="badge bg-<%= article.status === 'published' ? 'success' : (article.status === 'draft' ? 'secondary' : 'warning') %>"><%= article.status %></span></td>
-                  <td><%= article.author_name %></td>
-                  <td><%= article.published_at ? new Date(article.published_at).toLocaleString() : '-' %></td>
-                  <td class="table-actions">
-                    <a href="/admin/news/<%= article.news_id %>/edit" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
-                    <form action="/admin/news/<%= article.news_id %>?_method=DELETE" method="POST" style="display:inline;">
-                      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this news?')"><i class="bi bi-trash"></i></button>
-                    </form>
-                    <% if (article.status === 'published') { %>
-                      <form action="/admin/news/<%= article.news_id %>/unpublish" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-warning"><i class="bi bi-eye-slash"></i></button>
-                      </form>
-                    <% } else { %>
-                      <form action="/admin/news/<%= article.news_id %>/publish" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-eye"></i></button>
-                      </form>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Published</h5>
+            <p class="display-6"><%= stats ? stats.published : '-' %></p>
+          </div>
         </div>
-      </main>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Drafts</h5>
+            <p class="display-6"><%= stats ? stats.draft : '-' %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Archived</h5>
+            <p class="display-6"><%= stats ? stats.archived : '-' %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Author</th>
+            <th>Published</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-news-tbody">
+          <% news.forEach(function(article) { %>
+            <tr>
+              <td><%= article.title %></td>
+              <td><%= article.category %></td>
+              <td><span class="badge bg-<%= article.status === 'published' ? 'success' : (article.status === 'draft' ? 'secondary' : 'warning') %>"><%= article.status %></span></td>
+              <td><%= article.author_name %></td>
+              <td><%= article.published_at ? new Date(article.published_at).toLocaleString() : '-' %></td>
+              <td class="table-actions">
+                <a href="/admin/news/<%= article.news_id %>/edit" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                <form action="/admin/news/<%= article.news_id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this news?')"><i class="bi bi-trash"></i></button>
+                </form>
+                <% if (article.status === 'published') { %>
+                  <form action="/admin/news/<%= article.news_id %>/unpublish" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-warning"><i class="bi bi-eye-slash"></i></button>
+                  </form>
+                <% } else { %>
+                  <form action="/admin/news/<%= article.news_id %>/publish" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-eye"></i></button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     </div>
   </div>
+  <%- include('../partials/footer') %>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/admin-news.js"></script>
 </body>
 </html> 

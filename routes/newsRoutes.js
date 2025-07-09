@@ -135,4 +135,37 @@ router.get('/user/bookmarks', isAuthenticated, async (req, res) => {
   }
 });
 
+// GET /api/news - AJAX endpoint for filtered news
+router.get('/api/news', async (req, res) => {
+  const category = req.query.category || '';
+  const search = req.query.search || '';
+  let where = "WHERE status = 'published'";
+  let params = [];
+  if (category && category !== 'All') {
+    where += ' AND category = ?';
+    params.push(category);
+  }
+  if (search) {
+    where += ' AND title LIKE ?';
+    params.push(`%${search}%`);
+  }
+  try {
+    const [newsRows] = await db.query(
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
+      params
+    );
+    let bookmarks = [];
+    let user = null;
+    if (req.session.loggedIn && req.session.user) {
+      user = req.session.user;
+      const [bmRows] = await db.query('SELECT news_id FROM user_bookmarks WHERE user_id = ?', [user.user_id]);
+      bookmarks = bmRows.map(bm => bm.news_id);
+    }
+    res.json({ success: true, articles: newsRows, bookmarks, user });
+  } catch (err) {
+    console.error('Error fetching news (AJAX):', err, 'Params:', params, 'Where:', where);
+    res.json({ success: false, articles: [], bookmarks: [], user: null, error: err.message });
+  }
+});
+
 module.exports = router;

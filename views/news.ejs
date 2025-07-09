@@ -17,7 +17,7 @@
     <!-- Category Filter & Search -->
     <form class="row mb-3" method="get" action="/news">
       <div class="col-md-3 mb-2">
-        <select class="form-select" name="category" onchange="this.form.submit()">
+        <select class="form-select" name="category" id="news-category-filter">
           <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
           <% categories.forEach(function(cat) { %>
             <option value="<%= cat %>" <%= selectedCategory === cat ? 'selected' : '' %>><%= cat %></option>
@@ -25,14 +25,15 @@
         </select>
       </div>
       <div class="col-md-5 mb-2">
-        <input type="text" class="form-control" name="search" placeholder="Search news..." value="<%= search %>">  <!-- TODO: Make Search news functional -->
+        <input type="text" class="form-control" name="search" id="news-search-input" placeholder="Search news..." value="<%= search %>">  <!-- TODO: Make Search news functional -->
       </div>
       <div class="col-md-2 mb-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+        <button type="button" class="btn btn-outline-primary w-100" id="news-search-btn">Search</button>
       </div>
     </form>
 
     <!-- Featured News Card -->  <!-- TODO: Ensure Featured News is the latest published article-->
+    <div id="featured-news-container">
     <% if (featured) { %>
     <a href="/news/<%= featured.news_id %>" style="text-decoration: none; color: inherit;">
       <div class="row mb-4">
@@ -58,9 +59,10 @@
       </div>
     </a>
     <% } %>
+    </div>
 
     <!-- News Cards Row -->
-    <div class="row">
+    <div class="row" id="news-list">
       <% articles.forEach(function(article) { %>
         <div class="col-md-3 mb-3">
           <div class="card h-100">

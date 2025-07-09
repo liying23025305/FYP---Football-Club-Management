@@ -15,7 +15,11 @@ router.post('/loginAccount', async (req, res) => {
   const [user] = await db.query(sql, values);
 
   if (user && user.length > 0) {
-    req.session.user = user[0];
+    req.session.user = {
+      user_id: user[0].user_id,
+      username: user[0].username,
+      role: user[0].role
+    };
     if (user[0].role === 'admin') return res.redirect('/admin');
     return res.redirect('/');
   } else {
@@ -47,7 +51,7 @@ router.post('/registerAccount', async (req, res) => {
     const values = [username, password, first_name, surname, email, dob, country, marketingConsentValue];
     await db.query(sql, values);
 
-    req.session.user = { id: username, email, role: 'member' };
+    req.session.user = { user_id: null, username, email, role: 'member' };
     res.redirect('/');
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {

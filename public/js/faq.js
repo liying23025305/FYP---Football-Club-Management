@@ -56,18 +56,22 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       let url = '/api/faqs';
       if (category) url += `?category=${encodeURIComponent(category)}`;
-      const res = await fetch(url);
-      console.log('FAQ fetch status:', res.status);
-      const text = await res.text();
-      console.log('FAQ fetch response:', text);
-      let faqs = JSON.parse(text);
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        throw new Error(`Server responded with status ${res.status}`);
+      }
+      const { success, data, error } = await res.json();
+      if (!success) {
+        throw new Error(error || 'Unknown error');
+      }
+      let faqs = data;
       if (search) {
         faqs = faqs.filter(faq => faq.question.toLowerCase().includes(search.toLowerCase()) || (faq.answer && faq.answer.toLowerCase().includes(search.toLowerCase())));
       }
       renderFaqs(faqs);
     } catch (err) {
       console.error('FAQ fetch error:', err);
-      faqList.innerHTML = '<div class="alert alert-danger">Failed to load FAQs.</div>';
+      faqList.innerHTML = `<div class="alert alert-danger">Failed to load FAQs.<br>${err && err.message ? err.message : ''}</div>`;
     }
   }
 
@@ -119,11 +123,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const res = await fetch('/api/faqs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question, category })
+          body: JSON.stringify({ question, category }),
+          credentials: 'include'
         });
         const data = await res.json();
         if (data.success) {
-          faqFormMessage.textContent = 'Your question has been submitted!';
+          faqFormMessage.textContent = data.message || 'Your question has been submitted!';
           faqFormMessage.className = 'text-success';
           faqQuestionForm.reset();
         } else {
@@ -147,35 +152,64 @@ document.addEventListener('DOMContentLoaded', function () {
   const addFaqBtn = document.getElementById('add-faq-btn');
   const faqModal = document.getElementById('faq-modal');
   const faqModalForm = document.getElementById('faq-modal-form');
+  const modalFaqQuestion = document.getElementById('modal-faq-question');
+  const modalFaqAnswer = document.getElementById('modal-faq-answer');
   const modalFaqCategory = document.getElementById('modal-faq-category');
+  const modalFaqStatus = document.getElementById('modal-faq-status');
   const modalFaqPublish = document.getElementById('modal-faq-publish');
+  const modalFaqOrder = document.getElementById('modal-faq-order');
   let editingFaqId = null;
   let allFaqs = [];
 
-  // Fetch all FAQs for admin (with category filter)
+  // Helper: Show admin message (persistent, green for success)
+  function showAdminMessage(msg, type = 'success') {
+    adminMessage.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : type} mb-3" style="font-weight:500;">${msg}</div>`;
+    if (type === 'success') {
+      setTimeout(() => { adminMessage.innerHTML = ''; }, 4000);
+    }
+  }
+
+  // Fetch all FAQs for admin (with status/category filter)
   async function loadAdminFaqs(filterStatus = '', filterCategory = '') {
     try {
+      adminTable.querySelector('tbody').innerHTML = '<tr><td colspan="7" class="text-center text-secondary">Loading...</td></tr>';
       let url = '/api/admin/faqs';
       const params = [];
       if (filterCategory) params.push(`category=${encodeURIComponent(filterCategory)}`);
       if (params.length) url += '?' + params.join('&');
-      const res = await fetch(url);
-      allFaqs = await res.json();
+      const res = await fetch(url, { credentials: 'include' });
+      const { success, data } = await res.json();
+      if (!success) throw new Error('Failed to fetch FAQs');
+      allFaqs = data;
       let faqs = allFaqs;
       if (filterStatus) {
         faqs = faqs.filter(faq => faq.status === filterStatus);
       }
       renderAdminFaqs(faqs);
     } catch (err) {
-      adminTable.querySelector('tbody').innerHTML = '<tr><td colspan="6" class="text-danger">Failed to load FAQs.</td></tr>';
+      adminTable.querySelector('tbody').innerHTML = '<tr><td colspan="7" class="text-danger">Failed to load FAQs.</td></tr>';
     }
   }
 
-  // Render admin FAQ table (with category & publish status columns)
+  // Update FAQ statistics cards
+  function updateFaqStats() {
+    const total = allFaqs.length;
+    const answered = allFaqs.filter(f => f.status === 'answered').length;
+    const pending = allFaqs.filter(f => f.status === 'pending').length;
+    const archived = allFaqs.filter(f => f.status === 'archived').length;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('faq-stat-total', total);
+    set('faq-stat-answered', answered);
+    set('faq-stat-pending', pending);
+    set('faq-stat-archived', archived);
+  }
+
+  // Render admin FAQ table
   function renderAdminFaqs(faqs) {
     const tbody = adminTable.querySelector('tbody');
     if (!faqs.length) {
       tbody.innerHTML = '<tr><td colspan="7" class="text-center">No FAQs found.</td></tr>';
+      updateFaqStats();
       return;
     }
     tbody.innerHTML = faqs.map(faq => `
@@ -183,215 +217,188 @@ document.addEventListener('DOMContentLoaded', function () {
         <td><input type="number" class="form-control form-control-sm faq-order-input" value="${faq.display_order || 0}" min="0"></td>
         <td>${faq.question}</td>
         <td>${faq.answer || ''}</td>
-        <td>${faq.category ? `<span class="badge bg-secondary">${faq.category}</span>` : ''}</td>
+        <td>${faq.category ? `<span class="badge badge-purple">${faq.category}</span>` : ''}</td>
         <td><span class="badge bg-${faq.status === 'answered' ? 'success' : faq.status === 'pending' ? 'warning' : 'secondary'}">${faq.status}</span></td>
         <td>
           <span class="badge bg-${faq.is_published === 'yes' ? 'success' : 'secondary'}">${faq.is_published === 'yes' ? 'Published' : 'Unpublished'}</span>
-          <button class="btn btn-sm btn-outline-${faq.is_published === 'yes' ? 'secondary' : 'success'} ms-2 toggle-publish-btn">${faq.is_published === 'yes' ? 'Unpublish' : 'Publish'}</button>
         </td>
         <td>
           <button class="btn btn-sm btn-primary edit-faq-btn">Edit</button>
-          <button class="btn btn-sm btn-danger delete-faq-btn">${faq.status === 'archived' ? 'Delete' : 'Archive'}</button>
+          <button class="btn btn-sm btn-danger delete-faq-btn">Delete</button>
         </td>
       </tr>
     `).join('');
+    attachAdminTableListeners();
+    updateFaqStats();
   }
 
-  // Status and category filter handler
-  if (statusFilter && adminCategoryFilter) {
-    statusFilter.addEventListener('change', function () {
-      loadAdminFaqs(this.value, adminCategoryFilter.value);
-    });
-    adminCategoryFilter.addEventListener('change', function () {
-      loadAdminFaqs(statusFilter.value, this.value);
-    });
-    // Initial load
-    populateAdminCategoryDropdowns();
-    loadAdminFaqs();
-  }
-
-  // Add FAQ button handler
-  if (addFaqBtn) {
-    addFaqBtn.addEventListener('click', function () {
-      editingFaqId = null;
-      openFaqModal();
-    });
-  }
-
-  // Open modal for add/edit (with category and publish status)
-  function openFaqModal(faq = {}) {
-    document.getElementById('modal-faq-question').value = faq.question || '';
-    document.getElementById('modal-faq-answer').value = faq.answer || '';
-    document.getElementById('modal-faq-status').value = faq.status || 'pending';
-    document.getElementById('modal-faq-order').value = faq.display_order || 0;
-    if (modalFaqCategory) modalFaqCategory.value = faq.category || '';
-    if (modalFaqPublish) modalFaqPublish.value = faq.is_published || 'no';
-    if (window.bootstrap) {
-      const modal = new bootstrap.Modal(faqModal);
-      modal.show();
-    } else {
-      $(faqModal).modal('show'); // fallback for jQuery
-    }
-  }
-
-  // Edit FAQ button handler and publish toggle
-  if (adminTable) {
-    adminTable.addEventListener('click', function (e) {
-      if (e.target.classList.contains('edit-faq-btn')) {
-        const tr = e.target.closest('tr');
+  // Attach event listeners to admin table actions
+  function attachAdminTableListeners() {
+    const tbody = adminTable.querySelector('tbody');
+    // Edit
+    tbody.querySelectorAll('.edit-faq-btn').forEach(btn => {
+      btn.onclick = function () {
+        const tr = btn.closest('tr');
         const faqId = tr.getAttribute('data-id');
         const faq = allFaqs.find(f => f.faq_id == faqId);
-        editingFaqId = faqId;
         openFaqModal(faq);
-      } else if (e.target.classList.contains('delete-faq-btn')) {
-        const tr = e.target.closest('tr');
+      };
+    });
+    // Delete
+    tbody.querySelectorAll('.delete-faq-btn').forEach(btn => {
+      btn.onclick = async function () {
+        const tr = btn.closest('tr');
         const faqId = tr.getAttribute('data-id');
-        if (confirm('Are you sure you want to archive/delete this FAQ?')) {
-          deleteFaq(faqId);
-        }
-      } else if (e.target.classList.contains('toggle-publish-btn')) {
-        const tr = e.target.closest('tr');
+        if (!confirm('Delete this FAQ permanently?')) return;
+        await deleteFaq(faqId);
+      };
+    });
+    // Order change
+    tbody.querySelectorAll('.faq-order-input').forEach(input => {
+      input.onchange = async function () {
+        const tr = input.closest('tr');
         const faqId = tr.getAttribute('data-id');
-        const faq = allFaqs.find(f => f.faq_id == faqId);
-        if (!faq) return;
-        // Toggle publish status
-        const newPublish = faq.is_published === 'yes' ? 'no' : 'yes';
-        updateFaqPublish(faqId, newPublish, faq);
-      }
-      // Inline order update
-      adminTable.addEventListener('change', function (e) {
-        if (e.target.classList.contains('faq-order-input')) {
-          const tr = e.target.closest('tr');
-          const faqId = tr.getAttribute('data-id');
-          const newOrder = e.target.value;
-          updateFaqOrder(faqId, newOrder);
-        }
-      });
+        const newOrder = parseInt(input.value, 10) || 0;
+        await updateFaq(faqId, { display_order: newOrder });
+        loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
+      };
     });
   }
 
-  // Modal form submit handler (add/edit FAQ, with category and publish status)
+  // Open modal for add/edit FAQ
+  function openFaqModal(faq = {}) {
+    editingFaqId = faq.faq_id || null;
+    faqModalForm.reset();
+    modalFaqQuestion.value = faq.question || '';
+    modalFaqAnswer.value = faq.answer || '';
+    modalFaqCategory.value = faq.category || '';
+    modalFaqStatus.value = faq.status || 'pending';
+    modalFaqPublish.value = faq.is_published || 'no';
+    modalFaqOrder.value = faq.display_order || 0;
+    const modal = new bootstrap.Modal(faqModal);
+    modal.show();
+  }
+
+  // Add custom purple badge style
+  if (!document.getElementById('faq-purple-badge-style')) {
+    const style = document.createElement('style');
+    style.id = 'faq-purple-badge-style';
+    style.innerHTML = `.badge-purple { background-color: #a259e6 !important; color: #fff !important; }`;
+    document.head.appendChild(style);
+  }
+
+  // Global variable to store pending success message for add/edit
+  let pendingAdminSuccessMsg = null;
+
+  // Handle add/edit FAQ form submit
   if (faqModalForm) {
-    faqModalForm.addEventListener('submit', async function (e) {
+    faqModalForm.onsubmit = async function (e) {
       e.preventDefault();
-      const question = document.getElementById('modal-faq-question').value.trim();
-      const answer = document.getElementById('modal-faq-answer').value.trim();
-      const status = document.getElementById('modal-faq-status').value;
-      const display_order = parseInt(document.getElementById('modal-faq-order').value, 10) || 0;
-      const category = modalFaqCategory ? modalFaqCategory.value : '';
-      const is_published = modalFaqPublish ? modalFaqPublish.value : 'no';
+      const question = modalFaqQuestion.value.trim();
+      const answer = modalFaqAnswer.value.trim();
+      const category = modalFaqCategory.value;
+      const status = modalFaqStatus.value;
+      const is_published = modalFaqPublish.value;
+      const display_order = parseInt(modalFaqOrder.value, 10) || 0;
       if (!question) {
         showAdminMessage('Question is required.', 'danger');
         return;
       }
+      // Confirmation dialog before saving
+      let actionType = editingFaqId ? 'edit' : 'add';
+      let confirmMsg = actionType === 'edit' ? 'Save changes to this FAQ?' : 'Add this new FAQ?';
+      if (!window.confirm(confirmMsg)) return;
+      const payload = { question, answer, category, status, is_published, display_order, users_user_id: 1 };
+      let successMsg = '';
       try {
-        let res, data;
         if (editingFaqId) {
-          res = await fetch(`/api/admin/faqs/${editingFaqId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, answer, status, display_order, category, is_published })
-          });
+          await updateFaq(editingFaqId, payload);
+          successMsg = 'Edit is successful!';
         } else {
-          // Might need to provide users_user_id (admin's user id)
-          res = await fetch('/api/admin/faqs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, answer, status, display_order, users_user_id: 1, category, is_published }) // TODO: Replace with actual admin user id
-          });
+          await createFaq(payload);
+          successMsg = 'Your question has been submitted successfully!';
         }
-        data = await res.json();
-        if (data.success) {
-          showAdminMessage('FAQ saved successfully.', 'success');
-          if (window.bootstrap) bootstrap.Modal.getInstance(faqModal).hide();
-          else $(faqModal).modal('hide');
-          loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
-        } else {
-          showAdminMessage(data.error || 'Save failed.', 'danger');
-        }
+        // Store the message globally and show after modal is hidden
+        pendingAdminSuccessMsg = successMsg;
+        const modalInstance = bootstrap.Modal.getInstance(faqModal);
+        modalInstance.hide();
       } catch (err) {
-        showAdminMessage('Save failed.', 'danger');
+        showAdminMessage('Failed to save FAQ.', 'danger');
+      }
+    };
+  }
+
+  // Always show pending success message after modal is hidden
+  if (faqModal) {
+    faqModal.addEventListener('hidden.bs.modal', function () {
+      if (pendingAdminSuccessMsg) {
+        showAdminMessage(pendingAdminSuccessMsg, 'success');
+        loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
+        pendingAdminSuccessMsg = null;
       }
     });
   }
 
-  // Delete/archive FAQ
+  // Create FAQ (admin)
+  async function createFaq(payload) {
+    const res = await fetch('/api/admin/faqs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Create failed');
+    return data;
+  }
+
+  // Update FAQ (admin)
+  async function updateFaq(faqId, payload) {
+    const res = await fetch(`/api/admin/faqs/${faqId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Update failed');
+    return data;
+  }
+
+  // Delete FAQ (admin)
   async function deleteFaq(faqId) {
-    try {
-      const res = await fetch(`/api/admin/faqs/${faqId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showAdminMessage('FAQ archived/deleted.', 'success');
-        loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
-      } else {
-        showAdminMessage(data.error || 'Delete failed.', 'danger');
-      }
-    } catch (err) {
-      showAdminMessage('Delete failed.', 'danger');
-    }
+    const res = await fetch(`/api/admin/faqs/${faqId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Delete failed');
+    loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
+    showAdminMessage('FAQ deleted successfully!', 'success');
   }
 
-  // Update FAQ display order
-  async function updateFaqOrder(faqId, display_order) {
-    const faq = allFaqs.find(f => f.faq_id == faqId);
-    if (!faq) return;
-    try {
-      const res = await fetch(`/api/admin/faqs/${faqId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: faq.question,
-          answer: faq.answer,
-          status: faq.status,
-          display_order: parseInt(display_order, 10) || 0
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAdminMessage('Order updated.', 'success');
-        loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
-      } else {
-        showAdminMessage(data.error || 'Order update failed.', 'danger');
-      }
-    } catch (err) {
-      showAdminMessage('Order update failed.', 'danger');
-    }
+  // Add FAQ button
+  if (addFaqBtn) {
+    addFaqBtn.onclick = function () {
+      openFaqModal();
+    };
   }
 
-  // Update FAQ publish status (quick toggle)
-  async function updateFaqPublish(faqId, is_published, faq) {
-    try {
-      const res = await fetch(`/api/admin/faqs/${faqId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: faq.question,
-          answer: faq.answer,
-          status: faq.status,
-          display_order: faq.display_order,
-          category: faq.category,
-          is_published
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAdminMessage('Publish status updated.', 'success');
-        loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
-      } else {
-        showAdminMessage(data.error || 'Publish update failed.', 'danger');
-      }
-    } catch (err) {
-      showAdminMessage('Publish update failed.', 'danger');
-    }
+  // Status/category filter
+  if (statusFilter) {
+    statusFilter.onchange = function () {
+      loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
+    };
+  }
+  if (adminCategoryFilter) {
+    adminCategoryFilter.onchange = function () {
+      loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
+    };
   }
 
-  // Show admin message
-  function showAdminMessage(msg, type) {
-    adminMessage.textContent = msg;
-    adminMessage.className = `alert alert-${type}`;
-    setTimeout(() => {
-      adminMessage.textContent = '';
-      adminMessage.className = '';
-    }, 3000);
+  // Populate admin category dropdowns and load FAQs on page load
+  if (adminTable) {
+    populateAdminCategoryDropdowns();
+    loadAdminFaqs();
   }
 }); 

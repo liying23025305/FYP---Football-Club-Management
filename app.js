@@ -4,6 +4,7 @@ const session = require('express-session');
 const app = express();
 const methodOverride = require('method-override'); // edit news
 const db = require('./models/db');
+const cors = require('cors');
 
 // Route modules
 const authRoutes = require('./routes/authRoutes');
@@ -21,6 +22,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
+app.use(express.json());
 
 // Session middleware
 app.use(
@@ -65,7 +67,7 @@ app.get('/store', (req, res) => {
     { gear_id: 3, gear_name: 'Boots', gear_desc: 'Football boots', price_per_unit: 89.99 },
   ];
 
-  res.render('store', { gear, cart });
+  res.render('store', { gear, cart, selectedSize: 'All' });
 });
 
 // Add item to cart
@@ -170,6 +172,12 @@ app.get('/membership/bronze', (req, res) => {
   res.render('bronze_membership', { title: 'Bronze Membership' });
   console.log('Bronze membership page requested');
 });
+
+// Add CORS Support for Local Development
+app.use(cors({
+  origin: 'http://localhost:3000', // or '*' for all origins during development
+  credentials: true
+}));
 
 // Start server
 const PORT = process.env.PORT || 3000;

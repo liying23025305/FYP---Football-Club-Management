@@ -140,4 +140,35 @@ router.get('/stats', isAuthenticated, (req, res) => {
   res.send('Bookmark stats coming soon.');
 });
 
+// GET /admin/news/api/list - AJAX endpoint for filtered news
+router.get('/api/list', isAuthenticated, async (req, res) => {
+  const status = req.query.status || '';
+  const category = req.query.category || '';
+  const search = req.query.search || '';
+  let where = 'WHERE 1=1';
+  let params = [];
+  if (status) {
+    where += ' AND n.status = ?';
+    params.push(status);
+  }
+  if (category) {
+    where += ' AND n.category = ?';
+    params.push(category);
+  }
+  if (search) {
+    where += ' AND n.title LIKE ?';
+    params.push(`%${search}%`);
+  }
+  try {
+    const [newsRows] = await db.query(
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY n.created_at DESC`,
+      params
+    );
+    res.json({ success: true, news: newsRows });
+  } catch (err) {
+    console.error('Error fetching admin news (AJAX):', err);
+    res.json({ success: false, news: [] });
+  }
+});
+
 module.exports = router; 
