@@ -1,0 +1,52 @@
+/* Bookmark Button */
+.bookmark-btn {
+  float: right;
+  font-size: 0.95rem;
+}
+
+/* Bookmarks section (legacy, for reference) */
+#my-bookmarks .card {
+  border: 1.5px solid #ffe066;
+}
+#my-bookmarks .bookmark-btn {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+#my-bookmarks .bookmark-btn[data-bookmarked] {
+  background: #fffbe6;
+}
+
+/* Bookmarked News Tab/Button */
+#bookmarked-news-tab {
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+#bookmarked-news-tab:hover {
+  border-color: #ffc107;
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.18);
+  background: #fffbe6;
+}
+
+/* Bookmark Icon States */
+.bookmark-icon {
+  color: #ccc;
+  font-size: 1.2em;
+  transition: color 0.2s;
+}
+.bookmark-icon.bookmarked, .bi-bookmark-fill {
+  color: #ffd700 !important;
+}
+
+/* Toast/Success Message */
+.bookmark-success-message {
+  background: #4CAF50;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 4px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2000;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  display: none;
+}

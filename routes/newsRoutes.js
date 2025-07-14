@@ -8,14 +8,10 @@ function sanitize(str) {
   return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// GET /news - List published news (paginated, filter by category)
+// GET /news - List published news (no pagination, scrollable)
 router.get('/', async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const perPage = 5;
   const category = req.query.category || '';
   const search = req.query.search || '';
-  const offset = (page - 1) * perPage;
-
   let where = "WHERE status = 'published'";
   let params = [];
   if (category && category !== 'All') {
@@ -26,48 +22,36 @@ router.get('/', async (req, res) => {
     where += ' AND title LIKE ?';
     params.push(`%${search}%`);
   }
-
   try {
-    // Get total count for pagination
-    const [countRows] = await db.query(`SELECT COUNT(*) as count FROM news ${where}`, params);
-    const total = countRows[0].count;
-    const totalPages = Math.ceil(total / perPage);
-
-    // Get news articles
+    // Get all news articles (no pagination)
     const [newsRows] = await db.query(
-      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
-      [...params, perPage, offset]
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
+      params
     );
-
     // Get categories for filter
     const [catRows] = await db.query('SELECT DISTINCT category FROM news WHERE category IS NOT NULL AND category != ""');
     const categories = catRows.map(row => row.category);
-
     // Get bookmarks for logged-in user
     let bookmarks = [];
     if (req.session.loggedIn && req.session.user) {
       const [bmRows] = await db.query('SELECT news_id FROM user_bookmarks WHERE user_id = ?', [req.session.user.user_id]);
       bookmarks = bmRows.map(bm => bm.news_id);
     }
-
-    // Featured news (first article)
+    // Featured news (latest published)
     const featured = newsRows.length > 0 ? newsRows[0] : null;
     const articles = featured ? newsRows.slice(1) : [];
-
     res.render('news', {
       user: req.session.user,
       featured,
       articles,
       categories,
       selectedCategory: category,
-      page,
-      totalPages,
       bookmarks,
       search
     });
   } catch (err) {
     console.error('Error fetching news:', err);
-    res.status(500).render('news', { user: req.session.user, featured: null, articles: [], categories: [], selectedCategory: '', page: 1, totalPages: 1, bookmarks: [], search: '' });
+    res.status(500).render('news', { user: req.session.user, featured: null, articles: [], categories: [], selectedCategory: '', bookmarks: [], search: '' });
   }
 });
 
@@ -132,6 +116,21 @@ router.get('/user/bookmarks', isAuthenticated, async (req, res) => {
   } catch (err) {
     console.error('Error fetching bookmarks:', err);
     res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// GET /news/bookmarks - Bookmarked News Page
+router.get('/bookmarks', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.user_id;
+  try {
+    const [rows] = await db.query(
+      'SELECT n.*, u.username as author_name FROM news n JOIN user_bookmarks b ON n.news_id = b.news_id JOIN users u ON n.users_user_id = u.user_id WHERE b.user_id = ? ORDER BY b.bookmarked_at DESC',
+      [userId]
+    );
+    res.render('bookmarked-news', { user: req.session.user, bookmarks: rows });
+  } catch (err) {
+    console.error('Error fetching bookmarks:', err);
+    res.status(500).render('bookmarked-news', { user: req.session.user, bookmarks: [] });
   }
 });
 

@@ -37,15 +37,21 @@ router.get('/create', isAuthenticated, (req, res) => {
 // POST /admin/news - Create news
 router.post('/', isAuthenticated, upload.single('featured_image'), async (req, res) => {
   try {
-    const { title, summary, content, category, status, published_at } = req.body;
+    let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
     if (req.file) {
       featured_image = '/images/news/' + req.file.filename;
     }
     const user_id = req.session.user.user_id;
+    // If publishing now and no published_at, set to CURRENT_TIMESTAMP
+    if (status === 'published' && !published_at) {
+      published_at = null; // Will use CURRENT_TIMESTAMP in SQL
+    }
     await db.query(
-      'INSERT INTO news (title, summary, content, featured_image, category, status, published_at, users_user_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [title, summary, content, featured_image, category, status, published_at || null, user_id, user_id]
+      'INSERT INTO news (title, summary, content, featured_image, category, status, published_at, users_user_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ' + (status === 'published' && !published_at ? 'CURRENT_TIMESTAMP' : '?') + ', ?, ?)',
+      status === 'published' && !published_at
+        ? [title, summary, content, featured_image, category, status, user_id, user_id]
+        : [title, summary, content, featured_image, category, status, published_at || null, user_id, user_id]
     );
     res.redirect('/admin/news?success=created');
   } catch (err) {
@@ -72,14 +78,20 @@ router.get('/:id/edit', isAuthenticated, async (req, res) => {
 router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req, res) => {
   try {
     const newsId = parseInt(req.params.id);
-    const { title, summary, content, category, status, published_at } = req.body;
+    let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
     if (req.file) {
       featured_image = '/images/news/' + req.file.filename;
     }
-    // If new image, update; else keep old
-    let updateSql = 'UPDATE news SET title=?, summary=?, content=?, category=?, status=?, published_at=?';
-    let params = [title, summary, content, category, status, published_at || null];
+    // If publishing now and no published_at, set to CURRENT_TIMESTAMP
+    if (status === 'published' && !published_at) {
+      published_at = null; // Will use CURRENT_TIMESTAMP in SQL
+    }
+    let updateSql = 'UPDATE news SET title=?, summary=?, content=?, category=?, status=?, published_at=' + (status === 'published' && !published_at ? 'CURRENT_TIMESTAMP' : '?');
+    let params = [title, summary, content, category, status];
+    if (!(status === 'published' && !published_at)) {
+      params.push(published_at || null);
+    }
     if (featured_image) {
       updateSql += ', featured_image=?';
       params.push(featured_image);
@@ -110,7 +122,8 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
 router.post('/:id/publish', isAuthenticated, async (req, res) => {
   try {
     const newsId = parseInt(req.params.id);
-    await db.query('UPDATE news SET status = "published" WHERE news_id = ?', [newsId]);
+    // Set status to published and published_at to CURRENT_TIMESTAMP
+    await db.query('UPDATE news SET status = "published", published_at = CURRENT_TIMESTAMP WHERE news_id = ?', [newsId]);
     res.redirect('/admin/news');
   } catch (err) {
     console.error('Error publishing news:', err);
