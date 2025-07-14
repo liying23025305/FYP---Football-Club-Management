@@ -16,6 +16,12 @@
 <body>
   <%- include('../partials/navbar') %>
   <div class="container my-5">
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= success === 'created' ? 'News article created successfully!' : (success === 'updated' ? 'News article updated successfully!' : 'Success!') %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>News Management</h2>
       <div>
@@ -76,8 +82,9 @@
       <div class="col-md-3">
         <div class="card text-center">
           <div class="card-body">
-            <h5 class="card-title">Archived</h5>
-            <p class="display-6"><%= stats ? stats.archived : '-' %></p>
+            <h5 class="card-title">Scheduled</h5>
+            <p class="display-6" id="scheduled-stat">-</p>
+            <small>Articles waiting to publish</small>
           </div>
         </div>
       </div>
@@ -95,11 +102,22 @@
           </tr>
         </thead>
         <tbody id="admin-news-tbody">
-          <% news.forEach(function(article) { %>
+          <% news.forEach(function(article, idx) { %>
             <tr>
               <td><%= article.title %></td>
               <td><%= article.category %></td>
-              <td><span class="badge bg-<%= article.status === 'published' ? 'success' : (article.status === 'draft' ? 'secondary' : 'warning') %>"><%= article.status %></span></td>
+              <td>
+                <% if (article.status === 'draft' && article.published_at && new Date(article.published_at) > new Date()) { %>
+                  <span class="status-badge scheduled">Scheduled</span>
+                  <span class="countdown-timer" id="countdown-<%= article.news_id %>"></span>
+                <% } else if (article.status === 'draft') { %>
+                  <span class="badge bg-secondary">Draft</span>
+                <% } else if (article.status === 'published') { %>
+                  <span class="badge bg-success">Published</span>
+                <% } else { %>
+                  <span class="badge bg-warning">Archived</span>
+                <% } %>
+              </td>
               <td><%= article.author_name %></td>
               <td><%= article.published_at ? new Date(article.published_at).toLocaleString() : '-' %></td>
               <td class="table-actions">

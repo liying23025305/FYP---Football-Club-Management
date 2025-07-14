@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'Events',
     'Tickets',
     'Technical',
-    'Other'
+    'Others'
   ];
 
   // Populate category dropdowns (public page)
@@ -40,18 +40,62 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // =========================
-  // PUBLIC FAQ PAGE
-  // =========================
-  const faqList = document.getElementById('faq-list');
-  const faqSearchForm = document.getElementById('faq-search-form');
-  const faqSearchInput = document.getElementById('faq-search');
-  const faqCategoryFilter = document.getElementById('faq-category-filter');
-  const faqQuestionForm = document.getElementById('faq-question-form');
-  const faqFormMessage = document.getElementById('faq-form-message');
-  const faqQuestionCategory = document.getElementById('faq-question-category');
+  // ===============
+  // CATEGORY TABS UI
+  // ===============
+  const faqCategoryTabs = document.getElementById('faq-category-tabs');
+  const faqAccordionList = document.getElementById('faq-accordion-list');
+  let selectedTabCategory = '';
 
-  // Fetch and render published FAQs (with category filter)
+  function renderCategoryTabs(categories, activeCategory) {
+    if (!faqCategoryTabs) return;
+    faqCategoryTabs.innerHTML = categories.map(cat => `
+      <li class="nav-item" role="presentation">
+        <button class="nav-link${activeCategory === cat ? ' active' : ''}" id="tab-${cat}" data-category="${cat}" type="button" role="tab">${cat}</button>
+      </li>
+    `).join('');
+    // Tab click listeners
+    faqCategoryTabs.querySelectorAll('button[data-category]').forEach(btn => {
+      btn.onclick = function() {
+        selectedTabCategory = this.getAttribute('data-category');
+        renderCategoryTabs(FAQ_CATEGORIES, selectedTabCategory);
+        loadFaqs(faqSearchInput.value.trim(), selectedTabCategory);
+      };
+    });
+  }
+
+  // ===============
+  // ACCORDION RENDER
+  // ===============
+  function renderFaqAccordion(faqs) {
+    if (!faqAccordionList) return;
+    if (!faqs.length) {
+      faqAccordionList.innerHTML = '<div class="alert alert-info">No FAQs found.</div>';
+      return;
+    }
+    faqAccordionList.innerHTML = `
+      <div class="accordion" id="faqAccordion">
+        ${faqs.map((faq, idx) => `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading${idx}">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${idx}" aria-expanded="false" aria-controls="collapse${idx}">
+                ${faq.question}
+              </button>
+            </h2>
+            <div id="collapse${idx}" class="accordion-collapse collapse" aria-labelledby="heading${idx}" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                ${faq.answer ? faq.answer : '<em>Not answered yet.</em>'}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ===============
+  // OVERRIDE LOAD/RENDER
+  // ===============
   async function loadFaqs(search = '', category = '') {
     try {
       let url = '/api/faqs';
@@ -68,44 +112,87 @@ document.addEventListener('DOMContentLoaded', function () {
       if (search) {
         faqs = faqs.filter(faq => faq.question.toLowerCase().includes(search.toLowerCase()) || (faq.answer && faq.answer.toLowerCase().includes(search.toLowerCase())));
       }
-      renderFaqs(faqs);
+      // If a tab is selected, filter by that category
+      if (selectedTabCategory) {
+        faqs = faqs.filter(faq => faq.category === selectedTabCategory);
+      }
+      renderFaqAccordion(faqs);
     } catch (err) {
       console.error('FAQ fetch error:', err);
-      faqList.innerHTML = `<div class="alert alert-danger">Failed to load FAQs.<br>${err && err.message ? err.message : ''}</div>`;
+      if (faqAccordionList) faqAccordionList.innerHTML = `<div class="alert alert-danger">Failed to load FAQs.<br>${err && err.message ? err.message : ''}</div>`;
     }
   }
 
+  // =========================
+  // PUBLIC FAQ PAGE
+  // =========================
+  const faqList = document.getElementById('faq-list');
+  const faqSearchForm = document.getElementById('faq-search-form');
+  const faqSearchInput = document.getElementById('faq-search');
+  const faqCategoryFilter = document.getElementById('faq-category-filter');
+  const faqQuestionForm = document.getElementById('faq-question-form');
+  const faqFormMessage = document.getElementById('faq-form-message');
+  const faqQuestionCategory = document.getElementById('faq-question-category');
+
+  // Fetch and render published FAQs (with category filter)
+  // This function is now overridden by loadFaqs
+  // async function loadFaqs(search = '', category = '') {
+  //   try {
+  //     let url = '/api/faqs';
+  //     if (category) url += `?category=${encodeURIComponent(category)}`;
+  //     const res = await fetch(url, { credentials: 'include' });
+  //     if (!res.ok) {
+  //       throw new Error(`Server responded with status ${res.status}`);
+  //     }
+  //     const { success, data, error } = await res.json();
+  //     if (!success) {
+  //       throw new Error(error || 'Unknown error');
+  //     }
+  //     let faqs = data;
+  //     if (search) {
+  //       faqs = faqs.filter(faq => faq.question.toLowerCase().includes(search.toLowerCase()) || (faq.answer && faq.answer.toLowerCase().includes(search.toLowerCase())));
+  //     }
+  //     renderFaqs(faqs);
+  //   } catch (err) {
+  //     console.error('FAQ fetch error:', err);
+  //     faqList.innerHTML = `<div class="alert alert-danger">Failed to load FAQs.<br>${err && err.message ? err.message : ''}</div>`;
+  //   }
+  // }
+
   // Render FAQ list (with category badge)
-  function renderFaqs(faqs) {
-    if (!faqs.length) {
-      faqList.innerHTML = '<div class="alert alert-info">No FAQs found.</div>';
-      return;
-    }
-    faqList.innerHTML = faqs.map(faq => `
-      <div class="card mb-3">
-        <div class="card-header fw-bold">
-          Q: ${faq.question}
-          ${faq.category ? `<span class="badge bg-secondary ms-2">${faq.category}</span>` : ''}
-        </div>
-        <div class="card-body"><span class="text-success">A:</span> ${faq.answer || '<em>Not answered yet.</em>'}</div>
-      </div>
-    `).join('');
-  }
+  // This function is now overridden by renderFaqAccordion
+  // function renderFaqs(faqs) {
+  //   if (!faqs.length) {
+  //     faqList.innerHTML = '<div class="alert alert-info">No FAQs found.</div>';
+  //     return;
+  //   }
+  //   faqList.innerHTML = faqs.map(faq => `
+  //     <div class="card mb-3">
+  //       <div class="card-header fw-bold">
+  //         Q: ${faq.question}
+  //         ${faq.category ? `<span class="badge bg-secondary ms-2">${faq.category}</span>` : ''}
+  //       </div>
+  //       <div class="card-body"><span class="text-success">A:</span> ${faq.answer || '<em>Not answered yet.</em>'}</div>
+  //     </div>
+  //   `).join('');
+  // }
 
   // Search and category filter handler
   if (faqSearchForm) {
     faqSearchForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      loadFaqs(faqSearchInput.value.trim(), faqCategoryFilter.value);
+      loadFaqs(faqSearchInput.value.trim(), selectedTabCategory);
     });
     if (faqCategoryFilter) {
       faqCategoryFilter.addEventListener('change', function () {
-        loadFaqs(faqSearchInput.value.trim(), this.value);
+        // If dropdown is used, override tab
+        selectedTabCategory = this.value || FAQ_CATEGORIES[0];
+        renderCategoryTabs(FAQ_CATEGORIES, selectedTabCategory);
+        loadFaqs(faqSearchInput.value.trim(), selectedTabCategory);
       });
     }
     // Initial load
     populateCategoryDropdowns();
-    loadFaqs();
   }
 
   // Submit question form handler (with category)
@@ -140,6 +227,16 @@ document.addEventListener('DOMContentLoaded', function () {
         faqFormMessage.className = 'text-danger';
       }
     });
+  }
+
+  // ===============
+  // INIT
+  // ===============
+  if (faqCategoryTabs && faqAccordionList) {
+    // Default to first category
+    selectedTabCategory = FAQ_CATEGORIES[0];
+    renderCategoryTabs(FAQ_CATEGORIES, selectedTabCategory);
+    loadFaqs('', selectedTabCategory);
   }
 
   // =========================

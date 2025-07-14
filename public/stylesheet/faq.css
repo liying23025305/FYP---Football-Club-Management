@@ -22,8 +22,6 @@ main {
 }
 
 /* -- FAQS EJS --*/
-
-/* public/stylesheet/faq.css */
 /* FAQ Card Styles */
 #faq-list .card {
   border-radius: 0.5rem;
@@ -66,6 +64,55 @@ main {
   min-width: 150px;
 }
 
+/* FAQ Category Tabs */
+#faq-category-tabs {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 1.5rem;
+}
+#faq-category-tabs .nav-link {
+  color: #a259e6;
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+#faq-category-tabs .nav-link.active {
+  color: #fff;
+  background: #a259e6;
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-bottom: 3px solid #a259e6;
+}
+#faq-category-tabs .nav-link:not(.active):hover {
+  color: #7c3aed;
+  background: #f3f0fa;
+}
+
+/* FAQ Accordion - displays collapsible sections of content */
+#faq-accordion-list .accordion-item {
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: none;
+}
+#faq-accordion-list .accordion-button {
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #222;
+  border-radius: 0.5rem 0.5rem 0 0;
+  transition: background 0.2s;
+}
+#faq-accordion-list .accordion-button:not(.collapsed) {
+  background: #a259e6;
+  color: #fff;
+}
+#faq-accordion-list .accordion-body {
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   #faq-list .card-header, #faq-list .card-body {
@@ -75,5 +122,11 @@ main {
     font-size: 0.95rem;
     padding: 0.4rem;
   }
+  #faq-category-tabs .nav-link {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.7rem;
+  }
+  #faq-accordion-list .accordion-button, #faq-accordion-list .accordion-body {
+    font-size: 0.95rem;
+  }
 }
-

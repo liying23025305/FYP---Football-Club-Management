@@ -14,7 +14,7 @@ const apiRoutes = require('./routes/apiRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const adminNewsRoutes = require('./routes/admin/news');
-const faqRoutes = require('./routes/faq');
+const faqRoutes = require('./routes/faqRoutes');
 
 // Middleware
 app.set('view engine', 'ejs');

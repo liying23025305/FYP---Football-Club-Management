@@ -22,10 +22,10 @@ router.get('/', isAuthenticated, async (req, res) => {
       FROM news`
     );
     const stats = statsRows[0];
-    res.render('admin/news-dashboard', { news: newsRows, stats });
+    res.render('admin/news-dashboard', { news: newsRows, stats, success: req.query.success });
   } catch (err) {
     console.error('Admin news dashboard error:', err);
-    res.render('admin/news-dashboard', { news: [], stats: null });
+    res.render('admin/news-dashboard', { news: [], stats: null, success: null });
   }
 });
 
@@ -47,7 +47,7 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
       'INSERT INTO news (title, summary, content, featured_image, category, status, published_at, users_user_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [title, summary, content, featured_image, category, status, published_at || null, user_id, user_id]
     );
-    res.redirect('/admin/news');
+    res.redirect('/admin/news?success=created');
   } catch (err) {
     console.error('Error creating news:', err);
     res.redirect('/admin/news');
@@ -87,7 +87,7 @@ router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req,
     updateSql += ' WHERE news_id=?';
     params.push(newsId);
     await db.query(updateSql, params);
-    res.redirect('/admin/news');
+    res.redirect('/admin/news?success=updated');
   } catch (err) {
     console.error('Error updating news:', err);
     res.redirect('/admin/news');
@@ -168,6 +168,74 @@ router.get('/api/list', isAuthenticated, async (req, res) => {
   } catch (err) {
     console.error('Error fetching admin news (AJAX):', err);
     res.json({ success: false, news: [] });
+  }
+});
+
+// GET /admin/news/scheduled - Get scheduled articles (status='draft' and published_at in future)
+router.get('/scheduled', isAuthenticated, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id
+       WHERE n.status = 'draft' AND n.published_at IS NOT NULL AND n.published_at > CURRENT_TIMESTAMP
+       ORDER BY n.published_at ASC`
+    );
+    res.json({ success: true, scheduled: rows });
+  } catch (err) {
+    console.error('Error fetching scheduled news:', err);
+    res.json({ success: false, scheduled: [], error: err.message });
+  }
+});
+
+// POST /admin/news/:id/schedule - Schedule an article for future publication
+router.post('/:id/schedule', isAuthenticated, async (req, res) => {
+  try {
+    const newsId = parseInt(req.params.id);
+    const { published_at } = req.body;
+    if (!published_at) return res.status(400).json({ success: false, error: 'Missing publish date/time' });
+    await db.query('UPDATE news SET published_at = ?, status = "draft" WHERE news_id = ?', [published_at, newsId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error scheduling news:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /admin/news/auto-publish - Manually trigger auto-publish (for testing)
+router.post('/auto-publish', isAuthenticated, async (req, res) => {
+  try {
+    // Find articles ready to publish
+    const [rows] = await db.query(`
+      SELECT news_id FROM news
+      WHERE status = 'draft'
+        AND published_at IS NOT NULL
+        AND published_at <= CURRENT_TIMESTAMP
+    `);
+    if (rows.length > 0) {
+      await db.query(`
+        UPDATE news
+        SET status = 'published', updated_at = CURRENT_TIMESTAMP
+        WHERE status = 'draft'
+          AND published_at IS NOT NULL
+          AND published_at <= CURRENT_TIMESTAMP
+      `);
+    }
+    res.json({ success: true, published: rows.length });
+  } catch (err) {
+    console.error('Error in auto-publish:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /admin/news/scheduled-count - Get count of scheduled articles
+router.get('/scheduled-count', isAuthenticated, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT COUNT(*) as scheduled_count FROM news WHERE status = 'draft' AND published_at IS NOT NULL AND published_at > CURRENT_TIMESTAMP`
+    );
+    res.json({ success: true, scheduled_count: rows[0].scheduled_count });
+  } catch (err) {
+    console.error('Error fetching scheduled count:', err);
+    res.json({ success: false, scheduled_count: 0, error: err.message });
   }
 });
 

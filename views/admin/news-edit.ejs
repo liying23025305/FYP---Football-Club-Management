@@ -35,21 +35,67 @@
         <input type="text" class="form-control" id="category" name="category" value="<%= article.category %>">
       </div>
       <div class="mb-3">
-        <label for="status" class="form-label">Status</label>
-        <select class="form-select" id="status" name="status" required>
-          <option value="draft" <%= article.status === 'draft' ? 'selected' : '' %>>Draft</option>
-          <option value="published" <%= article.status === 'published' ? 'selected' : '' %>>Published</option>
-          <option value="archived" <%= article.status === 'archived' ? 'selected' : '' %>>Archived</option>
-        </select>
+        <label class="form-label">Publish Options</label>
+        <div class="publish-options">
+          <label class="me-3"><input type="radio" name="publish_type" value="now" <%= article.status === 'published' ? 'checked' : '' %>> Publish Now</label>
+          <label class="me-3"><input type="radio" name="publish_type" value="draft" <%= article.status === 'draft' && (!article.published_at || new Date(article.published_at) <= new Date()) ? 'checked' : '' %>> Save as Draft</label>
+          <label><input type="radio" name="publish_type" value="schedule" <%= article.status === 'draft' && article.published_at && new Date(article.published_at) > new Date() ? 'checked' : '' %>> Schedule for Later</label>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="published_at" class="form-label">Publish Date</label>
-        <input type="datetime-local" class="form-control" id="published_at" name="published_at" value="<%= article.published_at ? article.published_at.toISOString().slice(0,16) : '' %>">
+      <div class="mb-3 schedule-datetime" id="scheduleDateTime" style="display: none;">
+        <label for="publishDate">Publish Date & Time:</label>
+        <input type="datetime-local" id="publishDate" name="published_at" min="" value="<%= article.published_at ? article.published_at.toISOString().slice(0,16) : '' %>">
+        <small class="timezone-info">All times are in your local timezone</small>
       </div>
+      <input type="hidden" id="status" name="status" value="<%= article.status %>">
+      <div id="news-form-message" class="mb-3"></div>
       <button type="submit" class="btn btn-primary">Update News</button>
       <a href="/admin/news" class="btn btn-secondary ms-2">Cancel</a>
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Scheduling logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const publishTypeRadios = document.querySelectorAll('input[name="publish_type"]');
+      const scheduleDateTime = document.getElementById('scheduleDateTime');
+      const publishDateInput = document.getElementById('publishDate');
+      const statusInput = document.getElementById('status');
+      const form = document.querySelector('form');
+      // Set min date to now
+      if (publishDateInput) {
+        const now = new Date();
+        publishDateInput.min = now.toISOString().slice(0,16);
+      }
+      function updateForm() {
+        const selected = document.querySelector('input[name="publish_type"]:checked').value;
+        if (selected === 'schedule') {
+          scheduleDateTime.style.display = '';
+          statusInput.value = 'draft';
+        } else {
+          scheduleDateTime.style.display = 'none';
+          publishDateInput.value = '';
+          statusInput.value = (selected === 'now') ? 'published' : 'draft';
+        }
+      }
+      publishTypeRadios.forEach(r => r.addEventListener('change', updateForm));
+      updateForm();
+      form.addEventListener('submit', function(e) {
+        const selected = document.querySelector('input[name="publish_type"]:checked').value;
+        if (selected === 'schedule') {
+          if (!publishDateInput.value) {
+            e.preventDefault();
+            alert('Please select a publish date and time.');
+            return false;
+          }
+          if (new Date(publishDateInput.value) <= new Date()) {
+            e.preventDefault();
+            alert('Publish date/time must be in the future.');
+            return false;
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html> 
