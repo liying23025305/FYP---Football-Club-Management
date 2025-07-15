@@ -1,11 +1,13 @@
 /* GENERAL */
 body {
-  background-color: #f4f6f9;
+  background-color: #f7f4f4;
+  color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* SECTION HEADINGS */
 h2, h3, h4 {
+  color: #ff9800;
   font-weight: 700;
 }
 
@@ -18,8 +20,9 @@ h2, h3, h4 {
 
 .calendar .day {
   padding: 12px;
-  background-color: #ffffff;
-  border: 1px solid #d1d1d1;
+  background-color: #222;
+  border: 1px solid #ff9800;
+  color: #fff;
   text-align: center;
   border-radius: 4px;
   font-size: 0.95rem;
@@ -27,38 +30,41 @@ h2, h3, h4 {
 }
 
 .calendar .day:hover {
-  background-color: #e2ecff;
+  background-color: #ff9800;
+  color: #181818;
 }
 
 .calendar .header {
-  background-color: #4875b9;
-  color: white;
+  background-color: #ff9800;
+  color: #181818;
   font-weight: bold;
 }
 
 .calendar .today {
-  background-color: #0c06c1 !important;
+  background-color: #ff9800 !important;
+  color: #181818 !important;
   font-weight: bold;
-  color: #000;
 }
 
 /* SCHEDULE TABLE */
 .table {
+  background-color: #222;
+  color: #fff;
   font-size: 0.95rem;
 }
 
 .table th {
-  background-color: #7096c0;
-  color: white;
+  background-color: #ff9800;
+  color: #181818;
 }
 
 .table-hover tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: #333;
 }
 
 /* ANNOUNCEMENTS */
 .announcement-box {
-  background-color: #8996d5;
+  background-color: #db8a48;
   color: white;
   padding: 1rem;
   border-radius: 6px;
@@ -72,6 +78,51 @@ h2, h3, h4 {
 .announcement-box li {
   margin-bottom: 10px;
   list-style-type: '📌 ';
+}
+
+/* BUTTONS */
+.btn-primary, .btn-warning, .btn-danger, .btn-success {
+  border: none;
+}
+
+.btn-primary, .btn-warning {
+  background-color: #ff9800;
+  color: #181818;
+}
+
+.btn-primary:hover, .btn-warning:hover {
+  background-color: #ffa726;
+  color: #181818;
+}
+
+.btn-danger {
+  background-color: #d84315;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #ff7043;
+  color: #fff;
+}
+
+/* CARDS AND BACKGROUNDS */
+.card, .bg-white, .bg-light {
+  background-color: #222 !important;
+  color: #fff !important;
+  border: 1px solid #ff9800;
+}
+
+/* FORM ELEMENTS */
+input, select, textarea {
+  background-color: #181818 !important;
+  color: #fff !important;
+  border: 1px solid #ff9800 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #ffa726 !important;
+  background-color: #222 !important;
+  color: #fff !important;
 }
 
 /* RESPONSIVE */
