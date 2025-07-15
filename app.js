@@ -173,6 +173,11 @@ app.get('/membership/bronze', (req, res) => {
   console.log('Bronze membership page requested');
 });
 
+// Debug route to print session info
+app.get('/debug-session', (req, res) => {
+  res.json({ session: req.session, user: req.session ? req.session.user : undefined });
+});
+
 // Add CORS Support for Local Development
 app.use(cors({
   origin: 'http://localhost:3000', // or '*' for all origins during development

@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle bookmark button click
   document.body.addEventListener('click', async function(e) {
     if (e.target.closest('.bookmark-btn')) {
+      e.preventDefault(); // Prevent navigation or form submission
       const btn = e.target.closest('.bookmark-btn');
       const newsId = btn.getAttribute('data-id');
       const isBookmarked = btn.getAttribute('data-bookmarked') === 'true';
@@ -41,15 +42,25 @@ document.addEventListener('DOMContentLoaded', function() {
           const res = await fetch('/news/bookmark', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ news_id: newsId })
+            body: JSON.stringify({ news_id: newsId }),
+            credentials: 'same-origin'
           });
+          if (res.status === 401 || res.redirected) {
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+            return;
+          }
           if (!res.ok) throw new Error();
           if (typeof loadMyBookmarks === 'function') loadMyBookmarks();
         } else {
           // Remove bookmark
           const res = await fetch(`/news/bookmark/${newsId}`, {
             method: 'DELETE',
+            credentials: 'same-origin'
           });
+          if (res.status === 401 || res.redirected) {
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+            return;
+          }
           if (!res.ok) throw new Error();
           if (typeof loadMyBookmarks === 'function') loadMyBookmarks();
           // If on bookmarks page, remove card

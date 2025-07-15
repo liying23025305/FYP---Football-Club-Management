@@ -13,10 +13,9 @@
 <body>
   <!-- Navbar -->
   <%- include('partials/navbar', { user: user }) %>
-
   <main class="container mt-4 position-relative">
     <div class="d-flex align-items-center mb-3" style="gap: 12px;">
-      <form class="row flex-grow-1" method="get" action="/news" style="margin-bottom: 0;">
+      <form id="news-search-form" class="row flex-grow-1" method="get" action="/news" style="margin-bottom: 0;">
         <div class="col-md-3 mb-2">
           <select class="form-select" name="category" id="news-category-filter">
             <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
@@ -33,7 +32,7 @@
         </div>
       </form>
       <% if (user) { %>
-        <a href="/news/bookmarks" id="bookmarked-news-tab" class="btn btn-light d-flex align-items-center justify-content-center" style="border: 2px solid #ffd700; border-radius: 6px; padding: 6px 10px; height: 38px;" title="Bookmarked News">
+        <a href="/news/bookmarks" id="bookmarked-news-tab" class="btn btn-light d-flex align-items-center justify-content-center" style="border: 2px solid #ffd700; border-radius: 6px; padding: 6px 10px; height: 38px; pointer-events: auto; z-index: 9999;" title="Bookmarked News">
           <i class="bi bi-bookmark-fill" style="color: #ffd700; font-size: 1.3em;"></i>
         </a>
       <% } %>

@@ -146,4 +146,18 @@ async function loadMyBookmarks() {
   } finally {
     loading.style.display = 'none';
   }
-} 
+}
+
+// Prevent anchor navigation when clicking bookmark button
+function delegateBookmarkClick(container) {
+  if (!container) return;
+  container.addEventListener('click', function(e) {
+    const btn = e.target.closest('.bookmark-btn');
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+}
+delegateBookmarkClick(newsList);
+delegateBookmarkClick(featuredContainer); 

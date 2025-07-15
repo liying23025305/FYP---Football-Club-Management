@@ -20,8 +20,10 @@ router.post('/loginAccount', async (req, res) => {
       username: user[0].username,
       role: user[0].role
     };
-    if (user[0].role === 'admin') return res.redirect('/admin');
-    return res.redirect('/');
+    req.session.save(() => {
+      if (user[0].role === 'admin') return res.redirect('/admin');
+      return res.redirect('/');
+    });
   } else {
     res.render('login', { error: 'Invalid credentials. Please register.' });
   }
