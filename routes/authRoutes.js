@@ -20,6 +20,7 @@ router.post('/loginAccount', async (req, res) => {
       username: user[0].username,
       role: user[0].role
     };
+    req.session.loggedIn = true; // <-- Ensure loggedIn is set
     req.session.save(() => {
       if (user[0].role === 'admin') return res.redirect('/admin');
       return res.redirect('/');
@@ -54,6 +55,7 @@ router.post('/registerAccount', async (req, res) => {
     await db.query(sql, values);
 
     req.session.user = { user_id: null, username, email, role: 'member' };
+    req.session.loggedIn = true; // <-- Ensure loggedIn is set after registration
     res.redirect('/');
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {

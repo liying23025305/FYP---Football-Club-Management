@@ -1,52 +1,52 @@
-/* Bookmark Button */
+/* Bookmark button styles */
 .bookmark-btn {
-  float: right;
-  font-size: 0.95rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  outline: none;
 }
 
-/* Bookmarks section (legacy, for reference) */
-#my-bookmarks .card {
-  border: 1.5px solid #ffe066;
-}
-#my-bookmarks .bookmark-btn {
-  color: #ffc107;
-  border-color: #ffc107;
-}
-#my-bookmarks .bookmark-btn[data-bookmarked] {
-  background: #fffbe6;
-}
-
-/* Bookmarked News Tab/Button */
-#bookmarked-news-tab {
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-#bookmarked-news-tab:hover {
-  border-color: #ffc107;
-  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.18);
-  background: #fffbe6;
-}
-
-/* Bookmark Icon States */
 .bookmark-icon {
   color: #ccc;
-  font-size: 1.2em;
+  font-size: 1.4em;
   transition: color 0.2s;
 }
-.bookmark-icon.bookmarked, .bi-bookmark-fill {
-  color: #ffd700 !important;
+
+.bookmark-icon.bookmarked,
+.bookmark-icon.bi-bookmark-fill {
+  color: #ffd700; /* Yellow */
 }
 
-/* Toast/Success Message */
+.bookmark-btn:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .bookmark-success-message {
   background: #4CAF50;
   color: white;
-  padding: 10px 18px;
+  padding: 12px 24px;
   border-radius: 4px;
   position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 2000;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
   font-size: 1.1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   display: none;
+}
+.bookmark-success-message.error {
+  background: #d9534f;
+}
+
+/* Bookmarked News tab/button */
+#bookmarked-news-btn {
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+#bookmarked-news-btn .bi {
+  font-size: 1.2em;
+  margin-right: 4px;
 }

@@ -15,6 +15,7 @@ const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const adminNewsRoutes = require('./routes/admin/news');
 const faqRoutes = require('./routes/faqRoutes');
+const bookmarksRoutes = require('./routes/bookmarks');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -49,6 +50,7 @@ app.use(adminRoutes);
 app.use('/news', newsRoutes);
 app.use('/admin/news', adminNewsRoutes);
 app.use(faqRoutes);
+app.use('/api/bookmarks', bookmarksRoutes);
 
 // Home Route
 app.get('/', (req, res) => {

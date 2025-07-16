@@ -32,8 +32,8 @@
         </div>
       </form>
       <% if (user) { %>
-        <a href="/news/bookmarks" id="bookmarked-news-tab" class="btn btn-light d-flex align-items-center justify-content-center" style="border: 2px solid #ffd700; border-radius: 6px; padding: 6px 10px; height: 38px; pointer-events: auto; z-index: 9999;" title="Bookmarked News">
-          <i class="bi bi-bookmark-fill" style="color: #ffd700; font-size: 1.3em;"></i>
+        <a href="/news/bookmarked-news" class="btn btn-warning ms-auto d-flex align-items-center" id="bookmarked-news-btn" style="height:40px;">
+          <i class="bi bi-bookmark-fill me-1"></i> Bookmarked News
         </a>
       <% } %>
     </div>
@@ -55,11 +55,6 @@
             <div class="text-muted" style="font-size:0.95rem;">
               <%= featured.category %> • <%= featured.author_name %> • <%= featured.published_at ? new Date(featured.published_at).toLocaleString() : '' %>
             </div>
-            <% if (user) { %>
-              <button class="btn btn-sm btn-outline-warning mt-2 bookmark-btn" data-id="<%= featured.news_id %>" <%= bookmarks.includes(featured.news_id) ? 'data-bookmarked="true"' : '' %>>
-                <i class="bi <%= bookmarks.includes(featured.news_id) ? 'bi-bookmark-fill' : 'bi-bookmark' %>"></i> Bookmark
-              </button>
-            <% } %>
           </div>
         </div>
       </div>
@@ -71,7 +66,7 @@
     <div class="row" id="news-list">
       <% articles.forEach(function(article) { %>
         <div class="col-md-3 mb-3">
-          <div class="card h-100">
+          <div class="card h-100 position-relative">
             <a href="/news/<%= article.news_id %>" style="text-decoration: none; color: inherit;">
               <div style="background:#eee; height:120px; border-radius:8px 8px 0 0; overflow:hidden;">
                 <img src="<%= article.featured_image %>" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
@@ -84,8 +79,12 @@
               </div>
             </a>
             <% if (user) { %>
-              <button class="btn btn-sm btn-outline-warning bookmark-btn m-2" data-id="<%= article.news_id %>" <%= bookmarks.includes(article.news_id) ? 'data-bookmarked="true"' : '' %>>
-                <i class="bi <%= bookmarks.includes(article.news_id) ? 'bi-bookmark-fill' : 'bi-bookmark' %>"></i> Bookmark
+              <button class="bookmark-btn" data-news-id="<%= article.news_id %>" aria-label="Bookmark" title="Bookmark" onclick="toggleBookmark(this)" style="position:absolute;top:10px;right:10px;background:none;border:none;">
+                <% if (bookmarks && bookmarks.includes(article.news_id)) { %>
+                  <i class="bi bi-bookmark-fill bookmark-icon bookmarked"></i>
+                <% } else { %>
+                  <i class="bi bi-bookmark bookmark-icon"></i>
+                <% } %>
               </button>
             <% } %>
           </div>

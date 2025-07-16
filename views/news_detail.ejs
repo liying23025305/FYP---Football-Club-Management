@@ -23,11 +23,6 @@
             <div class="mb-2 text-muted">
               <%= article.category %> • <%= article.author_name %> • <%= article.published_at ? new Date(article.published_at).toLocaleString() : '' %>
             </div>
-            <% if (user) { %>
-              <button class="btn btn-sm btn-outline-warning bookmark-btn mb-3" data-id="<%= article.news_id %>" <%= isBookmarked ? 'data-bookmarked="true"' : '' %>>
-                <i class="bi <%= isBookmarked ? 'bi-bookmark-fill' : 'bi-bookmark' %>"></i> Bookmark
-              </button>
-            <% } %>
             <div class="news-detail-content">
               <%- article.content %>
             </div>
