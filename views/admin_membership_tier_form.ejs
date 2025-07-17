@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= tier ? 'Edit' : 'Create' %> Membership Tier - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheet/style.css" />
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-crown me-2"></i>
+                            <%= tier ? 'Edit' : 'Create' %> Membership Tier
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Error Messages -->
+                        <% if (errors && errors.length > 0) { %>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    <% errors.forEach(function(error) { %>
+                                        <li><%= error.msg %></li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        <% } %>
+
+                        <form action="<%= tier ? `/admin/membership-tiers/${tier.tier_id}/edit` : '/admin/membership-tiers/create' %>" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tier_name" class="form-label">Tier Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="tier_name" name="tier_name" 
+                                           value="<%= tier ? tier.tier_name : (formData.tier_name || '') %>" 
+                                           required placeholder="e.g., Bronze, Silver, Gold">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="price" class="form-label">Price ($) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" 
+                                           value="<%= tier ? tier.price : (formData.price || '') %>" 
+                                           required placeholder="29.99">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tier_desc" class="form-label">Description</label>
+                                <textarea class="form-control" id="tier_desc" name="tier_desc" rows="3" 
+                                          placeholder="Brief description of this membership tier"><%- tier ? tier.tier_desc : (formData.tier_desc || '') %></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="discount_percentage" class="form-label">Discount (%) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" max="100" class="form-control" 
+                                           id="discount_percentage" name="discount_percentage" 
+                                           value="<%= tier ? tier.discount_percentage : (formData.discount_percentage || '') %>" 
+                                           required placeholder="15.00">
+                                    <div class="form-text">Discount percentage for store purchases</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="cashback_rate" class="form-label">Cashback (%) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" max="100" class="form-control" 
+                                           id="cashback_rate" name="cashback_rate" 
+                                           value="<%= tier ? tier.cashback_rate : (formData.cashback_rate || '') %>" 
+                                           required placeholder="5.00">
+                                    <div class="form-text">Cashback percentage on purchases</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="duration_months" class="form-label">Duration (months) <span class="text-danger">*</span></label>
+                                    <input type="number" min="1" max="120" class="form-control" 
+                                           id="duration_months" name="duration_months" 
+                                           value="<%= tier ? tier.duration_months : (formData.duration_months || '12') %>" 
+                                           required placeholder="12">
+                                    <div class="form-text">Membership validity period</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="display_order" class="form-label">Display Order</label>
+                                    <input type="number" min="0" class="form-control" id="display_order" name="display_order" 
+                                           value="<%= tier ? tier.display_order : (formData.display_order || '0') %>" 
+                                           placeholder="0">
+                                    <div class="form-text">Lower numbers appear first (0 = first)</div>
+                                </div>
+                                <% if (tier) { %>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="active" class="form-label">Status</label>
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" id="active" name="active" 
+                                                   <%= tier.active ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="active">
+                                                Active (users can purchase this tier)
+                                            </label>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <!-- Preview Card -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h6>Preview:</h6>
+                                    <div class="card" style="max-width: 300px;">
+                                        <div class="card-header text-center bg-primary text-white">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-crown me-1"></i>
+                                                <span id="preview-name"><%= tier ? tier.tier_name : 'Tier Name' %></span>
+                                            </h6>
+                                            <h5 class="mt-1 mb-0">
+                                                $<span id="preview-price"><%= tier ? parseFloat(tier.price).toFixed(2) : '0.00' %></span>
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-percentage text-success me-2"></i><span id="preview-discount"><%= tier ? tier.discount_percentage : '0' %></span>% discount</li>
+                                                <li><i class="fas fa-coins text-warning me-2"></i><span id="preview-cashback"><%= tier ? tier.cashback_rate : '0' %></span>% cashback</li>
+                                                <li><i class="fas fa-calendar text-info me-2"></i><span id="preview-duration"><%= tier ? tier.duration_months : '12' %></span> month(s)</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    <%= tier ? 'Update' : 'Create' %> Tier
+                                </button>
+                                <a href="/admin/membership-tiers" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Live preview updates
+        document.getElementById('tier_name').addEventListener('input', function() {
+            document.getElementById('preview-name').textContent = this.value || 'Tier Name';
+        });
+        
+        document.getElementById('price').addEventListener('input', function() {
+            const price = parseFloat(this.value) || 0;
+            document.getElementById('preview-price').textContent = price.toFixed(2);
+        });
+        
+        document.getElementById('discount_percentage').addEventListener('input', function() {
+            document.getElementById('preview-discount').textContent = this.value || '0';
+        });
+        
+        document.getElementById('cashback_rate').addEventListener('input', function() {
+            document.getElementById('preview-cashback').textContent = this.value || '0';
+        });
+        
+        document.getElementById('duration_months').addEventListener('input', function() {
+            document.getElementById('preview-duration').textContent = this.value || '12';
+        });
+    </script>
+</body>
+</html>

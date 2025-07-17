@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Football Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+ 
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
+            --border-radius: 16px;
+            --primary-color: #667eea;
+            --success-color: #11998e;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .checkout-container {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .checkout-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkout-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .demo-banner {
+            background: var(--warning-gradient);
+            border: none;
+            color: #2d3748;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 500;
+        }
+
+        .demo-banner i {
+            margin-right: 0.5rem;
+            color: #d69e2e;
+        }
+
+        .payment-form {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .payment-form:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .form-section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .input-group-icon {
+            position: relative;
+        }
+
+        .input-group-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            z-index: 5;
+        }
+
+        .input-group-icon .form-control {
+            padding-left: 2.5rem;
+        }
+
+        #card-element {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            min-height: 45px;
+        }
+
+        #card-element.StripeElement--focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        #card-errors {
+            color: #e53e3e;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .security-badges {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f0fff4;
+            border-radius: 12px;
+            border: 1px solid #9ae6b4;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #2f855a;
+            font-weight: 500;
+        }
+
+        .security-badge i {
+            margin-right: 0.5rem;
+            color: #48bb78;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            position: sticky;
+            top: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .order-summary:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .order-summary-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .order-summary-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .ticket-item {
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-gradient);
+        }
+
+        .ticket-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .event-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .event-details {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .event-details i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+            width: 16px;
+        }
+
+        .price-breakdown {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .discount-badge {
+            background: var(--success-gradient);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .totals-section {
+            border-top: 2px solid #f1f5f9;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .total-line.discount {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .total-line.final {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-top: 2px solid #e2e8f0;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .member-savings {
+            background: var(--success-gradient);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .member-savings::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .member-savings h6 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .member-savings p {
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        .member-savings i {
+            margin-right: 0.5rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .processing {
+            display: none;
+        }
+
+        .processing.show {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                padding: 1rem 0;
+            }
+
+            .payment-form {
+                padding: 1.5rem;
+            }
+
+            .order-summary {
+                position: static;
+                margin-top: 2rem;
+            }
+
+            .checkout-title {
+                font-size: 2rem;
+            }
+
+            .security-badges {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h5>Processing Your Payment</h5>
+            <p class="text-muted">Please wait while we securely process your transaction...</p>
+        </div>
+    </div>
+
+    <div class="container checkout-container">
+        <div class="checkout-header fade-in">
+            <h1 class="checkout-title">
+                <i class="fas fa-shopping-cart me-3"></i>
+                Secure Checkout
+            </h1>
+            <p class="checkout-subtitle">Complete your ticket purchase safely and securely</p>
+        </div>
+
+        <div class="row">
+            <!-- Payment Form -->
+            <div class="col-lg-8">
+                <div class="payment-form fade-in">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Information
+                    </h4>
+                    
+                    <form id="payment-form">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="cardholder-name" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Cardholder Name *
+                                </label>
+                                <div class="input-group-icon">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" class="form-control" id="cardholder-name" placeholder="Enter full name as on card" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Email Address *
+                                </label>
+                                <div class="input-group-icon">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="email" class="form-control" id="email" value="<%= user.email %>" placeholder="your@email.com" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="card-element" class="form-label">
+                                <i class="fas fa-credit-card me-1"></i>
+                                Card Details *
+                            </label>
+                            <div id="card-element">
+                                <!-- Stripe Elements will create form elements here -->
+                            </div>
+                            <div id="card-errors" role="alert"></div>
+                        </div>
+
+                        <button type="submit" id="submit-button" class="btn btn-primary btn-lg w-100">
+                            <span id="button-text">
+                                <i class="fas fa-lock me-2"></i>
+                                Complete Secure Payment - $<%= (parseFloat(totalAmount) + 2.50).toFixed(2) %>
+                            </span>
+                            <span id="spinner" class="processing">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Processing Payment...
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="security-badges">
+                        <div class="security-badge">
+                            <i class="fas fa-lock"></i>
+                            256-bit SSL encryption
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            PCI DSS Level 1 compliant
+                        </div>
+                        <div class="security-badge">
+                            <i class="fab fa-cc-stripe"></i>
+                            Powered by Stripe
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="order-summary fade-in">
+                    <h4 class="order-summary-title">
+                        <i class="fas fa-receipt"></i>
+                        Order Summary
+                    </h4>
+                    
+                    <% reservedTickets.forEach(function(ticket) { %>
+                    <div class="ticket-item">
+                        <h6 class="event-name"><%= ticket.event_name %></h6>
+                        <div class="event-details">
+                            <i class="fas fa-calendar-alt"></i>
+                            <%= new Date(ticket.event_date).toLocaleDateString('en-US', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            }) %>
+                        </div>
+                        <% if (ticket.event_time) { %>
+                        <div class="event-details">
+                            <i class="fas fa-clock"></i>
+                            <%= new Date('1970-01-01T' + ticket.event_time + 'Z').toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: 'UTC'
+                            }) %>
+                        </div>
+                        <% } %>
+                        <div class="price-breakdown">
+                            <span>
+                                <i class="fas fa-ticket-alt me-1"></i>
+                                <%= ticket.quantity %> × $<%= parseFloat(ticket.unit_price).toFixed(2) %>
+                            </span>
+                            <strong>$<%= parseFloat(ticket.total_price).toFixed(2) %></strong>
+                        </div>
+                        <% if (ticket.discount_applied > 0) { %>
+                        <div class="discount-badge">
+                            <i class="fas fa-tag me-1"></i>
+                            Member Discount: -$<%= parseFloat(ticket.discount_applied).toFixed(2) %>
+                        </div>
+                        <% } %>
+                    </div>
+                    <% }) %>
+
+                    <!-- Order Totals -->
+                    <div class="totals-section">
+                        <div class="total-line">
+                            <span>Subtotal:</span>
+                            <span>$<%= (reservedTickets.reduce((sum, ticket) => sum + parseFloat(ticket.total_price), 0)).toFixed(2) %></span>
+                        </div>
+                        
+                        <% if (membership && membership.discount_percentage > 0) { %>
+                        <div class="total-line discount">
+                            <span>
+                                <i class="fas fa-star me-1"></i>
+                                Member Discount:
+                            </span>
+                            <span>-$<%= (reservedTickets.reduce((sum, ticket) => sum + parseFloat(ticket.discount_applied), 0)).toFixed(2) %></span>
+                        </div>
+                        <% } %>
+                        
+                        <div class="total-line">
+                            <span>Processing Fee:</span>
+                            <span>$2.50</span>
+                        </div>
+                        
+                        <div class="total-line final">
+                            <strong>Total:</strong>
+                            <strong>$<%= (parseFloat(totalAmount) + 2.50).toFixed(2) %></strong>
+                        </div>
+                    </div>
+
+                    <% if (membership) { %>
+                    <div class="member-savings">
+                        <h6>
+                            <i class="fas fa-crown"></i>
+                            <%= membership.tier_name %> Member
+                        </h6>
+                        <p>
+                            <i class="fas fa-piggy-bank"></i>
+                            You saved $<%= (reservedTickets.reduce((sum, ticket) => sum + parseFloat(ticket.discount_applied), 0)).toFixed(2) %> with your membership!
+                        </p>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe with custom theme
+        const stripe = Stripe('<%= stripePublishableKey %>');
+        const elements = stripe.elements({
+            appearance: {
+                theme: 'stripe',
+                variables: {
+                    colorPrimary: '#667eea',
+                    colorBackground: '#f8fafc',
+                    colorText: '#2d3748',
+                    colorDanger: '#e53e3e',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    spacingUnit: '4px',
+                    borderRadius: '12px'
+                }
+            }
+        });
+
+        // Create card element
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#2d3748',
+                    '::placeholder': {
+                        color: '#a0aec0',
+                    },
+                },
+            },
+        });
+
+        cardElement.mount('#card-element');
+
+        // Handle real-time validation errors from the card Element
+        cardElement.on('change', ({error}) => {
+            const displayError = document.getElementById('card-errors');
+            if (error) {
+                displayError.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${error.message}`;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Handle form submission
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const spinner = document.getElementById('spinner');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Show loading state
+            submitButton.disabled = true;
+            buttonText.style.display = 'none';
+            spinner.classList.add('show');
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                // Create payment intent
+                const response = await fetch('/create-ticket-payment-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const { clientSecret, error } = await response.json();
+
+                if (error) {
+                    throw new Error(error);
+                }
+
+                // Confirm payment
+                const {error: confirmError, paymentIntent} = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: document.getElementById('cardholder-name').value,
+                            email: document.getElementById('email').value,
+                        },
+                    }
+                });
+
+                if (confirmError) {
+                    throw new Error(confirmError.message);
+                }
+
+                if (paymentIntent.status === 'succeeded') {
+                    // Payment successful, confirm with backend
+                    const confirmResponse = await fetch('/confirm-ticket-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            payment_intent_id: paymentIntent.id
+                        })
+                    });
+
+                    const confirmResult = await confirmResponse.json();
+
+                    if (confirmResult.success) {
+                        // Show success message briefly before redirect
+                        loadingOverlay.innerHTML = `
+                            <div class="loading-content">
+                                <div style="color: #48bb78; font-size: 3rem; margin-bottom: 1rem;">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h5 style="color: #48bb78;">Payment Successful!</h5>
+                                <p class="text-muted">Redirecting you to your tickets...</p>
+                            </div>
+                        `;
+                        
+                        setTimeout(() => {
+                            window.location.href = confirmResult.redirectUrl + '?success=' + encodeURIComponent(confirmResult.message);
+                        }, 2000);
+                    } else {
+                        throw new Error(confirmResult.message || 'Payment confirmation failed');
+                    }
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                loadingOverlay.style.display = 'none';
+                document.getElementById('card-errors').innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${error.message}`;
+                
+                // Reset button state
+                submitButton.disabled = false;
+                buttonText.style.display = 'inline-block';
+                spinner.classList.remove('show');
+            }
+        });
+
+        // Add entrance animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
