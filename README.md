@@ -10,6 +10,7 @@
 ---
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## 🛠 Tech Stack
 
 - **Frontend**: HTML, CSS (Bootstrap 5), EJS (Embedded JavaScript Templates)
@@ -31,6 +32,11 @@ Start Apache and MySQL
 Open phpMyAdmin and import the database (e.g. football_club.sql if provided)
 
 ### 3. Install Node.js Dependencies
+=======
+## Install dependencies
+```bash
+cd "C:\Users\23021014\Downloads\fyp"
+>>>>>>> ed52af2 (Update README.md)
 =======
 ## Install dependencies
 ```bash
@@ -98,6 +104,7 @@ Or with plain Node:
 ```bash
 node app.js
 <<<<<<< HEAD
+<<<<<<< HEAD
 Then open your browser and go to:
 http://localhost:3000
 
@@ -106,6 +113,8 @@ http://localhost:3000
 ### Install also:
 npm install mysql2 bcrypt
 =======
+=======
+>>>>>>> ed52af2 (Update README.md)
 ```
 
 Open your browser and go to:  
@@ -126,4 +135,7 @@ Open your browser and go to:
 | Payment Gateway   | stripe@18.3.0, @paypal/checkout-server-sdk@1.0.3 |
 | Environment Vars  | dotenv@16.5.0                              |
 | Dev Tool          | nodemon@3.1.10   
+<<<<<<< HEAD
+>>>>>>> ed52af2 (Update README.md)
+=======
 >>>>>>> ed52af2 (Update README.md)
