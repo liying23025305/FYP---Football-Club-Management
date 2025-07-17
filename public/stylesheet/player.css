@@ -1,0 +1,39 @@
+/* Players EJS */
+.player-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.player-card:hover {
+  transform: scale(1.05);
+}
+
+.player-info {
+  position: absolute;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  width: 100%;
+  padding: 8px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  font-weight: bold;
+}
+
+.player-card:hover .player-info {
+  transform: translateY(0);
+}
+
+.player-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+h2 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}

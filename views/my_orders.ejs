@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Football Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheet/style.css" />
+    <style>
+        .order-card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .order-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: transform 0.2s ease;
+        }
+        .product-image:hover {
+            transform: scale(1.1);
+        }
+        .reorder-btn {
+            transition: all 0.3s ease;
+        }
+        .reorder-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-shopping-cart me-2"></i>My Orders</h1>
+            <a href="/profile" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Profile
+            </a>
+        </div>
+
+        <!-- Debug Information (remove in production) -->
+        <% if (typeof orders !== 'undefined') { %>
+            <div class="alert alert-info mb-4">
+                <small>
+                    <i class="fas fa-info-circle me-1"></i>
+                    Debug: Found <%= orders ? orders.length : 0 %> orders for your account.
+                    <% if (orders && orders.length > 0) { %>
+                        Showing orders from <%= new Date(Math.min(...orders.map(o => new Date(o.order_date)))).toLocaleDateString() %> 
+                        to <%= new Date(Math.max(...orders.map(o => new Date(o.order_date)))).toLocaleDateString() %>
+                    <% } %>
+                </small>
+            </div>
+        <% } %>
+
+        <% if (orders && orders.length > 0) { %>
+            <div class="row">
+                <% orders.forEach(order => { %>
+                    <div class="col-12 mb-4">
+                        <div class="card order-card">
+                            <div class="card-header order-header">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-1">Order #<%= order.order_id %></h5>
+                                        <small>
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            Placed on <%= new Date(order.order_date).toLocaleDateString('en-US', { 
+                                                weekday: 'long', 
+                                                year: 'numeric', 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                            }) %>
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <%= new Date(order.order_date).toLocaleTimeString('en-US', { 
+                                                hour: '2-digit', 
+                                                minute: '2-digit',
+                                                hour12: true 
+                                            }) %>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <span class="badge bg-light text-dark fs-6">
+                                            <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                                        </span>
+                                        <div class="mt-1">
+                                            <strong>$<%= parseFloat(order.total_amount || order.final_amount || 0).toFixed(2) %></strong>
+                                        </div>
+                                        <% if (order.status === 'pending') { %>
+                                            <form action="/orders/<%= order.order_id %>/remove" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-danger mt-2" onclick="return confirm('Remove this pending order?')">
+                                                    <i class="fas fa-trash me-1"></i>Remove
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <% if (order.items && order.items.length > 0) { %>
+                                        <% order.items.forEach(item => { %>
+                                            <div class="col-md-6 col-lg-4 mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <img src="<%= item.gear_image && item.gear_image.trim() ? ('/images/' + item.gear_image.replace(/^.*[\\\/]/, '')) : '/images/logo.png' %>" 
+                                                         alt="<%= item.gear_name || 'Club Logo' %>" 
+                                                         class="product-image me-3"
+                                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #dee2e6;"
+                                                         onerror="this.onerror=null;this.src='/images/logo.png';">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1"><%= item.gear_name %></h6>
+                                                        <p class="mb-1 text-muted">
+                                                            Qty: <%= item.quantity %> × $<%= parseFloat(item.price || item.unit_price || 0).toFixed(2) %>
+                                                        </p>
+                                                        <button class="btn btn-sm btn-outline-primary reorder-btn" 
+                                                                onclick="reorderItem(<%= item.gear_id %>, <%= item.quantity %>)">
+                                                            <i class="fas fa-redo me-1"></i>Order Again
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div class="col-12">
+                                            <p class="text-muted">No items found for this order.</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <div class="border-top pt-2">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        Order Date: <%= new Date(order.order_date).toLocaleDateString('en-US', { 
+                                                            month: 'short', 
+                                                            day: 'numeric', 
+                                                            year: 'numeric' 
+                                                        }) %>
+                                                        at <%= new Date(order.order_date).toLocaleTimeString('en-US', { 
+                                                            hour: '2-digit', 
+                                                            minute: '2-digit',
+                                                            hour12: true 
+                                                        }) %>
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-6 text-md-end">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-box me-1"></i>
+                                                        <%= order.total_items %> item(s) • 
+                                                        <strong>Total: $<%= parseFloat(order.total_amount || order.final_amount || 0).toFixed(2) %></strong>
+                                                    </small>
+                                                    <% if (order.refund_status && order.refund_status !== 'none') { %>
+                                                        <div class="mt-2">
+                                                            <% if (order.refund_status === 'requested') { %>
+                                                                <span class="badge bg-warning">Refund Requested</span>
+                                                            <% } else if (order.refund_status === 'approved') { %>
+                                                                <span class="badge bg-success">Refund Approved</span>
+                                                            <% } else if (order.refund_status === 'rejected') { %>
+                                                                <span class="badge bg-danger">Refund Rejected</span>
+                                                            <% } else if (order.refund_status === 'processed') { %>
+                                                                <span class="badge bg-primary">Refund Processed</span>
+                                                            <% } %>
+                                                        </div>
+                                                    <% } %>
+                                                    <div class="mt-2">
+                                                        <a href="/orders/<%= order.order_id %>/refund-request" class="btn btn-sm btn-warning">
+                                                            <i class="fas fa-undo me-1"></i>Request Refund
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 4rem;"></i>
+                <h3 class="text-muted mb-3">No Orders Yet</h3>
+                <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see your order history here!</p>
+                <a href="/store" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function reorderItem(gearId, quantity) {
+            try {
+                const response = await fetch(`/profile/reorder/${gearId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ quantity: quantity })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                    alert.style.top = '20px';
+                    alert.style.right = '20px';
+                    alert.style.zIndex = '9999';
+                    alert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>${result.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alert);
+                    
+                    // Auto-dismiss after 3 seconds
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.remove();
+                        }
+                    }, 3000);
+                } else {
+                    // Show error message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+                    alert.style.top = '20px';
+                    alert.style.right = '20px';
+                    alert.style.zIndex = '9999';
+                    alert.innerHTML = `
+                        <i class="fas fa-exclamation-circle me-2"></i>${result.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alert);
+                    
+                    // Auto-dismiss after 3 seconds
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.remove();
+                        }
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error reordering item:', error);
+                alert('An error occurred while adding the item to your cart. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
