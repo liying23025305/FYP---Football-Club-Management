@@ -1,7 +1,7 @@
 /* GENERAL */
 body {
-  background-color: #f7f4f4;
-  color: #fff;
+  background-color: #fff;
+  color: #222;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -20,55 +20,57 @@ h2, h3, h4 {
 
 .calendar .day {
   padding: 12px;
-  background-color: #222;
+  background-color: #fff;
   border: 1px solid #ff9800;
-  color: #fff;
+  color: #ff9800;
   text-align: center;
   border-radius: 4px;
   font-size: 0.95rem;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
 }
 
 .calendar .day:hover {
   background-color: #ff9800;
-  color: #181818;
+  color: #fff;
 }
 
 .calendar .header {
   background-color: #ff9800;
-  color: #181818;
+  color: #fff;
   font-weight: bold;
 }
 
 .calendar .today {
-  background-color: #ff9800 !important;
-  color: #181818 !important;
+  background-color: #fff3e0 !important;
+  color: #ff9800 !important;
   font-weight: bold;
+  border: 2px solid #ff9800;
 }
 
 /* SCHEDULE TABLE */
 .table {
-  background-color: #222;
-  color: #fff;
+  background-color: #fff;
+  color: #222;
   font-size: 0.95rem;
 }
 
 .table th {
   background-color: #ff9800;
-  color: #181818;
+  color: #fff;
 }
 
 .table-hover tbody tr:hover {
-  background-color: #333;
+  background-color: #fff3e0;
 }
 
 /* ANNOUNCEMENTS */
 .announcement-box {
-  background-color: #db8a48;
-  color: white;
+  background-color: #ff9800;
+  color: #fff;
   padding: 1rem;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
 }
 
 .announcement-box ul {
@@ -85,14 +87,14 @@ h2, h3, h4 {
   border: none;
 }
 
-.btn-primary, .btn-warning {
+.btn-primary, .btn-warning, .btn-success {
   background-color: #ff9800;
-  color: #181818;
+  color: #fff;
 }
 
-.btn-primary:hover, .btn-warning:hover {
+.btn-primary:hover, .btn-warning:hover, .btn-success:hover {
   background-color: #ffa726;
-  color: #181818;
+  color: #fff;
 }
 
 .btn-danger {
@@ -107,22 +109,22 @@ h2, h3, h4 {
 
 /* CARDS AND BACKGROUNDS */
 .card, .bg-white, .bg-light {
-  background-color: #222 !important;
-  color: #fff !important;
+  background-color: #fff !important;
+  color: #222 !important;
   border: 1px solid #ff9800;
 }
 
 /* FORM ELEMENTS */
 input, select, textarea {
-  background-color: #181818 !important;
-  color: #fff !important;
+  background-color: #fff !important;
+  color: #222 !important;
   border: 1px solid #ff9800 !important;
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: #ffa726 !important;
-  background-color: #222 !important;
-  color: #fff !important;
+  background-color: #fff3e0 !important;
+  color: #222 !important;
 }
 
 /* RESPONSIVE */
@@ -134,4 +136,18 @@ input:focus, select:focus, textarea:focus {
   .announcement-box {
     margin-top: 2rem;
   }
+}
+
+/* Adjust the logo size */
+.navbar .logo {
+    height: 50px; /* Set a fixed height */
+    width: auto; /* Maintain aspect ratio */
+    max-width: 150px; /* Optional: Limit the maximum width */
+    object-fit: contain; /* Ensure the image fits within the specified dimensions */
+    margin-right: 10px; /* Add spacing if needed */
+}
+
+/* Ensure the navbar background color is consistent */
+.navbar {
+    background-color: #212529 !important; /* Dark background */
 }

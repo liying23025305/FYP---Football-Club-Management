@@ -231,6 +231,17 @@ app.post('/schedule/delete/:id', (req, res) => {
   );
 });
 
+app.get('/manage-schedule', (req, res) => {
+  connection.query('SELECT * FROM schedules', (err, schedules) => {
+    if (err) return res.status(500).send('Database error');
+    let editSchedule = null;
+    if (req.query.edit) {
+      editSchedule = schedules.find(s => s.schedule_id == req.query.edit);
+    }
+    res.render('manage-schedule', { schedules, editSchedule });
+  });
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

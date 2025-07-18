@@ -120,11 +120,10 @@
                   <th>Time</th>
                   <th>Type</th>
                   <th>Team</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <% 
+                <%
                   function formatDate(dt) {
                     if (!dt) return '';
                     if (dt instanceof Date) return dt.toISOString().slice(0,10);
@@ -150,12 +149,6 @@
                     <td><%= formatTime(s.start_time) %> - <%= formatTime(s.end_time) %></td>
                     <td><%= s.schedule_type %></td>
                     <td><%= s.team %></td>
-                    <td>
-                      <a href="/schedule?edit=<%= s.schedule_id %>&month=<%= month %>&year=<%= year %><%= selectedDate ? '&date=' + selectedDate : '' %>" class="btn btn-warning btn-sm">Edit</a>
-                      <form action="/schedule/delete/<%= s.schedule_id %>" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this schedule?');">Delete</button>
-                      </form>
-                    </td>
                   </tr>
                 <% }); %>
               </tbody>
@@ -163,52 +156,49 @@
           </div>
         </div>
 
-        <!-- Add/Edit Schedule Form -->
+        <!-- Add New Schedule Form -->
         <div class="card mb-4">
           <div class="card-body">
-            <h3><%= editSchedule ? "Edit" : "Add New" %> Schedule</h3>
-            <form action="<%= editSchedule ? '/schedule/edit/' + editSchedule.schedule_id : '/schedule/add' %>" method="POST">
+            <h3>Add New Schedule</h3>
+            <form action="/schedule/add" method="POST">
               <div class="mb-3">
                 <label>Date</label>
-                <input type="date" name="date" class="form-control" value="<%= editSchedule ? formatDate(editSchedule.start_time) : '' %>" required>
+                <input type="date" name="date" class="form-control" required>
               </div>
               <div class="mb-3">
                 <label>Title</label>
-                <input type="text" name="title" class="form-control" value="<%= editSchedule ? editSchedule.title : '' %>" required>
+                <input type="text" name="title" class="form-control" required>
               </div>
               <div class="mb-3">
                 <label>Description</label>
-                <input type="text" name="description" class="form-control" value="<%= editSchedule ? editSchedule.description : '' %>">
+                <input type="text" name="description" class="form-control">
               </div>
               <div class="mb-3">
                 <label>Venue</label>
-                <input type="text" name="location" class="form-control" value="<%= editSchedule ? editSchedule.location : '' %>" required>
+                <input type="text" name="location" class="form-control" required>
               </div>
               <div class="mb-3">
                 <label>Schedule Type</label>
                 <select name="schedule_type" class="form-control" required>
                   <% const types = ['training', 'match', 'meeting', 'event']; %>
                   <% types.forEach(function(type) { %>
-                    <option value="<%= type %>" <%= editSchedule && editSchedule.schedule_type === type ? 'selected' : '' %>><%= type.charAt(0).toUpperCase() + type.slice(1) %></option>
+                    <option value="<%= type %>"><%= type.charAt(0).toUpperCase() + type.slice(1) %></option>
                   <% }); %>
                 </select>
               </div>
               <div class="mb-3">
                 <label>Team</label>
-                <input type="text" name="team" class="form-control" value="<%= editSchedule ? editSchedule.team : '' %>">
+                <input type="text" name="team" class="form-control">
               </div>
               <div class="mb-3">
                 <label>Start Time</label>
-                <input type="time" name="start_time" class="form-control" value="<%= editSchedule ? formatTime(editSchedule.start_time) : '' %>" required>
+                <input type="time" name="start_time" class="form-control" required>
               </div>
               <div class="mb-3">
                 <label>End Time</label>
-                <input type="time" name="end_time" class="form-control" value="<%= editSchedule ? formatTime(editSchedule.end_time) : '' %>" required>
+                <input type="time" name="end_time" class="form-control" required>
               </div>
-              <button type="submit" class="btn btn-success"><%= editSchedule ? "Update" : "Add" %> Schedule</button>
-              <% if (editSchedule) { %>
-                <a href="/schedule" class="btn btn-secondary">Cancel</a>
-              <% } %>
+              <button type="submit" class="btn btn-success">Add Schedule</button>
             </form>
           </div>
         </div>

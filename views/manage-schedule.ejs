@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Schedules</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/stylesheet/schedule.css" />
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <main class="container mt-5">
+    <h1 class="mb-4">Manage Schedules</h1>
+    <div class="table-responsive">
+      <!-- Table of all schedules -->
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Venue</th>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Team</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%
+            function formatDate(dt) {
+              if (!dt) return '';
+              if (dt instanceof Date) return dt.toISOString().slice(0,10);
+              if (typeof dt === 'string' && dt.length >= 10) return dt.slice(0,10);
+              return dt;
+            }
+            function formatTime(dt) {
+              if (!dt) return '';
+              if (dt instanceof Date) return dt.toTimeString().slice(0,5);
+              if (typeof dt === 'string' && dt.length >= 16) return dt.slice(11,16);
+              return dt;
+            }
+          %>
+          <% schedules.forEach(function(s) { %>
+            <tr>
+              <td><%= formatDate(s.start_time) %></td>
+              <td><%= s.title %></td>
+              <td><%= s.location %></td>
+              <td><%= formatTime(s.start_time) %> - <%= formatTime(s.end_time) %></td>
+              <td><%= s.schedule_type %></td>
+              <td><%= s.team %></td>
+              <td>
+                <a href="/manage-schedule?edit=<%= s.schedule_id %>" class="btn btn-warning btn-sm">Edit</a>
+                <form action="/schedule/delete/<%= s.schedule_id %>" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this schedule?');">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Edit Schedule Form (only show if editing) -->
+    <% if (editSchedule) { %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h3>Edit Schedule</h3>
+        <form action="/schedule/edit/<%= editSchedule.schedule_id %>" method="POST">
+          <div class="mb-3">
+            <label>Date</label>
+            <input type="date" name="date" class="form-control" value="<%= formatDate(editSchedule.start_time) %>" required>
+          </div>
+          <div class="mb-3">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" value="<%= editSchedule.title %>" required>
+          </div>
+          <div class="mb-3">
+            <label>Description</label>
+            <input type="text" name="description" class="form-control" value="<%= editSchedule.description %>">
+          </div>
+          <div class="mb-3">
+            <label>Venue</label>
+            <input type="text" name="location" class="form-control" value="<%= editSchedule.location %>" required>
+          </div>
+          <div class="mb-3">
+            <label>Schedule Type</label>
+            <select name="schedule_type" class="form-control" required>
+              <% const types = ['training', 'match', 'meeting', 'event']; %>
+              <% types.forEach(function(type) { %>
+                <option value="<%= type %>" <%= editSchedule.schedule_type === type ? 'selected' : '' %>><%= type.charAt(0).toUpperCase() + type.slice(1) %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Team</label>
+            <input type="text" name="team" class="form-control" value="<%= editSchedule.team %>">
+          </div>
+          <div class="mb-3">
+            <label>Start Time</label>
+            <input type="time" name="start_time" class="form-control" value="<%= formatTime(editSchedule.start_time) %>" required>
+          </div>
+          <div class="mb-3">
+            <label>End Time</label>
+            <input type="time" name="end_time" class="form-control" value="<%= formatTime(editSchedule.end_time) %>" required>
+          </div>
+          <button type="submit" class="btn btn-success">Update Schedule</button>
+          <a href="/manage-schedule" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+    <% } %>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>
