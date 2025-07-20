@@ -143,82 +143,52 @@ router.get('/api/admin/faqs', isAdmin, async (req, res) => {
 });
 
 // POST /api/admin/faqs - Create new FAQ (admin)
-router.post('/api/admin/faqs', isAdmin, (req, res) => {
+router.post('/api/admin/faqs', isAdmin, async (req, res) => {
   console.log('POST /api/admin/faqs called');
-  
   const { question, answer, status, display_order, users_user_id, category, is_published } = req.body;
-  
   if (!validateFaqInput(question, answer, status, category, is_published) || !users_user_id) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Invalid input' 
-    });
+    return res.status(400).json({ success: false, error: 'Invalid input' });
   }
-  
   let sql, params;
   if (is_published === 'yes') {
-    sql = `INSERT INTO faq (question, answer, status, display_order, users_user_id, category, is_published, published_at) 
-           VALUES (?, ?, ?, ?, ?, ?, 'yes', NOW())`;
+    sql = `INSERT INTO faq (question, answer, status, display_order, users_user_id, category, is_published, published_at) VALUES (?, ?, ?, ?, ?, ?, 'yes', NOW())`;
     params = [question, answer, status, display_order || 0, users_user_id, category];
   } else {
-    sql = `INSERT INTO faq (question, answer, status, display_order, users_user_id, category, is_published) 
-           VALUES (?, ?, ?, ?, ?, ?, 'no')`;
+    sql = `INSERT INTO faq (question, answer, status, display_order, users_user_id, category, is_published) VALUES (?, ?, ?, ?, ?, ?, 'no')`;
     params = [question, answer, status, display_order || 0, users_user_id, category];
   }
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('Admin FAQ creation error:', err);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Database error', 
-        details: err.message 
-      });
-    }
-    
+  try {
+    const [result] = await db.query(sql, params);
     res.json({ success: true, faq_id: result.insertId });
-  });
+  } catch (err) {
+    console.error('Admin FAQ creation error:', err);
+    res.status(500).json({ success: false, error: 'Database error', details: err.message });
+  }
 });
 
 // PUT /api/admin/faqs/:id - Update FAQ (admin)
-router.put('/api/admin/faqs/:id', isAdmin, (req, res) => {
+router.put('/api/admin/faqs/:id', isAdmin, async (req, res) => {
   console.log('PUT /api/admin/faqs/:id called');
-  
   const { question, answer, status, display_order, category, is_published } = req.body;
   const faqId = req.params.id;
-  
   if (!validateFaqInput(question, answer, status, category, is_published)) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Invalid input' 
-    });
+    return res.status(400).json({ success: false, error: 'Invalid input' });
   }
-  
   let sql, params;
   if (is_published === 'yes') {
-    sql = `UPDATE faq 
-           SET question=?, answer=?, status=?, display_order=?, category=?, is_published='yes', published_at=IFNULL(published_at, NOW()) 
-           WHERE faq_id=?`;
+    sql = `UPDATE faq SET question=?, answer=?, status=?, display_order=?, category=?, is_published='yes', published_at=IFNULL(published_at, NOW()) WHERE faq_id=?`;
     params = [question, answer, status, display_order || 0, category, faqId];
   } else {
-    sql = `UPDATE faq 
-           SET question=?, answer=?, status=?, display_order=?, category=?, is_published='no' 
-           WHERE faq_id=?`;
+    sql = `UPDATE faq SET question=?, answer=?, status=?, display_order=?, category=?, is_published='no' WHERE faq_id=?`;
     params = [question, answer, status, display_order || 0, category, faqId];
   }
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('Admin FAQ update error:', err);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Database error', 
-        details: err.message 
-      });
-    }
-    
+  try {
+    const [result] = await db.query(sql, params);
     res.json({ success: true });
-  });
+  } catch (err) {
+    console.error('Admin FAQ update error:', err);
+    res.status(500).json({ success: false, error: 'Database error', details: err.message });
+  }
 });
 
 // DELETE /api/admin/faqs/:id - Hard delete FAQ (admin)

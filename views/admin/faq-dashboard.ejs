@@ -11,6 +11,12 @@
 <body>
   <%- include('../partials/navbar') %>
   <div class="container my-5">
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= success === 'created' ? 'FAQ added successfully!' : (success === 'updated' ? 'FAQ updated successfully!' : 'Success!') %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>FAQ Management</h2>
       <div>

@@ -31,7 +31,7 @@ router.get('/admin/faq', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.redirect('/');
   }
-  res.render('admin/faq-dashboard', { user: req.session.user });
+  res.render('admin/faq-dashboard', { user: req.session.user, success: req.query.success });
 });
 
 module.exports = router;

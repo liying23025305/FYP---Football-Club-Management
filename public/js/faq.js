@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // =========================
   // CATEGORY SUPPORT
   // =========================
-  // You can fetch categories from backend or hardcode them here
+  // Fetch categories from backend or hardcode
   const FAQ_CATEGORIES = [
     'General',
     'Membership',
@@ -276,9 +276,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <td>
           <span class="badge bg-${faq.is_published === 'yes' ? 'success' : 'secondary'}">${faq.is_published === 'yes' ? 'Published' : 'Unpublished'}</span>
         </td>
-        <td>
-          <button class="btn btn-sm btn-primary edit-faq-btn">Edit</button>
-          <button class="btn btn-sm btn-danger delete-faq-btn">Delete</button>
+        <td class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary edit-faq-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger delete-faq-btn" title="Delete"><i class="bi bi-trash"></i></button>
         </td>
       </tr>
     `).join('');
@@ -366,27 +366,45 @@ document.addEventListener('DOMContentLoaded', function () {
       let successMsg = '';
       try {
         if (editingFaqId) {
-          await updateFaq(editingFaqId, payload);
-          successMsg = 'Edit is successful!';
+          const result = await updateFaq(editingFaqId, payload);
+          console.log('Edit result:', result);
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(faqModal);
+          if (modalInstance) modalInstance.hide();
+          const addFaqBtn = document.getElementById('add-faq-btn');
+          if (addFaqBtn) addFaqBtn.focus();
+          setTimeout(() => {
+            window.location.assign('/admin/faq?success=updated');
+          }, 300);
+          return;
         } else {
-          await createFaq(payload);
-          successMsg = 'Your question has been submitted successfully!';
+          const result = await createFaq(payload);
+          console.log('Add result:', result);
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(faqModal);
+          if (modalInstance) modalInstance.hide();
+          const addFaqBtn = document.getElementById('add-faq-btn');
+          if (addFaqBtn) addFaqBtn.focus();
+          setTimeout(() => {
+            window.location.assign('/admin/faq?success=created');
+          }, 300);
+          return;
         }
-        // Store the message globally and show after modal is hidden
+        // Store message and type globally, close modal
         pendingAdminSuccessMsg = successMsg;
+        pendingAdminSuccessType = 'success';
         const modalInstance = bootstrap.Modal.getInstance(faqModal);
-        modalInstance.hide();
+        if (modalInstance) modalInstance.hide();
       } catch (err) {
         showAdminMessage('Failed to save FAQ.', 'danger');
+        console.error('FAQ save error:', err);
       }
     };
   }
 
-  // Always show pending success message after modal is hidden
+  // Always show pending success message and refresh table after modal is hidden
   if (faqModal) {
     faqModal.addEventListener('hidden.bs.modal', function () {
       if (pendingAdminSuccessMsg) {
-        showAdminMessage(pendingAdminSuccessMsg, 'success');
+        showAdminMessage(pendingAdminSuccessMsg, pendingAdminSuccessType);
         loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);
         pendingAdminSuccessMsg = null;
       }
