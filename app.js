@@ -5,6 +5,7 @@ const app = express();
 const methodOverride = require('method-override'); // edit news
 const db = require('./models/db');
 const cors = require('cors');
+const autoPublishNews = require('./autoPublishNews');
 
 // Route modules
 const authRoutes = require('./routes/authRoutes');

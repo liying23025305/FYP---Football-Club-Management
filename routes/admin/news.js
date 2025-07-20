@@ -6,12 +6,22 @@ const multer = require('multer');
 const path = require('path');
 const upload = multer({ dest: 'public/images/news/' });
 
-// GET /admin/news - News dashboard
+// GET /admin/news - News dashboard & Bookmark Count
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const [newsRows] = await db.query(
-      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ORDER BY n.created_at DESC`
+      `SELECT n.*, u.username as author_name, 
+        COALESCE(bc.bookmark_count, 0) as bookmark_count
+      FROM news n
+      JOIN users u ON n.users_user_id = u.user_id
+      LEFT JOIN (
+        SELECT news_id, COUNT(*) as bookmark_count
+        FROM user_bookmarks
+        GROUP BY news_id
+      ) bc ON n.news_id = bc.news_id
+      ORDER BY n.created_at DESC`
     );
+    
     // Stats
     const [statsRows] = await db.query(
       `SELECT 
@@ -46,6 +56,10 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
     // If publishing now and no published_at, set to CURRENT_TIMESTAMP
     if (status === 'published' && !published_at) {
       published_at = null; // Will use CURRENT_TIMESTAMP in SQL
+    }
+    // If draft and not scheduled, set published_at to NULL
+    if (status === 'draft' && (!published_at || new Date(published_at) <= new Date())) {
+      published_at = null;
     }
     await db.query(
       'INSERT INTO news (title, summary, content, featured_image, category, status, published_at, users_user_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ' + (status === 'published' && !published_at ? 'CURRENT_TIMESTAMP' : '?') + ', ?, ?)',
@@ -86,6 +100,10 @@ router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req,
     // If publishing now and no published_at, set to CURRENT_TIMESTAMP
     if (status === 'published' && !published_at) {
       published_at = null; // Will use CURRENT_TIMESTAMP in SQL
+    }
+    // If draft and not scheduled, set published_at to NULL
+    if (status === 'draft' && (!published_at || new Date(published_at) <= new Date())) {
+      published_at = null;
     }
     let updateSql = 'UPDATE news SET title=?, summary=?, content=?, category=?, status=?, published_at=' + (status === 'published' && !published_at ? 'CURRENT_TIMESTAMP' : '?');
     let params = [title, summary, content, category, status];
@@ -135,7 +153,8 @@ router.post('/:id/publish', isAuthenticated, async (req, res) => {
 router.post('/:id/unpublish', isAuthenticated, async (req, res) => {
   try {
     const newsId = parseInt(req.params.id);
-    await db.query('UPDATE news SET status = "draft" WHERE news_id = ?', [newsId]);
+    // Set status to draft and published_at to NULL
+    await db.query('UPDATE news SET status = "draft", published_at = NULL WHERE news_id = ?', [newsId]);
     res.redirect('/admin/news');
   } catch (err) {
     console.error('Error unpublishing news:', err);
@@ -174,7 +193,17 @@ router.get('/api/list', isAuthenticated, async (req, res) => {
   }
   try {
     const [newsRows] = await db.query(
-      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY n.created_at DESC`,
+      `SELECT n.*, u.username as author_name,
+              COALESCE(bc.bookmark_count, 0) as bookmark_count
+       FROM news n
+       JOIN users u ON n.users_user_id = u.user_id
+       LEFT JOIN (
+         SELECT news_id, COUNT(*) as bookmark_count
+         FROM user_bookmarks
+         GROUP BY news_id
+       ) bc ON n.news_id = bc.news_id
+       ${where}
+       ORDER BY n.created_at DESC`,
       params
     );
     res.json({ success: true, news: newsRows });
@@ -189,8 +218,8 @@ router.get('/scheduled', isAuthenticated, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id
-       WHERE n.status = 'draft' AND n.published_at IS NOT NULL AND n.published_at > CURRENT_TIMESTAMP
-       ORDER BY n.published_at ASC`
+        WHERE n.status = 'draft' AND n.published_at IS NOT NULL AND n.published_at > CURRENT_TIMESTAMP
+        ORDER BY n.published_at ASC`
     );
     res.json({ success: true, scheduled: rows });
   } catch (err) {
@@ -252,4 +281,4 @@ router.get('/scheduled-count', isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;

@@ -134,49 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const faqFormMessage = document.getElementById('faq-form-message');
   const faqQuestionCategory = document.getElementById('faq-question-category');
 
-  // Fetch and render published FAQs (with category filter)
-  // This function is now overridden by loadFaqs
-  // async function loadFaqs(search = '', category = '') {
-  //   try {
-  //     let url = '/api/faqs';
-  //     if (category) url += `?category=${encodeURIComponent(category)}`;
-  //     const res = await fetch(url, { credentials: 'include' });
-  //     if (!res.ok) {
-  //       throw new Error(`Server responded with status ${res.status}`);
-  //     }
-  //     const { success, data, error } = await res.json();
-  //     if (!success) {
-  //       throw new Error(error || 'Unknown error');
-  //     }
-  //     let faqs = data;
-  //     if (search) {
-  //       faqs = faqs.filter(faq => faq.question.toLowerCase().includes(search.toLowerCase()) || (faq.answer && faq.answer.toLowerCase().includes(search.toLowerCase())));
-  //     }
-  //     renderFaqs(faqs);
-  //   } catch (err) {
-  //     console.error('FAQ fetch error:', err);
-  //     faqList.innerHTML = `<div class="alert alert-danger">Failed to load FAQs.<br>${err && err.message ? err.message : ''}</div>`;
-  //   }
-  // }
-
-  // Render FAQ list (with category badge)
-  // This function is now overridden by renderFaqAccordion
-  // function renderFaqs(faqs) {
-  //   if (!faqs.length) {
-  //     faqList.innerHTML = '<div class="alert alert-info">No FAQs found.</div>';
-  //     return;
-  //   }
-  //   faqList.innerHTML = faqs.map(faq => `
-  //     <div class="card mb-3">
-  //       <div class="card-header fw-bold">
-  //         Q: ${faq.question}
-  //         ${faq.category ? `<span class="badge bg-secondary ms-2">${faq.category}</span>` : ''}
-  //       </div>
-  //       <div class="card-body"><span class="text-success">A:</span> ${faq.answer || '<em>Not answered yet.</em>'}</div>
-  //     </div>
-  //   `).join('');
-  // }
-
   // Search and category filter handler
   if (faqSearchForm) {
     faqSearchForm.addEventListener('submit', function (e) {

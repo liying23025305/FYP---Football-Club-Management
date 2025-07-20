@@ -93,6 +93,11 @@ document.addEventListener('DOMContentLoaded', function() {
               </form>
             `}
           </td>
+          <td>
+            <span class="badge bg-info">
+              <i class="bi bi-bookmark-fill me-1"></i>${article.bookmark_count || 0}
+            </span>
+          </td>
         </tr>
         `;
       }).join('');
