@@ -54,7 +54,17 @@
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.tiny.cloud/1/r164jjjdorxw1wtb0gzyp6yihah9lic2rqvk4zfks4pyjzkk/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
   <script>
+    tinymce.init({
+      selector: '#content',
+      plugins: 'link image media lists',
+      toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media',
+      menubar: false,
+      height: 350,
+      branding: false,
+      content_style: "body { font-size: 1.1rem; line-height: 1.7; }"
+    });
     // Scheduling logic
     document.addEventListener('DOMContentLoaded', function() {
       const publishTypeRadios = document.querySelectorAll('input[name="publish_type"]');

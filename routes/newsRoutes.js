@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
 const { isAuthenticated } = require('../models/auth');
+const sanitizeHtml = require('sanitize-html');
 
 // Helper: sanitize input to prevent code injection
 function sanitize(str) {
@@ -90,6 +91,38 @@ router.get('/:id', async (req, res) => {
       const [bmRows] = await db.query('SELECT 1 FROM user_bookmarks WHERE user_id = ? AND news_id = ?', [req.session.user.user_id, newsId]);
       isBookmarked = bmRows.length > 0;
     }
+    // Sanitize content, allowing formatting and YouTube iframes
+    article.sanitizedContent = sanitizeHtml(article.content, {
+      allowedTags: [
+        'p', 'br', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'a', 'img', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'
+      ],
+      allowedAttributes: {
+        a: ['href', 'name', 'target', 'rel'],
+        img: ['src', 'alt', 'title', 'width', 'height', 'style'],
+        iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen'],
+        '*': ['style']
+      },
+      allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'youtu.be'],
+      transformTags: {
+        'iframe': function(tagName, attribs) {
+          const src = attribs.src || '';
+          if (
+            src.startsWith('https://www.youtube.com/embed/') ||
+            src.startsWith('https://youtube.com/embed/') ||
+            src.startsWith('https://youtu.be/')
+          ) {
+            return {
+              tagName: 'iframe',
+              attribs: {
+                ...attribs,
+                class: 'w-100 rounded-3 shadow'
+              }
+            };
+          }
+          return { tagName: 'div', text: '' };
+        }
+      }
+    });
     res.render('news_detail', { user: req.session.user, article, isBookmarked });
   } catch (err) {
     console.error('Error fetching news detail:', err);
