@@ -14,7 +14,7 @@ const memberRoutes = require('./routes/memberRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const newsRoutes = require('./routes/newsRoutes');
-const adminNewsRoutes = require('./routes/admin/news');
+const adminNewsRoutes = require('./routes/admin/newsAdmin');
 const faqRoutes = require('./routes/faqRoutes');
 const bookmarksRoutes = require('./routes/bookmarks');
 
