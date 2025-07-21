@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { isAdmin } = require('../models/auth');
 
 // Admin Dashboard
 router.get('/admin/dashboard', (req, res) => {
@@ -32,6 +33,21 @@ router.get('/admin/faq', (req, res) => {
     return res.redirect('/');
   }
   res.render('admin/faq-dashboard', { user: req.session.user, success: req.query.success });
+});
+
+// Admin Matches Dashboard
+router.get('/admin/matches', isAdmin, (req, res) => {
+  res.render('admin/matches-dashboard');
+});
+
+// Admin Create Match Page
+router.get('/admin/matches-create', isAdmin, (req, res) => {
+  res.render('admin/matches-create');
+});
+
+// Admin Edit Match Page
+router.get('/admin/matches-edit', isAdmin, (req, res) => {
+  res.render('admin/matches-edit');
 });
 
 module.exports = router;

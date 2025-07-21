@@ -17,6 +17,7 @@ const newsRoutes = require('./routes/newsRoutes');
 const adminNewsRoutes = require('./routes/admin/newsAdmin');
 const faqRoutes = require('./routes/faqRoutes');
 const bookmarksRoutes = require('./routes/bookmarks');
+const matchRoutes = require('./routes/matchRoutes');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -52,6 +53,7 @@ app.use('/news', newsRoutes);
 app.use('/admin/news', adminNewsRoutes);
 app.use(faqRoutes);
 app.use('/api/bookmarks', bookmarksRoutes);
+app.use(matchRoutes);
 
 // Home Route
 app.get('/', (req, res) => {

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Match</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheet/style.css" />
+  <link rel="stylesheet" href="/stylesheet/matches.css" />
+</head>
+<body>
+  <div class="container mt-5">
+    <h2>Edit Match</h2>
+    <form id="editMatchForm" class="mt-4">
+      <input type="hidden" id="match_id" name="match_id">
+      <div class="mb-3">
+        <label for="home_team" class="form-label">Home Team</label>
+        <input type="text" class="form-control" id="home_team" name="home_team" required>
+      </div>
+      <div class="mb-3">
+        <label for="away_team" class="form-label">Away Team</label>
+        <input type="text" class="form-control" id="away_team" name="away_team" required>
+      </div>
+      <div class="mb-3">
+        <label for="match_date" class="form-label">Match Date & Time</label>
+        <input type="datetime-local" class="form-control" id="match_date" name="match_date" required>
+      </div>
+      <div class="mb-3">
+        <label for="venue" class="form-label">Venue</label>
+        <input type="text" class="form-control" id="venue" name="venue">
+      </div>
+      <div class="mb-3">
+        <label for="competition" class="form-label">Competition</label>
+        <input type="text" class="form-control" id="competition" name="competition">
+      </div>
+      <div class="mb-3">
+        <label for="season" class="form-label">Season</label>
+        <input type="text" class="form-control" id="season" name="season" required>
+      </div>
+      <div class="mb-3">
+        <label for="home_score" class="form-label">Home Score</label>
+        <input type="number" class="form-control" id="home_score" name="home_score" min="0" required>
+      </div>
+      <div class="mb-3">
+        <label for="away_score" class="form-label">Away Score</label>
+        <input type="number" class="form-control" id="away_score" name="away_score" min="0" required>
+      </div>
+      <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        <select class="form-select" id="status" name="status" required>
+          <option value="scheduled">Scheduled</option>
+          <option value="live">Live</option>
+          <option value="completed">Completed</option>
+          <option value="postponed">Postponed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="match_notes" class="form-label">Match Notes</label>
+        <textarea class="form-control" id="match_notes" name="match_notes" rows="2"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Match</button>
+      <a href="/admin/matches" class="btn btn-secondary ms-2">Cancel</a>
+      <div id="editMatchMsg" class="mt-3"></div>
+    </form>
+  </div>
+  <script src="/js/admin-matches.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
