@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
     modalFaqStatus.value = faq.status || 'pending';
     modalFaqPublish.value = faq.is_published || 'no';
     modalFaqOrder.value = faq.display_order || 0;
-    
+
     // Initialize TinyMCE on answer field
     setTimeout(() => {
       if (window.tinymce) {
@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }, 300);
           return;
         }
-        // Store message and type globally, close modal
+        // Store message & type globally, close modal
         pendingAdminSuccessMsg = successMsg;
         pendingAdminSuccessType = 'success';
         const modalInstance = bootstrap.Modal.getInstance(faqModal);
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 
-  // Always show pending success message and refresh table after modal is hidden
+  // Always show pending success message & refresh table after modal is hidden
   if (faqModal) {
     faqModal.addEventListener('hidden.bs.modal', function () {
       // Remove TinyMCE instance to avoid duplicates
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 
-  // Populate admin category dropdowns and load FAQs on page load
+  // Populate admin category dropdowns & load FAQs on page load
   if (adminTable) {
     populateAdminCategoryDropdowns();
     loadAdminFaqs();
