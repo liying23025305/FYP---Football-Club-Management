@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
               </button>
             </h2>
             <div id="collapse${idx}" class="accordion-collapse collapse" aria-labelledby="heading${idx}" data-bs-parent="#faqAccordion">
-              <div class="accordion-body">
+              <div class="accordion-body faq-answer-html" data-faq-id="${faq.faq_id || ''}">
                 ${faq.answer ? faq.answer : '<em>Not answered yet.</em>'}
               </div>
             </div>
@@ -329,6 +329,22 @@ document.addEventListener('DOMContentLoaded', function () {
     modalFaqStatus.value = faq.status || 'pending';
     modalFaqPublish.value = faq.is_published || 'no';
     modalFaqOrder.value = faq.display_order || 0;
+    
+    // Initialize TinyMCE on answer field
+    setTimeout(() => {
+      if (window.tinymce) {
+        if (tinymce.get('modal-faq-answer')) tinymce.get('modal-faq-answer').remove();
+        tinymce.init({
+          selector: '#modal-faq-answer',
+          plugins: 'link image media lists code',
+          toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
+          menubar: false,
+          height: 250,
+          branding: false,
+          content_style: "body { font-size: 1.05rem; line-height: 1.6; }"
+        });
+      }
+    }, 200);
     const modal = new bootstrap.Modal(faqModal);
     modal.show();
   }
@@ -349,7 +365,13 @@ document.addEventListener('DOMContentLoaded', function () {
     faqModalForm.onsubmit = async function (e) {
       e.preventDefault();
       const question = modalFaqQuestion.value.trim();
-      const answer = modalFaqAnswer.value.trim();
+      // Get answer from TinyMCE if available
+      let answer = '';
+      if (window.tinymce && tinymce.get('modal-faq-answer')) {
+        answer = tinymce.get('modal-faq-answer').getContent();
+      } else {
+        answer = modalFaqAnswer.value.trim();
+      }
       const category = modalFaqCategory.value;
       const status = modalFaqStatus.value;
       const is_published = modalFaqPublish.value;
@@ -403,6 +425,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Always show pending success message and refresh table after modal is hidden
   if (faqModal) {
     faqModal.addEventListener('hidden.bs.modal', function () {
+      // Remove TinyMCE instance to avoid duplicates
+      if (window.tinymce && tinymce.get('modal-faq-answer')) {
+        tinymce.get('modal-faq-answer').remove();
+      }
       if (pendingAdminSuccessMsg) {
         showAdminMessage(pendingAdminSuccessMsg, pendingAdminSuccessType);
         loadAdminFaqs(statusFilter.value, adminCategoryFilter.value);

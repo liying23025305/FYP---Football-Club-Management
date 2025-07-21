@@ -113,6 +113,38 @@ main {
   border-radius: 0 0 0.5rem 0.5rem;
 }
 
+/* Enhance the 'Didn't find your answer?' box */
+.card.mt-5 {
+  border: 2px solid #a259e6;
+  box-shadow: 0 4px 24px rgba(162,89,230,0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+  background: linear-gradient(90deg, #f8f6ff 60%, #f3eaff 100%);
+  border-radius: 1rem;
+}
+.card.mt-5 .card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 1rem;
+}
+.card.mt-5 .form-label {
+  font-weight: 600;
+  color: #5a189a;
+}
+.card.mt-5 .form-control, .card.mt-5 .form-select {
+  border-radius: 0.5rem;
+  border: 1.5px solid #e0c3fc;
+}
+.card.mt-5 .btn-success {
+  background: linear-gradient(90deg, #a259e6 60%, #7c3aed 100%);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(162,89,230,0.08);
+}
+.card.mt-5 .btn-success:hover {
+  background: linear-gradient(90deg, #7c3aed 60%, #a259e6 100%);
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   #faq-list .card-header, #faq-list .card-body {
