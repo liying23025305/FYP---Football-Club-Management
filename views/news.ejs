@@ -51,7 +51,7 @@
         <div class="col-md-5 d-flex align-items-center">
           <div class="card w-100 p-3" style="min-height: 260px;">
             <h5 class="fw-bold"><%= featured.title %></h5>
-            <p class="mb-2"><%= featured.summary ? featured.summary.substring(0, 500) : '' %></p>
+            <p class="mb-2"><%- featured.summary ? featured.summary.substring(0, 500) : '' %></p>
             <div class="text-muted" style="font-size:0.95rem;">
               <%= featured.category %> • <%= featured.author_name %> • <%= featured.published_at ? new Date(featured.published_at).toLocaleString() : '' %>
             </div>
