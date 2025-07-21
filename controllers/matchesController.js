@@ -48,7 +48,11 @@ exports.createMatch = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     data.status = data.status || 'scheduled';
-    data.result = calculateResult(Number(data.home_score || 0), Number(data.away_score || 0));
+    if (data.status === 'completed') {
+      data.result = calculateResult(Number(data.home_score || 0), Number(data.away_score || 0));
+    } else {
+      data.result = null;
+    }
     const result = await Matches.createMatch(data);
     res.json({ success: true, match_id: result.insertId });
   } catch (err) {
@@ -64,7 +68,11 @@ exports.updateMatch = async (req, res) => {
     if (!data.home_team || !data.away_team || !data.match_date || !data.season) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    data.result = calculateResult(Number(data.home_score || 0), Number(data.away_score || 0));
+    if (data.status === 'completed') {
+      data.result = calculateResult(Number(data.home_score || 0), Number(data.away_score || 0));
+    } else {
+      data.result = null;
+    }
     await Matches.updateMatch(req.params.id, data);
     res.json({ success: true });
   } catch (err) {
@@ -72,10 +80,10 @@ exports.updateMatch = async (req, res) => {
   }
 };
 
-// Soft delete a match (admin only)
+// Delete a match (admin only, hard delete)
 exports.deleteMatch = async (req, res) => {
   try {
-    await Matches.softDeleteMatch(req.params.id);
+    await Matches.deleteMatch(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });

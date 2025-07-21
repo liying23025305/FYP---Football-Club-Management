@@ -73,9 +73,9 @@ exports.updateMatch = async (id, data) => {
   return result;
 };
 
-// Soft delete a match (set status to 'cancelled')
-exports.softDeleteMatch = async (id) => {
-  const [result] = await db.query('UPDATE matches SET status = "cancelled" WHERE match_id = ?', [id]);
+// Delete a match from the database
+exports.deleteMatch = async (id) => {
+  const [result] = await db.query('DELETE FROM matches WHERE match_id = ?', [id]);
   return result;
 };
 

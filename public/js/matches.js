@@ -183,18 +183,63 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(match => {
         const statusClass = statusColors[match.status] || 'status-gray';
-        const resultBadge = match.result === 'win' ? '<span class="badge bg-success">Win</span>' :
-          match.result === 'loss' ? '<span class="badge bg-danger">Loss</span>' :
-          match.result === 'draw' ? '<span class="badge bg-secondary">Draw</span>' : '-';
+        const resultBadge = match.result === 'win' ? '<span class="badge bg-success"><i class="bi bi-trophy-fill"></i> Win</span>' :
+          match.result === 'loss' ? '<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Loss</span>' :
+          match.result === 'draw' ? '<span class="badge bg-secondary"><i class="bi bi-dash-circle-fill"></i> Draw</span>' : '-';
         document.getElementById('userMatchDetailContent').innerHTML = `
-          <div class="row mb-2"><div class="col-6"><b>Home Team:</b> ${match.home_team}</div><div class="col-6"><b>Away Team:</b> ${match.away_team}</div></div>
-          <div class="row mb-2"><div class="col-6"><b>Score:</b> ${match.home_score} - ${match.away_score}</div><div class="col-6"><b>Season:</b> ${match.season}</div></div>
-          <div class="row mb-2"><div class="col-6"><b>Competition:</b> ${match.competition || '-'}</div><div class="col-6"><b>Date & Time:</b> ${formatDateTime(match.match_date)}</div></div>
-          <div class="row mb-2"><div class="col-6"><b>Venue:</b> ${match.venue || '-'}</div><div class="col-6"><b>Status:</b> <span class="badge ${statusClass}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</span></div></div>
-          <div class="row mb-2"><div class="col-6"><b>Result:</b> ${resultBadge}</div></div>
-          <div class="mb-2"><b>Match Notes:</b></div>
-          <div>${match.match_notes ? match.match_notes : '<i>No notes.</i>'}</div>
+          <div class="container-fluid">
+            <div class="row mb-3">
+              <div class="col-12 text-center mb-2">
+                <h4><b>${match.home_team}</b> <span class="mx-2">vs</span> <b>${match.away_team}</b></h4>
+                <div class="fs-5 mb-1">${match.home_score} - ${match.away_score}</div>
+                <div>${resultBadge}</div>
+              </div>
+            </div>
+            <hr/>
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <p><b>Competition:</b> ${match.competition || '-'}</p>
+                <p><b>Venue:</b> ${match.venue || '-'}</p>
+                <p><b>Season:</b> ${match.season}</p>
+              </div>
+              <div class="col-md-6">
+                <p><b>Date & Time:</b> ${formatDateTime(match.match_date)}</p>
+                <p><b>Status:</b> <span class="badge ${statusClass}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</span></p>
+              </div>
+            </div>
+            <hr/>
+            <div class="row mb-2">
+              <div class="col-12">
+                <b>Match Notes:</b>
+                <textarea id="userMatchNotesEditor">${match.match_notes ? match.match_notes : ''}</textarea>
+              </div>
+            </div>
+          </div>
         `;
+        // Dynamically load TinyMCE if not present
+        function loadTinyMCE(callback) {
+          if (window.tinymce) return callback();
+          const script = document.createElement('script');
+          script.src = 'https://cdn.tiny.cloud/1/r164jjjdorxw1wtb0gzyp6yihah9lic2rqvk4zfks4pyjzkk/tinymce/6/tinymce.min.js';
+          script.referrerPolicy = 'origin';
+          script.onload = callback;
+          document.head.appendChild(script);
+        }
+        loadTinyMCE(() => {
+          if (window.tinymce) {
+            if (tinymce.get('userMatchNotesEditor')) tinymce.get('userMatchNotesEditor').remove();
+            tinymce.init({
+              selector: '#userMatchNotesEditor',
+              menubar: false,
+              toolbar: false,
+              readonly: 1,
+              plugins: 'autolink lists',
+              height: 180,
+              statusbar: false,
+              content_style: 'body { background: #f8f9fa; font-size: 1.05em; }',
+            });
+          }
+        });
         // Show modal
         var modal = new bootstrap.Modal(document.getElementById('userMatchDetailModal'));
         modal.show();

@@ -93,9 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusClass = statusColors[match.status] || 'status-gray';
     // Result display
     let resultDisplay = '-';
-    if (match.result === 'win') resultDisplay = '<span class="badge bg-success">Win</span>';
-    else if (match.result === 'loss') resultDisplay = '<span class="badge bg-danger">Loss</span>';
-    else if (match.result === 'draw') resultDisplay = '<span class="badge bg-secondary">Draw</span>';
+    if (match.status === 'completed') {
+      if (match.result === 'win') resultDisplay = '<span class="badge bg-success">Win</span>';
+      else if (match.result === 'loss') resultDisplay = '<span class="badge bg-danger">Loss</span>';
+      else if (match.result === 'draw') resultDisplay = '<span class="badge bg-secondary">Draw</span>';
+      else resultDisplay = '-';
+    }
     tr.innerHTML = `
       <td>${dateStr}</td>
       <td>${match.home_team}</td>
@@ -246,17 +249,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Delete match
   function deleteMatch(id) {
+    // Disable all delete buttons while deleting
+    document.querySelectorAll('.btn-delete').forEach(btn => btn.disabled = true);
     fetch(`/api/matches/${id}`, { method: 'DELETE' })
       .then(res => res.json())
       .then(result => {
+        console.log('Delete API response:', result);
         if (result.success) {
           showMsg('adminMatchesMsg', 'Match deleted.', true);
           reloadDashboard();
         } else {
           showMsg('adminMatchesMsg', result.error || 'Failed to delete match.', false);
+          alert(result.error || 'Failed to delete match.');
         }
       })
-      .catch(() => showMsg('adminMatchesMsg', 'Failed to delete match.', false));
+      .catch((err) => {
+        showMsg('adminMatchesMsg', 'Failed to delete match.', false);
+        alert('Failed to delete match.');
+        console.error('Delete error:', err);
+      })
+      .finally(() => {
+        // Re-enable delete buttons
+        document.querySelectorAll('.btn-delete').forEach(btn => btn.disabled = false);
+      });
   }
 
   // Show success/error message
