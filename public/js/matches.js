@@ -109,6 +109,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Render the live match at the top and other matches below
+  function renderMatchesWithLive() {
+    const liveMatch = allMatches.find(m => m.status === 'live');
+    const otherMatches = allMatches.filter(m => m.status !== 'live');
+    // Render live match
+    const liveMatchContainer = document.getElementById('liveMatchContainer');
+    if (liveMatch) {
+      liveMatchContainer.innerHTML = '';
+      liveMatchContainer.appendChild(renderLiveMatchCard(liveMatch));
+      liveMatchContainer.style.display = 'block';
+    } else {
+      liveMatchContainer.innerHTML = '';
+      liveMatchContainer.style.display = 'none';
+    }
+    // Render other matches
+    matchesList.innerHTML = '';
+    otherMatches.forEach(match => {
+      matchesList.appendChild(renderMatchCard(match));
+    });
+  }
+
   // Render a single match card
   function renderMatchCard(match) {
     const card = document.createElement('div');
@@ -121,10 +142,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateStr = dateObj.toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false
     }).replace(',', '');
-    // Score display
-    const score = match.status === 'completed' || match.status === 'live'
-      ? `<span class="score">${match.home_team} <b>${match.home_score}</b> - <b>${match.away_score}</b> ${match.away_team}</span>`
-      : `<span class="score">${match.home_team} vs ${match.away_team}</span>`;
+    // Score display (centered, enhanced)
+    let score = '';
+    if (match.status === 'completed' || match.status === 'live') {
+      score = `
+        <span class="score-team">${match.home_team}</span>
+        <span class="score-value">${match.home_score}</span>
+        <span class="score-sep">-</span>
+        <span class="score-value">${match.away_score}</span>
+        <span class="score-team">${match.away_team}</span>
+      `;
+    } else {
+      score = `
+        <span class="score-team">${match.home_team}</span>
+        <span class="score-sep">vs</span>
+        <span class="score-team">${match.away_team}</span>
+      `;
+    }
     // Result badge for completed matches
     let resultBadge = '';
     if (match.status === 'completed') {
@@ -135,12 +169,41 @@ document.addEventListener('DOMContentLoaded', () => {
     card.innerHTML = `
       <div class="match-date">${dateStr}</div>
       <div class="match-info">
-        ${score}
+        <div class="score">${score}</div>
         ${resultBadge ? `<div style="display:flex;justify-content:center;align-items:center;margin-top:4px;">${resultBadge}</div>` : ''}
         <span class="competition">${match.competition || ''}</span>
       </div>
       <div class="match-status ${statusClass}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</div>
     `;
+    return card;
+  }
+
+  // Render a prominent live match card
+  function renderLiveMatchCard(match) {
+    const card = document.createElement('div');
+    card.className = 'live-match-card d-flex align-items-center justify-content-between mb-4 p-4 shadow';
+    card.setAttribute('data-match-id', match.match_id);
+    card.innerHTML = `
+      <div class="team-info text-end flex-grow-1">
+        <div class="team-name home-team">${match.home_team}</div>
+      </div>
+      <div class="score-section mx-4 text-center">
+        <div class="live-badge mb-2">LIVE</div>
+        <div class="live-score">
+          <span class="score-num">${match.home_score}</span>
+          <span class="score-sep">-</span>
+          <span class="score-num">${match.away_score}</span>
+        </div>
+        <div class="live-competition mt-2">${match.competition || ''}</div>
+        <div class="live-date">${formatDateTime(match.match_date)}</div>
+      </div>
+      <div class="team-info text-start flex-grow-1">
+        <div class="team-name away-team">${match.away_team}</div>
+      </div>
+    `;
+    card.addEventListener('click', function() {
+      showUserMatchDetailModal(match.match_id);
+    });
     return card;
   }
 
@@ -258,10 +321,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Patch renderFilteredMatches to add click handlers after rendering
+  // Patch renderFilteredMatches to use new live match logic
   const origRenderFilteredMatches = renderFilteredMatches;
   renderFilteredMatches = function() {
-    origRenderFilteredMatches.apply(this, arguments);
+    // Filtered matches
+    const selectedCategory = categorySelect.value;
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    let filtered = allMatches;
+    if (selectedCategory) {
+      filtered = filtered.filter(m => m.competition === selectedCategory);
+    }
+    if (searchTerm) {
+      filtered = filtered.filter(m =>
+        m.home_team.toLowerCase().includes(searchTerm) ||
+        m.away_team.toLowerCase().includes(searchTerm)
+      );
+    }
+    // Separate live match
+    const liveMatch = filtered.find(m => m.status === 'live');
+    const otherMatches = filtered.filter(m => m.status !== 'live');
+    // Render live match
+    const liveMatchContainer = document.getElementById('liveMatchContainer');
+    if (liveMatch) {
+      liveMatchContainer.innerHTML = '';
+      liveMatchContainer.appendChild(renderLiveMatchCard(liveMatch));
+      liveMatchContainer.style.display = 'block';
+    } else {
+      liveMatchContainer.innerHTML = '';
+      liveMatchContainer.style.display = 'none';
+    }
+    // Render other matches
+    if (!otherMatches.length) {
+      matchesList.innerHTML = '<div class="no-matches">No matches found for the selected filters.</div>';
+      return;
+    }
+    matchesList.innerHTML = '';
+    otherMatches.forEach(match => {
+      matchesList.appendChild(renderMatchCard(match));
+    });
     addMatchCardClickHandlers();
   };
 }); 

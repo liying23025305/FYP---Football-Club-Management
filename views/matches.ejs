@@ -11,29 +11,28 @@
 <body>
   <%- include('partials/navbar') %>
   <main class="matches-main">
-    <div class="matches-header mb-3">
-      <h1>Fixtures & Results</h1>
+    <div id="liveMatchContainer"></div>
+    <div class="matches-filters-row mb-4">
+      <form id="matches-search-form" class="row g-2 align-items-end flex-nowrap w-100">
+        <div class="col-md-3">
+          <label for="seasonSelect" class="form-label">Season:</label>
+          <select id="seasonSelect" class="form-select"></select>
+        </div>
+        <div class="col-md-3">
+          <label for="categorySelect" class="form-label">Competition:</label>
+          <select id="categorySelect" class="form-select">
+            <option value="">All Competitions</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="matchesSearchInput" class="form-label">Search Team:</label>
+          <input type="text" id="matchesSearchInput" class="form-control" placeholder="Search team name">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+        </div>
+      </form>
     </div>
-    <form id="matches-search-form" class="row g-2 mb-4 align-items-end">
-      <div class="col-md-3">
-        <label for="seasonSelect" class="form-label">Season:</label>
-        <select id="seasonSelect" class="form-select"></select>
-      </div>
-      <div class="col-md-3">
-        <label for="categorySelect" class="form-label">Competition:</label>
-        <select id="categorySelect" class="form-select">
-          <option value="">All Competitions</option>
-          <!-- Categories will be populated by JS -->
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="matchesSearchInput" class="form-label">Search Team:</label>
-        <input type="text" id="matchesSearchInput" class="form-control" placeholder="Search team name">
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
-      </div>
-    </form>
     <div id="matchesList" class="matches-list">
       <!-- Match cards will be rendered here by JS -->
     </div>
