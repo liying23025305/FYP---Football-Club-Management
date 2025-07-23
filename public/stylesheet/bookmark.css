@@ -1,0 +1,52 @@
+/* Bookmark button styles */
+.bookmark-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  outline: none;
+}
+
+.bookmark-icon {
+  color: #ccc;
+  font-size: 1.4em;
+  transition: color 0.2s;
+}
+
+.bookmark-icon.bookmarked,
+.bookmark-icon.bi-bookmark-fill {
+  color: #ffd700; /* Yellow */
+}
+
+.bookmark-btn:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.bookmark-success-message {
+  background: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  display: none;
+}
+.bookmark-success-message.error {
+  background: #d9534f;
+}
+
+/* Bookmarked News tab/button */
+#bookmarked-news-btn {
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+#bookmarked-news-btn .bi {
+  font-size: 1.2em;
+  margin-right: 4px;
+}

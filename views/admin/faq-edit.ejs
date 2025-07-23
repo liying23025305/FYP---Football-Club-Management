@@ -1,0 +1,40 @@
+<%- include('../partials/navbar') %>
+<div class="container my-5">
+  <h2>Edit FAQ</h2>
+  <form action="/admin/faq/<%= faq.faq_id %>/edit" method="POST" class="mt-4">
+    <div class="mb-3">
+      <label for="faq-question" class="form-label">Question</label>
+      <textarea class="form-control" id="faq-question" name="question" required><%= faq.question %></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="faq-answer" class="form-label">Answer</label>
+      <textarea class="form-control" id="faq-answer" name="answer"><%= faq.answer %></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="faq-category" class="form-label">Category</label>
+      <input type="text" class="form-control" id="faq-category" name="category" value="<%= faq.category %>">
+    </div>
+    <div class="mb-3">
+      <label for="faq-status" class="form-label">Status</label>
+      <select class="form-select" id="faq-status" name="status" required>
+        <option value="pending" <%= faq.status === 'pending' ? 'selected' : '' %>>Pending</option>
+        <option value="answered" <%= faq.status === 'answered' ? 'selected' : '' %>>Answered</option>
+        <option value="archived" <%= faq.status === 'archived' ? 'selected' : '' %>>Archived</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="faq-publish" class="form-label">Publish Status</label>
+      <select class="form-select" id="faq-publish" name="is_published">
+        <option value="no" <%= faq.is_published === 'no' ? 'selected' : '' %>>Unpublished</option>
+        <option value="yes" <%= faq.is_published === 'yes' ? 'selected' : '' %>>Published</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="faq-order" class="form-label">Display Order</label>
+      <input type="number" class="form-control" id="faq-order" name="display_order" min="0" value="<%= faq.display_order %>">
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="/admin/faq" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+<%- include('../partials/footer') %>

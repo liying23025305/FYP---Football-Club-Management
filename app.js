@@ -77,6 +77,11 @@ const reservationsRoutes = require('./routes/reservations');
 const unifiedPaymentsRoutes = require('./routes/unifiedPayments');
 const playersRoutes = require('./routes/players');
 const scheduleRoutes = require('./routes/schedule');
+const newsRoutes = require('./routes/newsRoutes');
+const adminNewsRoutes = require('./routes/admin/newsAdmin');
+const faqRoutes = require('./routes/faqRoutes');
+const bookmarksRoutes = require('./routes/bookmarks');
+const matchRoutes = require('./routes/matchRoutes');
 
 // Use routes
 app.use('/', authRoutes);
@@ -93,6 +98,12 @@ app.use('/reservations', reservationsRoutes);
 app.use('/unified-payments', unifiedPaymentsRoutes);
 app.use('/', playersRoutes);
 app.use('/', scheduleRoutes);
+app.use('/news', newsRoutes);
+app.use('/admin/news', adminNewsRoutes);
+app.use(faqRoutes);
+app.use('/api/bookmarks', bookmarksRoutes);
+app.use(matchRoutes);
+
 // Error handling middleware
 app.use((req, res) => {
   res.status(404).render('error', { 

@@ -1,0 +1,187 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../models/db');
+const { isAuthenticated } = require('../models/auth');
+const sanitizeHtml = require('sanitize-html');
+
+// Helper: sanitize input to prevent code injection
+function sanitize(str) {
+  return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// GET /news - List published news (no pagination, scrollable)
+router.get('/', async (req, res) => {
+  const category = req.query.category || '';
+  const search = req.query.search || '';
+  let where = "WHERE status = 'published'";
+  let params = [];
+  if (category && category !== 'All') {
+    where += ' AND category = ?';
+    params.push(category);
+  }
+  if (search) {
+    where += ' AND title LIKE ?';
+    params.push(`%${search}%`);
+  }
+  try {
+    // Get all news articles (no pagination)
+    const [newsRows] = await db.query(
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
+      params
+    );
+    // Get categories for filter
+    const [catRows] = await db.query('SELECT DISTINCT category FROM news WHERE category IS NOT NULL AND category != ""');
+    const categories = catRows.map(row => row.category);
+    // Get bookmarks for logged-in user
+    let bookmarks = [];
+    if (req.session.loggedIn && req.session.user) {
+      const [bmRows] = await db.query('SELECT news_id FROM user_bookmarks WHERE user_id = ?', [req.session.user.user_id]);
+      bookmarks = bmRows.map(bm => bm.news_id);
+    }
+    // Featured news (latest published)
+    const featured = newsRows.length > 0 ? newsRows[0] : null;
+    const articles = featured ? newsRows.slice(1) : [];
+    res.render('news', {
+      user: req.session.user,
+      featured,
+      articles,
+      categories,
+      selectedCategory: category,
+      bookmarks,
+      search
+    });
+  } catch (err) {
+    console.error('Error fetching news:', err);
+    res.status(500).render('news', { user: req.session.user, featured: null, articles: [], categories: [], selectedCategory: '', bookmarks: [], search: '' });
+  }
+});
+
+// Render Bookmarked News Page
+router.get('/bookmarked-news', async (req, res) => {
+  if (!req.session.loggedIn || !req.session.user) {
+    return res.redirect('/login');
+  }
+  const userId = req.session.user.user_id;
+  try {
+    const [rows] = await db.query(
+      `SELECT n.*, ub.bookmarked_at FROM news n JOIN user_bookmarks ub ON n.news_id = ub.news_id WHERE ub.user_id = ? AND n.status = 'published' ORDER BY ub.bookmarked_at DESC`,
+      [userId]
+    );
+    res.render('bookmarked_news', {
+      user: req.session.user,
+      bookmarks: rows
+    });
+  } catch (err) {
+    console.error('Error fetching bookmarked news:', err);
+    res.render('bookmarked_news', { user: req.session.user, bookmarks: [] });
+  }
+});
+
+// GET /news/:id - News detail page
+router.get('/:id', async (req, res) => {
+  const newsId = parseInt(req.params.id);
+  if (isNaN(newsId)) return res.redirect('/news');
+  try {
+    const [rows] = await db.query('SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id WHERE n.news_id = ?', [newsId]);
+    if (rows.length === 0) return res.redirect('/news');
+    const article = rows[0];
+    // Check if bookmarked
+    let isBookmarked = false;
+    if (req.session.loggedIn && req.session.user) {
+      const [bmRows] = await db.query('SELECT 1 FROM user_bookmarks WHERE user_id = ? AND news_id = ?', [req.session.user.user_id, newsId]);
+      isBookmarked = bmRows.length > 0;
+    }
+    // Sanitize content, allowing formatting and YouTube iframes
+    article.sanitizedContent = sanitizeHtml(article.content, {
+      allowedTags: [
+        'p', 'br', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'a', 'img', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'
+      ],
+      allowedAttributes: {
+        a: ['href', 'name', 'target', 'rel'],
+        img: ['src', 'alt', 'title', 'width', 'height', 'style'],
+        iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen'],
+        '*': ['style']
+      },
+      allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'youtu.be'],
+      transformTags: {
+        'iframe': function(tagName, attribs) {
+          const src = attribs.src || '';
+          if (
+            src.startsWith('https://www.youtube.com/embed/') ||
+            src.startsWith('https://youtube.com/embed/') ||
+            src.startsWith('https://youtu.be/')
+          ) {
+            return {
+              tagName: 'iframe',
+              attribs: {
+                ...attribs,
+                class: 'w-100 rounded-3 shadow'
+              }
+            };
+          }
+          return { tagName: 'div', text: '' };
+        }
+      }
+    });
+    res.render('news_detail', { user: req.session.user, article, isBookmarked });
+  } catch (err) {
+    console.error('Error fetching news detail:', err);
+    res.redirect('/news');
+  }
+});
+
+// GET /api/news - AJAX endpoint for filtered news
+router.get('/api/news', async (req, res) => {
+  const category = req.query.category || '';
+  const search = req.query.search || '';
+  let where = "WHERE status = 'published'";
+  let params = [];
+  if (category && category !== 'All') {
+    where += ' AND category = ?';
+    params.push(category);
+  }
+  if (search) {
+    where += ' AND title LIKE ?';
+    params.push(`%${search}%`);
+  }
+  try {
+    const [newsRows] = await db.query(
+      `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
+      params
+    );
+    let bookmarks = [];
+    let user = null;
+    if (req.session.loggedIn && req.session.user) {
+      user = req.session.user;
+      const [bmRows] = await db.query('SELECT news_id FROM user_bookmarks WHERE user_id = ?', [user.user_id]);
+      bookmarks = bmRows.map(bm => bm.news_id);
+    }
+    res.json({ success: true, articles: newsRows, bookmarks, user });
+  } catch (err) {
+    console.error('Error fetching news (AJAX):', err, 'Params:', params, 'Where:', where);
+    res.json({ success: false, articles: [], bookmarks: [], user: null, error: err.message });
+  }
+});
+
+// Render Bookmarked News Page
+router.get('/bookmarked-news', async (req, res) => {
+  if (!req.session.loggedIn || !req.session.user) {
+    return res.redirect('/login');
+  }
+  const userId = req.session.user.user_id;
+  try {
+    const [rows] = await db.query(
+      `SELECT n.*, ub.bookmarked_at FROM news n JOIN user_bookmarks ub ON n.news_id = ub.news_id WHERE ub.user_id = ? AND n.status = 'published' ORDER BY ub.bookmarked_at DESC`,
+      [userId]
+    );
+    res.render('bookmarked_news', {
+      user: req.session.user,
+      bookmarks: rows
+    });
+  } catch (err) {
+    console.error('Error fetching bookmarked news:', err);
+    res.render('bookmarked_news', { user: req.session.user, bookmarks: [] });
+  }
+});
+
+module.exports = router;

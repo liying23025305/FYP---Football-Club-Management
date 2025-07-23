@@ -1,0 +1,165 @@
+/*footer*/
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Navbar logo size */
+.navbar .logo {
+  height: 50px;
+  width: auto;
+  max-width: 150px;
+  object-fit: contain; /* Ensure image fits within the specified dimensions */
+  margin-right: 10px; /* Add spacing if needed */
+}
+
+/* -- FAQS EJS --*/
+/* FAQ Card Styles */
+#faq-list .card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+#faq-list .card-header {
+  background: #f8f9fa;
+  font-size: 1.1rem;
+}
+#faq-list .card-body {
+  font-size: 1rem;
+}
+
+/* FAQ Form Styles */
+#faq-question-form textarea {
+  resize: vertical;
+}
+#faq-form-message {
+  min-height: 1.5em;
+}
+
+/* Admin Table Styles */
+#faq-admin-table td, #faq-admin-table th {
+  vertical-align: middle;
+}
+#faq-admin-table .faq-order-input {
+  width: 70px;
+}
+
+/* FAQ Category Badge */
+#faq-list .badge,
+#faq-admin-table .badge {
+  font-size: 0.95em;
+  vertical-align: middle;
+}
+
+/* Category dropdown spacing */
+#faq-category-filter,
+#faq-category-filter-admin {
+  min-width: 150px;
+}
+
+/* FAQ Category Tabs */
+#faq-category-tabs {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 1.5rem;
+}
+#faq-category-tabs .nav-link {
+  color: #a259e6;
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+#faq-category-tabs .nav-link.active {
+  color: #fff;
+  background: #a259e6;
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-bottom: 3px solid #a259e6;
+}
+#faq-category-tabs .nav-link:not(.active):hover {
+  color: #7c3aed;
+  background: #f3f0fa;
+}
+
+/* FAQ Accordion - displays collapsible sections of content */
+#faq-accordion-list .accordion-item {
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: none;
+}
+#faq-accordion-list .accordion-button {
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #222;
+  border-radius: 0.5rem 0.5rem 0 0;
+  transition: background 0.2s;
+}
+#faq-accordion-list .accordion-button:not(.collapsed) {
+  background: #a259e6;
+  color: #fff;
+}
+#faq-accordion-list .accordion-body {
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Enhance the 'Didn't find your answer?' box */
+.card.mt-5 {
+  border: 2px solid #a259e6;
+  box-shadow: 0 4px 24px rgba(162,89,230,0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+  background: linear-gradient(90deg, #f8f6ff 60%, #f3eaff 100%);
+  border-radius: 1rem;
+}
+.card.mt-5 .card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 1rem;
+}
+.card.mt-5 .form-label {
+  font-weight: 600;
+  color: #5a189a;
+}
+.card.mt-5 .form-control, .card.mt-5 .form-select {
+  border-radius: 0.5rem;
+  border: 1.5px solid #e0c3fc;
+}
+.card.mt-5 .btn-success {
+  background: linear-gradient(90deg, #a259e6 60%, #7c3aed 100%);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(162,89,230,0.08);
+}
+.card.mt-5 .btn-success:hover {
+  background: linear-gradient(90deg, #7c3aed 60%, #a259e6 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  #faq-list .card-header, #faq-list .card-body {
+    font-size: 0.95rem;
+  }
+  #faq-admin-table th, #faq-admin-table td {
+    font-size: 0.95rem;
+    padding: 0.4rem;
+  }
+  #faq-category-tabs .nav-link {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.7rem;
+  }
+  #faq-accordion-list .accordion-button, #faq-accordion-list .accordion-body {
+    font-size: 0.95rem;
+  }
+}
+
