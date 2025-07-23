@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheet/style.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <main class="container mt-5">
+    <h1 class="text-center">Payment</h1>
+    <div class="mt-4">
+      <h3>Order Summary</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let totalAmount = 0; %>
+          <% cart.forEach(item => { %>
+            <tr>
+              <td><%= item.gear_name %></td>
+              <td><%= item.gear_desc %></td>
+              <td>$<%= Number(item.price_per_unit).toFixed(2) %></td>
+              <td><%= item.quantity || 1 %></td>
+            </tr>
+            <% totalAmount += parseFloat(item.price_per_unit) * (item.quantity || 1); %>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class="text-end">
+        <h4>Total: $<%= totalAmount.toFixed(2) %></h4>
+      </div>
+    </div>
+    <div class="mt-4">
+      <h3>Customer Details</h3>
+      <p><strong>Name:</strong> <%= customer.first_name %> <%= customer.surname %></p>
+      <p><strong>Email:</strong> <%= customer.email %></p>
+      <p><strong>Address:</strong> <%= customer.address ? customer.address : '' %></p>
+    </div>
+    <div class="mt-4">
+      <h3>Cashback</h3>
+      <p>You have <strong>$<%= customer.cashback_balance ? Number(customer.cashback_balance).toFixed(2) : '0.00' %></strong> cashback available.</p>
+      <div class="mb-3">
+        <label for="applyCashback" class="form-label">Apply cashback:</label>
+        <input type="text" class="form-control" id="applyCashback" name="applyCashback" value="0" placeholder="Enter amount (max: $<%= customer.cashback_balance ? Number(customer.cashback_balance).toFixed(2) : '0.00' %>)">
+        <div class="form-text">Maximum available: $<%= customer.cashback_balance ? Number(customer.cashback_balance).toFixed(2) : '0.00' %></div>
+      </div>
+      <div class="text-end">
+        <h5>Cashback used: $<span id="cashbackUsed">0.00</span></h5>
+        <h4>New Total: $<span id="newTotal"><%= totalAmount.toFixed(2) %></span></h4>
+      </div>
+    </div>
+    <div class="mt-4">
+      <h3>Choose Payment Method</h3>
+      <div id="paypal-button-container"></div>
+      <div id="result-message" class="mt-3"></div>
+      <form id="stripePayForm" action="/create-stripe-session" method="POST">
+        <input type="hidden" name="applyCashback" id="stripeApplyCashback" value="0">
+        <button type="submit" class="btn btn-primary w-100 mb-3" id="stripePayBtn">
+          <img src="https://stripe.com/img/v3/home/social.png" alt="Stripe" style="height:1.5rem;vertical-align:middle;margin-right:0.5rem;">Pay with Card (Stripe)
+        </button>
+      </form>
+    </div>
+  </main>
+  <script src="https://www.paypal.com/sdk/js?client-id=AS2gJGCXH97Twxgp-Q_pZI1pGdSToXtvvHj3iJ7iGObV7_jCJTXM1Kq0iNLTMUFMMSbGkxT-H1hYHSVS&currency=USD"></script>
+  <script>
+    // Cashback logic
+    const applyCashbackInput = document.getElementById('applyCashback');
+    const newTotalSpan = document.getElementById('newTotal');
+    const cashbackUsedSpan = document.getElementById('cashbackUsed');
+    const jsTotalAmount = Number('<%= totalAmount %>');
+    const jsMaxCashback = Number('<%= customer.cashback_balance ? customer.cashback_balance : 0 %>');
+    let paypalAmount = jsTotalAmount;
+
+    function updateTotals() {
+      let cashback = parseFloat(applyCashbackInput.value) || 0;
+      
+      // Validate and constrain cashback input
+      if (isNaN(cashback) || cashback < 0) {
+        cashback = 0;
+      }
+      if (cashback > jsTotalAmount) cashback = jsTotalAmount;
+      if (cashback > jsMaxCashback) cashback = jsMaxCashback;
+      
+      // Don't auto-update the input value while typing to allow free typing
+      cashbackUsedSpan.textContent = cashback.toFixed(2);
+      const newTotal = (jsTotalAmount - cashback).toFixed(2);
+      newTotalSpan.textContent = newTotal;
+      document.getElementById('stripeApplyCashback').value = cashback.toFixed(2);
+      paypalAmount = newTotal;
+    }
+
+    function validateAndCorrectInput() {
+      let cashback = parseFloat(applyCashbackInput.value) || 0;
+      
+      // Validate and constrain cashback input
+      if (isNaN(cashback) || cashback < 0) {
+        cashback = 0;
+      }
+      if (cashback > jsTotalAmount) cashback = jsTotalAmount;
+      if (cashback > jsMaxCashback) cashback = jsMaxCashback;
+      
+      // Update the input value to the validated amount
+      applyCashbackInput.value = cashback.toFixed(2);
+      updateTotals();
+    }
+
+    applyCashbackInput.addEventListener('input', updateTotals); // Update totals while typing but don't change input
+    applyCashbackInput.addEventListener('blur', validateAndCorrectInput); // Validate and correct when user finishes typing
+    document.addEventListener('DOMContentLoaded', function() {
+      applyCashbackInput.value = '0.00';
+      updateTotals();
+    });
+
+    document.getElementById('stripePayForm').onsubmit = async function(e) {
+      e.preventDefault();
+      validateAndCorrectInput(); // Ensure latest value is validated
+      const btn = document.getElementById('stripePayBtn');
+      btn.disabled = true;
+      btn.textContent = 'Redirecting...';
+      const cashback = document.getElementById('applyCashback').value;
+      const newTotal = paypalAmount;
+      const res = await fetch('/create-stripe-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applyCashback: cashback, finalAmount: newTotal })
+      });
+      const data = await res.json();
+      if (data && data.url) {
+        window.location.href = data.url;
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Pay with Card (Stripe)';
+        alert('Error creating Stripe session.');
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          // Validate cashback before creating PayPal order
+          validateAndCorrectInput();
+          let cashback = parseFloat(applyCashbackInput.value) || 0;
+          if (cashback > jsTotalAmount) cashback = jsTotalAmount;
+          if (cashback > jsMaxCashback) cashback = jsMaxCashback;
+          let finalAmount = (jsTotalAmount - cashback).toFixed(2);
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: finalAmount
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            window.location.href = '/paypal/success?orderId=' + data.orderID + '&applyCashback=' + (applyCashbackInput.value || 0);
+          });
+        },
+        onCancel: function (data) {
+          window.location.href = '/paypal/cancel';
+        },
+        onError: function(err) {
+          document.getElementById('result-message').innerHTML = '<div class="alert alert-danger">Payment could not be completed. Please try again.</div>';
+        }
+      }).render('#paypal-button-container');
+    });
+  </script>
+  <!-- <script src="/paypal.js"></script> -->
+</body>
+</html>
+<%- include('partials/footer') %>

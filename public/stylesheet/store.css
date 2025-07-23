@@ -1,23 +1,138 @@
-.store-card {
-  /* Keep the card at a reasonable size */
-  max-width: 150px !important; /* Or whatever appropriate size for your card */
-  width: 100%;
-  margin: 0 auto;
-  padding: 10px;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  text-align: center; /* Center content within the card */
+body {
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  padding: 0;
+  margin: 0;
 }
 
-.store-jersey-img {
-  width: 40px !important;      /* Force a very small width */
-  height: 40px !important;     /* Force a very small height */
-  max-width: 40px !important;
-  max-height: 40px !important;
-  object-fit: contain !important;
-  display: block;
+.title, h1, h2, h3, h5 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0;
+  padding: 2rem 1rem;
+}
+
+.toolbar, .toolbar-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.form-select, .form-input, .btn, .form-control {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card, .card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
   border: none;
-  background: none;
+  width: 100%;
+  max-width: 100%;
+}
+
+.product-card:hover, .card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+}
+
+.product-card img, .card-img-top, .store-jersey-img {
+  width: 100%;
+  min-width: 120px;
+  max-width: 220px;
+  height: 180px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  background: #f3f3f3;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title, .card-text {
+  white-space: normal;
+  word-break: break-word;
+  letter-spacing: normal;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.highlight, .border-primary {
+  border: 2px solid #007bff !important;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.cart-box, .card.cart-box {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: 320px;
+  max-height: 60vh;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.13);
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  z-index: 1000;
+}
+
+.list-group-item {
+  border: none;
+  font-size: 1rem;
+}
+
+.btn-success, .btn-primary {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .cart-box, .card.cart-box {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 2rem;
+  }
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  .product-card img, .card-img-top, .store-jersey-img {
+    min-width: 80px;
+    max-width: 100%;
+    height: 120px;
+  }
 }

@@ -32,7 +32,7 @@
 </head>
 <body>
   <!-- Navbar -->
-  <%- include('partials/navbar') %>
+  <%- include('partials/navbar', { user: user }) %>
 
   <main class="container mt-5">
     <div class="row">
@@ -40,124 +40,167 @@
       <div class="col-lg-9">
         <!-- Calendar -->
         <div class="p-4 mb-4 bg-light border rounded shadow-sm">
-          <h2 class="mb-3">🗓 May 2025</h2>
-          <div class="calendar">
-            <div class="day header">Sun</div>
-            <div class="day header">Mon</div>
-            <div class="day header">Tue</div>
-            <div class="day header">Wed</div>
-            <div class="day header">Thu</div>
-            <div class="day header">Fri</div>
-            <div class="day header">Sat</div>
-
-            <!-- Week 1 -->
-            <div class="day"></div>
-            <div class="day"></div>
-            <div class="day"></div>
-            <div class="day">1</div>
-            <div class="day">2</div>
-            <div class="day">3</div>
-            <div class="day">4</div>
-
-            <!-- Week 2 -->
-            <div class="day">5</div>
-            <div class="day">6</div>
-            <div class="day">7</div>
-            <div class="day">8</div>
-            <div class="day">9</div>
-            <div class="day">10</div>
-            <div class="day">11</div>
-
-            <!-- Week 3 -->
-            <div class="day">12</div>
-            <div class="day">13</div>
-            <div class="day">14</div>
-            <div class="day">15</div>
-            <div class="day">16</div>
-            <div class="day">17</div>
-            <div class="day">18</div>
-
-            <!-- Week 4 -->
-            <div class="day">19</div>
-            <div class="day">20</div>
-            <div class="day">21</div>
-            <div class="day">22</div>
-            <div class="day">23</div>
-            <div class="day">24</div>
-            <div class="day">25</div>
-
-            <!-- Week 5 -->
-            <div class="day">26</div>
-            <div class="day">27</div>
-            <div class="day">28</div>
-            <div class="day">29</div>
-            <div class="day today">30</div>
-            <div class="day">31</div>
-            <div class="day"></div>
+          <h2 class="mb-3">🗓 Schedule Calendar</h2>
+          <% 
+            // Group schedules by date for quick lookup
+            const scheduleMap = {};
+            schedules.forEach(s => {
+              let dateStr = '';
+              if (s.start_time instanceof Date) {
+                dateStr = s.start_time.toISOString().slice(0,10);
+              } else if (typeof s.start_time === 'string' && s.start_time.length >= 10) {
+                dateStr = s.start_time.slice(0,10);
+              }
+              if (dateStr) {
+                if (!scheduleMap[dateStr]) scheduleMap[dateStr] = [];
+                scheduleMap[dateStr].push(s);
+              }
+            });
+            // Use year/month from backend
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month+1, 0).getDate();
+            const today = new Date();
+          %>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <form method="get" action="/schedule" class="d-inline">
+              <input type="hidden" name="month" value="<%= month === 0 ? 11 : month - 1 %>">
+              <input type="hidden" name="year" value="<%= month === 0 ? year - 1 : year %>">
+              <button type="submit" class="btn btn-outline-primary btn-sm">&lt; Prev</button>
+            </form>
+            <h5 class="mb-0">
+              <%= new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' }) %>
+            </h5>
+            <form method="get" action="/schedule" class="d-inline">
+              <input type="hidden" name="month" value="<%= month === 11 ? 0 : month + 1 %>">
+              <input type="hidden" name="year" value="<%= month === 11 ? year + 1 : year %>">
+              <button type="submit" class="btn btn-outline-primary btn-sm">Next &gt;</button>
+            </form>
+          </div>
+          <div class="calendar mb-3">
+            <% for(let i=0; i<firstDay; i++) { %>
+              <div class="day" style="width:40px; height:40px;"></div>
+            <% } %>
+            <% for(let d=1; d<=daysInMonth; d++) { 
+                const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                const hasSchedule = scheduleMap[dateStr];
+                const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+            %>
+              <form method="get" action="/schedule" style="display:inline;">
+                <input type="hidden" name="year" value="<%= year %>">
+                <input type="hidden" name="month" value="<%= month %>">
+                <input type="hidden" name="date" value="<%= dateStr %>">
+                <button type="submit" class="day <%= hasSchedule ? 'bg-warning' : '' %> <%= isToday ? 'today' : '' %>" style="width:40px; height:40px; border:none; padding:0; margin:0;">
+                  <%= d %>
+                  <% if (hasSchedule) { %>
+                    <span style="display:block; font-size:10px; color:#007bff;">•</span>
+                  <% } %>
+                </button>
+              </form>
+            <% } %>
           </div>
         </div>
 
         <!-- Schedule Table -->
-        <div class="p-4 bg-white border rounded shadow-sm">
-          <h3 class="mb-3">Upcoming Matches & Training Sessions</h3>
+        <div class="p-4 bg-white border rounded shadow-sm mb-4">
+          <h3 class="mb-3">
+            <% if (selectedDate) { %>
+              Schedules for <%= selectedDate %>
+              <a href="/schedule?month=<%= month %>&year=<%= year %>" class="btn btn-link btn-sm">(Show All)</a>
+            <% } else { %>
+              Upcoming Matches & Training Sessions
+            <% } %>
+          </h3>
           <div class="table-responsive">
             <table class="table table-bordered table-hover">
               <thead class="table-primary">
                 <tr>
                   <th>Date</th>
-                  <th>Match</th>
+                  <th>Title</th>
                   <th>Venue</th>
                   <th>Time</th>
+                  <th>Type</th>
+                  <th>Team</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>May 27, 2025</td>
-                  <td>Isagi vs Rin</td>
-                  <td>Blue Lock Arena A</td>
-                  <td>10:00 AM</td>
-                </tr>
-                <tr>
-                  <td>May 28, 2025</td>
-                  <td>Nagi & Reo vs Barou</td>
-                  <td>Training Ground C</td>
-                  <td>1:30 PM</td>
-                </tr>
-                <tr>
-                  <td>May 29, 2025</td>
-                  <td>Kaiser vs Shidou</td>
-                  <td>Kaiser Dome</td>
-                  <td>4:00 PM</td>
-                </tr>
-                <tr>
-                  <td>May 30, 2025</td>
-                  <td>Ubers Strategy Simulation</td>
-                  <td>Neo Egoist League HQ</td>
-                  <td>2:00 PM</td>
-                </tr>
-                <tr>
-                  <td>May 31, 2025</td>
-                  <td>Team PXG vs Blue Lock Eleven</td>
-                  <td>Paris Dome</td>
-                  <td>7:00 PM</td>
-                </tr>
+                <%
+                  function formatDate(dt) {
+                    if (!dt) return '';
+                    if (dt instanceof Date) return dt.toISOString().slice(0,10);
+                    if (typeof dt === 'string' && dt.length >= 10) return dt.slice(0,10);
+                    return dt;
+                  }
+                  function formatTime(dt) {
+                    if (!dt) return '';
+                    if (dt instanceof Date) return dt.toTimeString().slice(0,5);
+                    if (typeof dt === 'string' && dt.length >= 16) return dt.slice(11,16);
+                    return dt;
+                  }
+                  let filteredSchedules = schedules;
+                  if (selectedDate) {
+                    filteredSchedules = schedules.filter(s => formatDate(s.start_time) === selectedDate);
+                  }
+                %>
+                <% filteredSchedules.forEach(function(s) { %>
+                  <tr>
+                    <td><%= formatDate(s.start_time) %></td>
+                    <td><%= s.title %></td>
+                    <td><%= s.location %></td>
+                    <td><%= formatTime(s.start_time) %> - <%= formatTime(s.end_time) %></td>
+                    <td><%= s.schedule_type %></td>
+                    <td><%= s.team %></td>
+                  </tr>
+                <% }); %>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      <!-- Right Column (Announcements) -->
-      <div class="col-lg-3 mt-4 mt-lg-0">
-        <div class="p-3 bg-info text-white rounded shadow-sm">
-          <h4 class="mb-3">📢 Announcements</h4>
-          <ul class="list-unstyled">
-            <li>⚡ New Ego Rankings to be revealed this Friday</li>
-            <li>🔥 Nagi’s ego test results published</li>
-            <li>📸 Team Z Reunion training scheduled next week</li>
-            <li>📅 Special Barou training drill: June 1, 9AM</li>
-            <li>🎥 Rin vs Isagi replay coming to BlueTube</li>
-          </ul>
+        <!-- Add New Schedule Form -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h3>Add New Schedule</h3>
+            <form action="/schedule/add" method="POST">
+              <div class="mb-3">
+                <label>Date</label>
+                <input type="date" name="date" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label>Title</label>
+                <input type="text" name="title" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label>Description</label>
+                <input type="text" name="description" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label>Venue</label>
+                <input type="text" name="location" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label>Schedule Type</label>
+                <select name="schedule_type" class="form-control" required>
+                  <% const types = ['training', 'match', 'meeting', 'event']; %>
+                  <% types.forEach(function(type) { %>
+                    <option value="<%= type %>"><%= type.charAt(0).toUpperCase() + type.slice(1) %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label>Team</label>
+                <input type="text" name="team" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label>Start Time</label>
+                <input type="time" name="start_time" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label>End Time</label>
+                <input type="time" name="end_time" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-success">Add Schedule</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

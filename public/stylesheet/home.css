@@ -1,52 +1,48 @@
-/* Make the main news image smaller and centered */
+/* --- General Colors --- */
+:root {
+  --main-orange: #ff7f2a;
+  --main-white: #fff;
+  --main-black: #222;
+  --main-grey: #f5f5f5;
+  --main-outline: #222;
+  --thin-outline: 1.2px solid var(--main-black);
+}
+
+/* --- Main News Card --- */
 .main-news-card img {
-  max-width: 80%;      /* Adjust this value as needed */
+  max-width: 80%;
   height: auto;
   display: block;
   margin-left: auto;
   margin-right: auto;
+  border: var(--thin-outline);
+  border-radius: 12px;
+  background: var(--main-white);
 }
 
-/* Example: Add some spacing to the news section */
+/* --- Section Titles --- */
 .section-title {
   margin-bottom: 1rem;
   font-size: 2rem;
   font-weight: bold;
+  color: var(--main-orange);
+  text-shadow: 1px 1px 0 var(--main-black);
+  letter-spacing: 1px;
 }
 
+/* --- News Thumbnails --- */
 .news-thumbnail {
-  width: 100px;
-  height: 70px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.news-thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.d-flex.justify-content-start.gap-2.flex-wrap {
-  justify-content: center !important; /* Center the mini cards */
-  gap: 1.5rem !important;             /* Increase gap between cards */
-}
-
-.news-thumbnail {
-  width: 240px;        /* Make thumbnails bigger */
+  width: 240px;
   height: 200px;
   border-radius: 12px;
   overflow: hidden;
-  background: #eee;
+  background: var(--main-grey);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: var(--thin-outline);
+  margin-bottom: 10px;
 }
 
 .news-thumbnail img {
@@ -56,18 +52,19 @@
   display: block;
 }
 
-
-/* Shop section styles */
+/* --- Shop Section --- */
 .image-card {
   width: 200px;
   height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: var(--main-white);
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   overflow: hidden;
+  border: var(--thin-outline);
+  transition: box-shadow 0.2s;
 }
 
 .image-card img {
@@ -79,21 +76,19 @@
 }
 
 .image-card img:hover {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
-
-
-/* Matches section wrapper */
+/* --- Matches Section --- */
 .events-section {
-  background-color: #f5faff; /* Light subtle blue background */
-  color: #003366;
+  background-color: var(--main-grey);
+  color: var(--main-black);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 30px;
+  border: var(--thin-outline);
 }
 
-/* Horizontal scrolling */
 .match-scroll-container {
   overflow-x: auto;
   padding-bottom: 10px;
@@ -107,114 +102,79 @@
   min-width: min-content;
 }
 
-/* Match card base */
 .match-card {
-  background-color: #ffffff;
-  border: 1px solid #cce4f6; /* Subtle blue border */
+  background-color: var(--main-white);
+  border: var(--thin-outline);
   border-radius: 8px;
   padding: 15px;
   min-width: 280px;
   flex: 0 0 auto;
-  color: #000000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease;
+  color: var(--main-black);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .match-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Score styling */
 .match-card .score {
   font-size: 1.5rem;
   font-weight: bold;
+  color: var(--main-orange);
+  text-shadow: 1px 1px 0 var(--main-black);
 }
 
-/* Special cards (Next/Previous Game) */
 .match-card.next-game,
 .match-card.previous-game {
-  background-color: #e6f2ff; /* Light blue tone */
-  color: #003366;
+  background-color: var(--main-orange);
+  color: var(--main-white);
   text-align: center;
   min-height: 150px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid #b3d9ff;
+  border: var(--thin-outline);
 }
 
-/* Titles inside special cards */
 .match-card.next-game h4,
 .match-card.previous-game h4 {
   font-size: 1.4rem;
   margin-bottom: 10px;
+  color: var(--main-black);
+  text-shadow: 1px 1px 0 var(--main-white);
 }
 
-/* Link inside special cards */
 .match-card.next-game a,
 .match-card.previous-game a {
   text-decoration: none;
   font-weight: bold;
-  color: #005bb5;
+  color: var(--main-black);
+  background: var(--main-white);
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: var(--thin-outline);
+  transition: background 0.2s, color 0.2s;
 }
 
 .match-card.next-game a:hover,
 .match-card.previous-game a:hover {
-  text-decoration: underline;
+  background: var(--main-orange);
+  color: var(--main-white);
 }
 
-/* Optional: custom scrollbar */
-.match-scroll-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.match-scroll-container::-webkit-scrollbar-track {
-  background: #eaeff5;
-  border-radius: 10px;
-}
-
-.match-scroll-container::-webkit-scrollbar-thumb {
-  background: #1a4f9e;
-  border-radius: 10px;
-}
-
-.match-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #1a237e;
-}
-
-
-
-/* Trending section */
+/* --- Trending Section --- */
 .trending-section {
   margin-bottom: 30px;
 }
 
-/* Scrollable trending container */
 .trending-scroll-container {
   overflow-x: auto;
   padding-bottom: 10px;
   scroll-behavior: smooth;
   direction: rtl;
-}
-
-/* Custom scrollbar styling for webkit browsers */
-.trending-scroll-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.trending-scroll-container::-webkit-scrollbar-track {
-  background: #e0f0ff; /* very light blue */
-  border-radius: 10px;
-}
-
-.trending-scroll-container::-webkit-scrollbar-thumb {
-  background: #155183; /* soft blue */
-  border-radius: 10px;
-}
-
-.trending-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #1a237e;
 }
 
 .trending-scroll-wrapper {
@@ -226,17 +186,18 @@
 }
 
 .trending-item {
-  background-color: #e3f2fd; /* light blue background */
+  background-color: var(--main-orange);
   border-radius: 8px;
   padding: 10px;
   height: 120px;
   position: relative;
-  color: #0d47a1; /* deep blue text */
+  color: var(--main-white);
   min-width: 200px;
   flex: 0 0 auto;
+  border: var(--thin-outline);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 
-/* Badge styling */
 .trending-badge {
   position: absolute;
   top: 10px;
@@ -245,44 +206,68 @@
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: bold;
+  background: var(--main-black);
+  color: var(--main-orange);
+  border: 1px solid var(--main-white);
 }
 
-/* Softer badge colors */
 .badge-live {
-  background-color: #bbdefb; /* soft blue */
-  color: #0d47a1;
+  background-color: var(--main-white);
+  color: var(--main-orange);
+  border: var(--thin-outline);
 }
 
 .badge-new {
-  background-color: #c5cae9; /* pale indigo */
-  color: #1a237e;
+  background-color: var(--main-black);
+  color: var(--main-orange);
+  border: 1px solid var(--main-white);
 }
 
-/* Hero section styles */
-
+/* --- Hero Section --- */
 .hero-section {
   margin-top: 20px;
-  background-color: #13377f;
+  background-color: var(--main-orange);
   padding: 40px;
   border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  border: 1.5px solid var(--main-black);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
 }
 
 .hero-text-box {
   flex: 1;
   max-width: 40%;
-  color: #ffffff;
+  color: var(--main-white);
+  text-shadow: 1px 1px 0 var(--main-black);
 }
 
 .hero-text-box h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   margin-bottom: 10px;
+  color: var(--main-white);
+  text-shadow: 2px 2px 0 var(--main-black);
 }
 
 .hero-text-box .lead {
   font-size: 1.1rem;
+  color: var(--main-white);
+  text-shadow: 1px 1px 0 var(--main-black);
+}
+
+.hero-text-box .btn {
+  font-weight: bold;
+  border: var(--thin-outline);
+  color: var(--main-black);
+  background: var(--main-white);
+  margin-right: 10px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hero-text-box .btn:hover {
+  background: var(--main-black);
+  color: var(--main-orange);
 }
 
 .hero-slideshow-box {
@@ -296,6 +281,8 @@
   height: 250px;
   overflow: hidden;
   border-radius: 8px;
+  border: var(--thin-outline);
+  background: var(--main-white);
 }
 
 .slideshow .slide {
@@ -313,21 +300,44 @@
   opacity: 1;
 }
 
-
-/* footer  */
+/* --- Footer --- */
 .social-footer {
-  background-color: #1a237e;
+  background-color: var(--main-black);
   text-align: center;
   padding: 1rem 0;
 }
 
 .social-footer a {
-  color: white;
+  color: var(--main-orange);
   margin: 0 1rem;
   font-size: 1.5rem;
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .social-footer a:hover {
-  color: #7478ce;
+  color: var(--main-white);
+}
+
+/* --- Custom Scrollbars --- */
+.match-scroll-container::-webkit-scrollbar,
+.trending-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.match-scroll-container::-webkit-scrollbar-track,
+.trending-scroll-container::-webkit-scrollbar-track {
+  background: var(--main-grey);
+  border-radius: 10px;
+}
+
+.match-scroll-container::-webkit-scrollbar-thumb,
+.trending-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--main-orange);
+  border-radius: 10px;
+}
+
+.match-scroll-container::-webkit-scrollbar-thumb:hover,
+.trending-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--main-black);
 }

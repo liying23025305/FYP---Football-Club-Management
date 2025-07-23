@@ -1,20 +1,32 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const path = require('path');
-const db = require(`../config.json`).database;
 
-const connection = mysql.createConnection({
-    host: db.host,
-    user: db.user,
-    password: db.password,
-    database: db.name,
-  });
+// Database configuration
+const dbConfig = {
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'mydb'
+};
 
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL database: ', err);
-        return;
+let connection;
+
+const initializeDatabase = async () => {
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        console.log('Connected to MySQL database');
+        return connection;
+    } catch (error) {
+        console.error('Error connecting to MySQL database: ', error);
+        throw error;
     }
-    console.log('Connected to MySQL database.');
-});
+};
 
-module.exports = connection.promise();
+const getConnection = () => {
+    if (!connection) {
+        throw new Error('Database not initialized. Call initializeDatabase first.');
+    }
+    return connection;
+};
+
+module.exports = { initializeDatabase, getConnection };

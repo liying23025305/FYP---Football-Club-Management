@@ -1,110 +1,122 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const bcrypt = require('bcrypt');
+const { body, validationResult } = require('express-validator');
+const { initializeDatabase, getConnection } = require('./models/db');
+const { isAuthenticated, isAdmin, canAccessProfile } = require('./models/auth');
+const stripe = require('stripe')(require('./config/stripe_config').stripeSecretKey);
 const app = express();
-const mysql = require('mysql2');
-
-// MySQL connection configuration
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'mydb'
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-    return;
-  }
-  console.log('Connected to MySQL database');
-});
-
-// Route modules
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const storeRoutes = require('./routes/storeRoutes');
+const stripeConfig = require('./config/stripe_config.js');
+const dotenv = require('dotenv');
 
 // Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session middleware
+
 app.use(
   session({
-    secret: 'your-secret-key',
+    secret: 'football-club-secret-key-2025',
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 }
+    cookie: { 
+      httpOnly: true, 
+      secure: false, 
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
   })
 );
 
-// Middleware to initialize session cart
-app.use((req, res, next) => {
-  if (!req.session.cart) {
-    req.session.cart = [];
+const cleanupExpiredReservations = async (req, res, next) => {
+  try {
+    const db = getConnection();
+    await db.execute(`
+      UPDATE ticket_purchases 
+      SET status = 'cancelled' 
+      WHERE status = 'reserved' AND reservation_expires_at < NOW()
+    `);
+    
+    // Update available tickets for events
+    await db.execute(`
+      UPDATE events e 
+      SET available_tickets = (
+        SELECT e.capacity - COALESCE(SUM(tp.quantity), 0)
+        FROM ticket_purchases tp 
+        WHERE tp.event_id = e.event_id 
+        AND tp.status IN ('confirmed', 'reserved')
+      )
+    `);
+    
+    next();
+  } catch (error) {
+    console.error('Error cleaning up expired reservations:', error);
+    next();
   }
-  next();
-});
+};
 
-// Routes
-app.use(authRoutes);
-app.use(adminRoutes);
+app.use(cleanupExpiredReservations);
+
+// Import routes
+const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
+const membershipRoutes = require('./routes/membership');
+const eventsRoutes = require('./routes/events');
+const ticketsRoutes = require('./routes/tickets');
+const adminRoutes = require('./routes/admin');
+const staticRoutes = require('./routes/static');
+const cartRoutes = require('./routes/cart');
+const storeRoutes = require('./routes/storeRoutes');
+const refundRoutes = require('./routes/refund');
+const reservationsRoutes = require('./routes/reservations');
+const unifiedPaymentsRoutes = require('./routes/unifiedPayments');
+const playersRoutes = require('./routes/players');
+const scheduleRoutes = require('./routes/schedule');
+
+// Use routes
+app.use('/', authRoutes);
+app.use('/', profileRoutes);
+app.use('/', membershipRoutes);
+app.use('/', eventsRoutes);
+app.use('/', ticketsRoutes);
+app.use('/', adminRoutes);
+app.use('/', staticRoutes);
+app.use('/', cartRoutes);
 app.use('/', storeRoutes);
-
-// Home Route
-app.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Home Page',
-    message: 'Welcome to my basic Express app!',
-    user: req.session.user
+app.use('/', refundRoutes);
+app.use('/reservations', reservationsRoutes);
+app.use('/unified-payments', unifiedPaymentsRoutes);
+app.use('/', playersRoutes);
+app.use('/', scheduleRoutes);
+// Error handling middleware
+app.use((req, res) => {
+  res.status(404).render('error', { 
+    message: 'Page not found',
+    user: req.session.user || null
   });
 });
 
-
-// Static routes
-app.get('/schedule', (req, res) => res.render('schedule'));
-app.get('/news', (req, res) => res.render('news'));
-app.get('/players', (req, res) => res.render('players'));
-app.get('/profile', (req, res) => res.render('profile'));
-app.get('/matches', (req, res) => res.render('matches', { title: 'Matches' }));
-app.get('/membership_tiers', (req, res) => res.render('membership_tiers', { title: 'Membership Tiers' }));
-app.get('/membership_faqs', (req, res) => res.render('membership_faqs', { title: 'Membership FAQs' }));
-
-// Membership page
-app.get('/membership', (req, res) => {
-  const user = {
-    username: 'john_doe',
-    email: 'john@example.com',
-    birthday: '1999-04-21',
-    membershipTier: 'Gold',
-    phone: '98765432',
-    favoriteTeam: 'FC Barcha',
-    joinDate: '2023-01-10'
-  };
-  res.render('membership', { user });
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).render('error', { 
+    message: 'An internal server error occurred',
+    user: req.session.user || null
+  });
 });
 
-// Membership tier pages
-app.get('/membership/gold', (req, res) => {
-  res.render('gold_membership', { title: 'Gold Membership' });
-  console.log('Gold membership page requested');
-});
-
-app.get('/membership/silver', (req, res) => {
-  res.render('silver_membership', { title: 'Silver Membership' });
-  console.log('Silver membership page requested');
-});
-
-app.get('/membership/bronze', (req, res) => {
-  res.render('bronze_membership', { title: 'Bronze Membership' });
-  console.log('Bronze membership page requested');
-});
-
-// Start server
+// Start Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+initializeDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}).catch(error => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
