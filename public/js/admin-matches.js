@@ -346,8 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save button event
         document.getElementById('saveMatchNotesBtn').onclick = function() {
           const notes = tinymce.get('matchNotesEditor').getContent();
-          fetch(`/api/matches/${matchId}`, {
-            method: 'PUT',
+          fetch(`/api/matches/${matchId}/notes`, {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ match_notes: notes })
           })

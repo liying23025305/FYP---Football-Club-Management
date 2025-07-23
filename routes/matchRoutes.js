@@ -16,6 +16,9 @@ router.post('/api/matches', isAdmin, matchesController.createMatch);
 // PUT /api/matches/:id - Update match (admin only)
 router.put('/api/matches/:id', isAdmin, matchesController.updateMatch);
 
+// PATCH /api/matches/:id/notes - Update only match notes (admin only)
+router.patch('/api/matches/:id/notes', isAdmin, matchesController.patchMatchNotes);
+
 // DELETE /api/matches/:id - Soft delete match (admin only)
 router.delete('/api/matches/:id', isAdmin, matchesController.deleteMatch);
 

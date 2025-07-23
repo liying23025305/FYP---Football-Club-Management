@@ -96,4 +96,11 @@ exports.getMatchStats = async () => {
     FROM matches
   `);
   return rows[0];
+};
+
+// PATCH: Update only match notes
+exports.patchMatchNotes = async (id, match_notes) => {
+  const sql = 'UPDATE matches SET match_notes=? WHERE match_id=?';
+  const [result] = await db.query(sql, [match_notes, id]);
+  return result;
 }; 

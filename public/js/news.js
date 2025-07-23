@@ -12,22 +12,28 @@ function renderFeatured(article, user, bookmarks) {
     return;
   }
   featuredContainer.innerHTML = `
-    <div class="d-flex justify-content-center my-4">
-      <div class="bg-light ratio ratio-16x9 shadow" style="max-width:700px; width:100%; border-radius:1rem; overflow:hidden;">
-        <img src="${article.featured_image}" alt="Image" class="w-100 h-100" style="object-fit:cover; border-radius:1rem;">
+  <a href="/news/${article.news_id}" style="text-decoration: none; color: inherit;">
+    <div class="row mb-4 position-relative">
+      <div class="col-md-7">
+        <div style="background:#eee; border-radius:12px; min-height:330px; max-height:330px; width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+          <img src="${article.featured_image}" alt="Image" style="width: 100%; height: 100%; max-height:330px; object-fit: cover;">
+        </div>
       </div>
-    </div>
-    <div class="card w-100 p-3 mt-3" style="max-width:700px; margin:auto;">
-      <h5 class="fw-bold">${article.title}</h5>
-      <p class="mb-2">${article.summary ? article.summary.substring(0, 500) : ''}</p>
-      <div class="text-muted" style="font-size:0.95rem;">
-        ${article.category} • ${article.author_name} • ${article.published_at ? new Date(article.published_at).toLocaleString() : ''}
+      <div class="col-md-5 d-flex align-items-center">
+        <div class="card w-100 p-3" style="min-height: 260px;">
+          <h5 class="fw-bold">${article.title}</h5>
+          <p class="mb-2">${article.summary ? article.summary.substring(0, 500) : ''}</p>
+          <div class="text-muted" style="font-size:0.95rem;">
+            ${article.category} • ${article.author_name} • ${article.published_at ? new Date(article.published_at).toLocaleString() : ''}
+          </div>
+        </div>
       </div>
-      ${user ? `<button class="btn btn-sm btn-outline-warning mt-2 bookmark-btn" data-id="${article.news_id}" ${bookmarks && bookmarks.includes(article.news_id) ? 'data-bookmarked="true"' : ''}>
-        <i class="bi ${bookmarks && bookmarks.includes(article.news_id) ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i> Bookmark
+      ${user ? `<button class="bookmark-btn" data-news-id="${article.news_id}" aria-label="Bookmark" title="Bookmark" onclick="toggleBookmark(this)" style="position:absolute;top:10px;right:10px;background:none;border:none;z-index:10;">
+        <i class="bi ${bookmarks && bookmarks.includes(article.news_id) ? 'bi-bookmark-fill bookmark-icon bookmarked' : 'bi-bookmark bookmark-icon'}"></i>
       </button>` : ''}
     </div>
-  `;
+  </a>
+`;
 }
 
 async function fetchAndRenderNews() {

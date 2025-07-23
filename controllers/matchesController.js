@@ -108,4 +108,18 @@ exports.getMatchStats = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
   }
+};
+
+// PATCH: Update only match notes
+exports.patchMatchNotes = async (req, res) => {
+  try {
+    const { match_notes } = req.body;
+    if (typeof match_notes === 'undefined') {
+      return res.status(400).json({ error: 'Missing match_notes' });
+    }
+    await Matches.patchMatchNotes(req.params.id, match_notes);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 }; 

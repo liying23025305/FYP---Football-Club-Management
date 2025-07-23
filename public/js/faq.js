@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
     faqModalForm.onsubmit = async function (e) {
       e.preventDefault();
       const question = modalFaqQuestion.value.trim();
-      // Get answer from TinyMCE if available
+      // Get answer from  if available
       let answer = '';
       if (window.tinymce && tinymce.get('modal-faq-answer')) {
         answer = tinymce.get('modal-faq-answer').getContent();
