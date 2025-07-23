@@ -274,36 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="row mb-2">
               <div class="col-12">
                 <b>Match Notes:</b>
-                <textarea id="userMatchNotesEditor">${match.match_notes ? match.match_notes : ''}</textarea>
+                <div id="userMatchNotesContent" style="min-height:80px; background:#f8f9fa; border-radius:6px; padding:10px;">${match.match_notes || '<span class=\'text-muted\'>No notes.</span>'}</div>
               </div>
             </div>
           </div>
         `;
-        // Dynamically load TinyMCE if not present
-        function loadTinyMCE(callback) {
-          if (window.tinymce) return callback();
-          const script = document.createElement('script');
-          script.src = 'https://cdn.tiny.cloud/1/r164jjjdorxw1wtb0gzyp6yihah9lic2rqvk4zfks4pyjzkk/tinymce/6/tinymce.min.js';
-          script.referrerPolicy = 'origin';
-          script.onload = callback;
-          document.head.appendChild(script);
-        }
-        loadTinyMCE(() => {
-          if (window.tinymce) {
-            if (tinymce.get('userMatchNotesEditor')) tinymce.get('userMatchNotesEditor').remove();
-            tinymce.init({
-              selector: '#userMatchNotesEditor',
-              menubar: false,
-              toolbar: false,
-              readonly: 1,
-              plugins: 'autolink lists',
-              height: 180,
-              statusbar: false,
-              content_style: 'body { background: #f8f9fa; font-size: 1.05em; }',
-            });
-          }
-        });
-        // Show modal
+        // No TinyMCE for user modal (display only)
         var modal = new bootstrap.Modal(document.getElementById('userMatchDetailModal'));
         modal.show();
       });

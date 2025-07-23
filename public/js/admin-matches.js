@@ -158,6 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (createForm) {
     createForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Ensure match_notes field contains TinyMCE content if present
+      if (window.tinymce && tinymce.get('match_notes')) {
+        createForm.match_notes.value = tinymce.get('match_notes').getContent();
+      }
       const data = Object.fromEntries(new FormData(createForm));
       // Basic validation
       if (!data.home_team || !data.away_team || !data.match_date || !data.season) {
@@ -212,6 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Submit edit
     editForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Ensure match_notes field contains TinyMCE content if present
+      if (window.tinymce && tinymce.get('match_notes')) {
+        editForm.match_notes.value = tinymce.get('match_notes').getContent();
+      }
       const data = Object.fromEntries(new FormData(editForm));
       // Basic validation
       if (!data.home_team || !data.away_team || !data.match_date || !data.season) {
@@ -357,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showDashboardMsg('Match notes updated!', true);
                 var modal = bootstrap.Modal.getInstance(document.getElementById('matchDetailModal'));
                 if (modal) modal.hide();
+                if (typeof loadAdminMatches === 'function') loadAdminMatches(); // Refresh admin match list
               } else {
                 showDashboardMsg(result.error || 'Failed to update notes.', false);
               }
