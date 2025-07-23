@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit User</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheet/style.css" />
+
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <main class="container mt-5" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Edit User</h2>
+      <a href="/admin/users" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Users
+      </a>
+    </div>
+    
+    <% if (errors && errors.length > 0) { %>
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% errors.forEach(error => { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+    
+    <div class="card">
+      <div class="card-body">
+        <form action="/admin/users/<%= targetUser.user_id %>" method="POST">
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">First Name *</label>
+              <input type="text" class="form-control" name="first_name" value="<%= targetUser.first_name %>" required>
+            </div>
+            <div class="col">
+              <label class="form-label">Surname *</label>
+              <input type="text" class="form-control" name="surname" value="<%= targetUser.surname %>" required>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" name="email" value="<%= targetUser.email %>" required>
+            </div>
+            <div class="col">
+              <label class="form-label">Username *</label>
+              <input type="text" class="form-control" name="username" value="<%= targetUser.username %>" required>
+              <small class="text-muted">3-20 characters, letters, numbers, and underscores only</small>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Country *</label>
+              <select class="form-select" name="country" required>
+                <option value="Singapore" <%= targetUser.country === 'Singapore' ? 'selected' : '' %>>Singapore</option>
+                <option value="Malaysia" <%= targetUser.country === 'Malaysia' ? 'selected' : '' %>>Malaysia</option>
+                <option value="Indonesia" <%= targetUser.country === 'Indonesia' ? 'selected' : '' %>>Indonesia</option>
+                <option value="Pakistan" <%= targetUser.country === 'Pakistan' ? 'selected' : '' %>>Pakistan</option>
+                <option value="Other" <%= targetUser.country === 'Other' ? 'selected' : '' %>>Other</option>
+              </select>
+            </div>
+            <div class="col">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-control" name="phone" value="<%= targetUser.phone || '' %>">
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Role *</label>
+              <select class="form-select" name="role" required>
+                <option value="user" <%= targetUser.role === 'user' ? 'selected' : '' %>>User</option>
+                <option value="admin" <%= targetUser.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+              </select>
+            </div>
+            <div class="col">
+              <label class="form-label">Status *</label>
+              <select class="form-select" name="is_active" required>
+                <option value="1" <%= targetUser.is_active ? 'selected' : '' %>>Active</option>
+                <option value="0" <%= !targetUser.is_active ? 'selected' : '' %>>Inactive</option>
+              </select>
+            </div>
+          </div>
+          
+          <hr>
+          
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Date of Birth</label>
+              <input type="date" class="form-control" value="<%= targetUser.dob ? targetUser.dob.toISOString().split('T')[0] : '' %>" readonly>
+              <small class="text-muted">Date of birth cannot be changed</small>
+            </div>
+            <div class="col">
+              <label class="form-label">Member Since</label>
+              <input type="text" class="form-control" value="<%= new Date(targetUser.created_at).toLocaleDateString() %>" readonly>
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="/admin/users" class="btn btn-secondary me-md-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="card mt-4">
+      <div class="card-header bg-danger text-white">
+        <h6 class="mb-0">Danger Zone</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          Delete this user account permanently. This action cannot be undone.
+        </p>
+        <% if (targetUser.user_id != user.user_id) { %>
+          <button type="button" class="btn btn-outline-danger" 
+                  onclick="confirmDelete(<%= targetUser.user_id %>, '<%= targetUser.first_name %> <%= targetUser.surname %>')">
+            Delete User Account
+          </button>
+        <% } else { %>
+          <button type="button" class="btn btn-outline-danger" disabled>
+            Cannot delete your own account
+          </button>
+        <% } %>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete the user <strong id="userName"></strong>?</p>
+          <p class="text-danger">This action cannot be undone and will delete all associated data.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form id="deleteForm" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-danger">Delete User</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function confirmDelete(userId, userName) {
+      document.getElementById('userName').textContent = userName;
+      document.getElementById('deleteForm').action = '/admin/users/' + userId + '/delete';
+      new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+  </script>
+  
+  <%- include('partials/footer') %>
+</body>
+</html>

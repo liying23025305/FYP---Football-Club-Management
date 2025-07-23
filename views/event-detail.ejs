@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= event.event_name %> - Football Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/stylesheet/style.css" />
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    
+    <div class="container my-5">
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <% if (event.featured_image) { %>
+                    <img src="<%= event.featured_image %>" class="img-fluid rounded mb-4" alt="<%= event.event_name %>">
+                <% } %>
+                
+                <h1><%= event.event_name %></h1>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <strong>Date:</strong> <%= new Date(event.event_date).toLocaleDateString() %>
+                        </p>
+                        <% if (event.event_time) { %>
+                            <p class="mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <strong>Time:</strong> <%= event.event_time %>
+                            </p>
+                        <% } %>
+                    </div>
+                    <div class="col-md-6">
+                        <% if (event.location) { %>
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <strong>Location:</strong> <%= event.location %>
+                            </p>
+                        <% } %>
+                        <p class="mb-2">
+                            <i class="fas fa-users text-primary me-2"></i>
+                            <strong>Capacity:</strong> <%= event.capacity %>
+                        </p>
+                    </div>
+                </div>
+                
+                <% if (event.event_desc) { %>
+                    <div class="mb-4">
+                        <h3>Event Description</h3>
+                        <p><%= event.event_desc %></p>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card sticky-top">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-ticket-alt me-2"></i>Ticket Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Price per ticket:</span>
+                                <span class="fw-bold text-success">$<%= parseFloat(event.ticket_price).toFixed(2) %></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Available tickets:</span>
+                                <span class="badge bg-info"><%= event.available_tickets %></span>
+                            </div>
+                        </div>
+                        
+                        <% if (user) { %>
+                            <% if (event.available_tickets > 0) { %>
+                                <form action="/events/<%= event.event_id %>/reserve" method="POST">
+                                    <div class="mb-3">
+                                        <label for="quantity" class="form-label">Quantity:</label>
+                                        <select class="form-select" name="quantity" id="quantity" required>
+                                            <% for (let i = 1; i <= Math.min(5, event.available_tickets); i++) { %>
+                                                <option value="<%= i %>"><%= i %></option>
+                                            <% } %>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-shopping-cart me-2"></i>Reserve Tickets
+                                    </button>
+                                </form>
+                                
+                                <small class="text-muted d-block mt-2">
+                                    Tickets will be reserved for 10 minutes
+                                </small>
+                            <% } else { %>
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fas fa-times me-2"></i>Sold Out
+                                </button>
+                            <% } %>
+                        <% } else { %>
+                            <a href="/login" class="btn btn-primary w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Buy Tickets
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <% if (userTickets && userTickets.length > 0) { %>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Your Tickets</h6>
+                        </div>
+                        <div class="card-body">
+                            <% userTickets.forEach(function(ticket) { %>
+                                <div class="border rounded p-2 mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Quantity: <%= ticket.quantity %></span>
+                                        <span class="badge bg-<%= ticket.status === 'confirmed' ? 'success' : ticket.status === 'reserved' ? 'warning' : 'secondary' %>">
+                                            <%= ticket.status %>
+                                        </span>
+                                    </div>
+                                    <% if (ticket.confirmation_code) { %>
+                                        <small class="text-muted">Code: <%= ticket.confirmation_code %></small>
+                                    <% } %>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <%- include('partials/footer') %>
+    
+</body>
+</html>
