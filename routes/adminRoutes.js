@@ -32,12 +32,12 @@ router.get('/admin/faq', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.redirect('/');
   }
-  res.render('admin/faq-dashboard', { user: req.session.user, success: req.query.success });
+  res.render('admin_faqs', { user: req.session.user, success: req.query.success });
 });
 
 // Admin Matches Dashboard
 router.get('/admin/matches', isAdmin, (req, res) => {
-  res.render('admin/matches-dashboard');
+  res.render('admin_matches');
 });
 
 // Admin Create Match Page
