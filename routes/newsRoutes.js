@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../models/db');
+const { getConnection } = require('../models/db');
 const { isAuthenticated } = require('../models/auth');
 const sanitizeHtml = require('sanitize-html');
 
@@ -24,6 +24,7 @@ router.get('/', async (req, res) => {
     params.push(`%${search}%`);
   }
   try {
+    const db = getConnection();
     // Get all news articles (no pagination)
     const [newsRows] = await db.query(
       `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
@@ -63,6 +64,7 @@ router.get('/bookmarked-news', async (req, res) => {
   }
   const userId = req.session.user.user_id;
   try {
+    const db = getConnection();
     const [rows] = await db.query(
       `SELECT n.*, ub.bookmarked_at FROM news n JOIN user_bookmarks ub ON n.news_id = ub.news_id WHERE ub.user_id = ? AND n.status = 'published' ORDER BY ub.bookmarked_at DESC`,
       [userId]
@@ -82,6 +84,7 @@ router.get('/:id', async (req, res) => {
   const newsId = parseInt(req.params.id);
   if (isNaN(newsId)) return res.redirect('/news');
   try {
+    const db = getConnection();
     const [rows] = await db.query('SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id WHERE n.news_id = ?', [newsId]);
     if (rows.length === 0) return res.redirect('/news');
     const article = rows[0];
@@ -145,6 +148,7 @@ router.get('/api/news', async (req, res) => {
     params.push(`%${search}%`);
   }
   try {
+    const db = getConnection();
     const [newsRows] = await db.query(
       `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id ${where} ORDER BY published_at DESC`,
       params
@@ -170,6 +174,7 @@ router.get('/bookmarked-news', async (req, res) => {
   }
   const userId = req.session.user.user_id;
   try {
+    const db = getConnection();
     const [rows] = await db.query(
       `SELECT n.*, ub.bookmarked_at FROM news n JOIN user_bookmarks ub ON n.news_id = ub.news_id WHERE ub.user_id = ? AND n.status = 'published' ORDER BY ub.bookmarked_at DESC`,
       [userId]

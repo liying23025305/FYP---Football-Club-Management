@@ -1,5 +1,5 @@
 // models/matches.js
-const db = require('./db');
+const { getConnection } = require('./db');
 
 // Get all matches with optional filters (season, status, competition, search)
 exports.getAllMatches = async (filters) => {
@@ -22,18 +22,21 @@ exports.getAllMatches = async (filters) => {
     params.push(`%${filters.search}%`, `%${filters.search}%`);
   }
   sql += ' ORDER BY match_date DESC';
+  const db = getConnection();
   const [rows] = await db.query(sql, params);
   return rows;
 };
 
 // Get a single match by ID
 exports.getMatchById = async (id) => {
+  const db = getConnection();
   const [rows] = await db.query('SELECT * FROM matches WHERE match_id = ?', [id]);
   return rows[0];
 };
 
 // Create a new match
 exports.createMatch = async (data) => {
+  const db = getConnection();
   const sql = `INSERT INTO matches (home_team, away_team, home_score, away_score, season, competition, match_date, venue, status, result, match_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const params = [
     data.home_team,
@@ -54,6 +57,7 @@ exports.createMatch = async (data) => {
 
 // Update an existing match
 exports.updateMatch = async (id, data) => {
+  const db = getConnection();
   const sql = `UPDATE matches SET home_team=?, away_team=?, home_score=?, away_score=?, season=?, competition=?, match_date=?, venue=?, status=?, result=?, match_notes=? WHERE match_id=?`;
   const params = [
     data.home_team,
@@ -75,18 +79,21 @@ exports.updateMatch = async (id, data) => {
 
 // Delete a match from the database
 exports.deleteMatch = async (id) => {
+  const db = getConnection();
   const [result] = await db.query('DELETE FROM matches WHERE match_id = ?', [id]);
   return result;
 };
 
 // Get all available seasons (distinct)
 exports.getSeasons = async () => {
+  const db = getConnection();
   const [rows] = await db.query('SELECT DISTINCT season FROM matches WHERE season IS NOT NULL ORDER BY season DESC');
   return rows;
 };
 
 // Get match statistics (total, win, loss, draw)
 exports.getMatchStats = async () => {
+  const db = getConnection();
   const [rows] = await db.query(`
     SELECT
       COUNT(*) as total,
@@ -100,6 +107,7 @@ exports.getMatchStats = async () => {
 
 // PATCH: Update only match notes
 exports.patchMatchNotes = async (id, match_notes) => {
+  const db = getConnection();
   const sql = 'UPDATE matches SET match_notes=? WHERE match_id=?';
   const [result] = await db.query(sql, [match_notes, id]);
   return result;

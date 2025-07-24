@@ -8,12 +8,4 @@ router.get('/', (req, res) => {
   });
 });
 
-
-
-router.get('/news', (req, res) => {
-  res.render('news', {
-    user: req.session.user || null
-  });
-});
-
 module.exports = router;

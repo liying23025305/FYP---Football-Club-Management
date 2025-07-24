@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const matchesController = require('../controllers/matchesController');
 const { isAdmin } = require('../models/auth'); // Use existing admin middleware
+const { getConnection } = require('../models/db');
 
 // Correct order:
 router.get('/api/matches/seasons', matchesController.getSeasons);
@@ -21,5 +22,10 @@ router.patch('/api/matches/:id/notes', isAdmin, matchesController.patchMatchNote
 
 // DELETE /api/matches/:id - Soft delete match (admin only)
 router.delete('/api/matches/:id', isAdmin, matchesController.deleteMatch);
+
+// UI route for /matches
+router.get('/matches', (req, res) => {
+  res.render('matches', { user: req.session.user || null });
+});
 
 module.exports = router;

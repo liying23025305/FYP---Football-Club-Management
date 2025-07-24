@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../models/db');
+const { getConnection } = require('../models/db');
 
 // Middleware for admin authentication
 function isAdmin(req, res, next) {
@@ -26,6 +26,7 @@ function validateFaqInput(question, answer, status, category, is_published) {
 // Test database connection
 function testDbConnection() {
   return new Promise((resolve, reject) => {
+    const db = getConnection();
     db.query('SELECT 1', (err, results) => {
       if (err) {
         console.error('Database connection test failed:', err);
@@ -59,6 +60,7 @@ router.get('/api/faqs', async (req, res) => {
   console.log('Executing SQL:', sql);
   console.log('With params:', params);
   try {
+    const db = getConnection();
     const [results] = await db.query(sql, params);
     console.log('FAQ query results:', results.length, 'records found');
     res.json({ success: true, data: results });
@@ -87,6 +89,7 @@ router.post('/api/faqs', async (req, res) => {
     });
   }
   try {
+    const db = getConnection();
     // If no user session, check or create anonymous user
     if (!userId) {
       const [anonRows] = await db.query(`SELECT user_id FROM users WHERE username = 'anonymous' LIMIT 1`);
@@ -119,6 +122,11 @@ router.post('/api/faqs', async (req, res) => {
   }
 });
 
+// UI route for /faqs
+router.get('/faqs', (req, res) => {
+  res.render('faqs', { user: req.session.user || null });
+});
+
 // =========================
 // ADMIN ENDPOINTS
 // =========================
@@ -135,6 +143,7 @@ router.get('/api/admin/faqs', isAdmin, async (req, res) => {
   }
   sql += ' ORDER BY display_order ASC, published_at DESC, created_at DESC';
   try {
+    const db = getConnection();
     const [results] = await db.query(sql, params);
     res.json({ success: true, data: Array.isArray(results) ? results : [] });
   } catch (err) {
@@ -158,6 +167,7 @@ router.post('/api/admin/faqs', isAdmin, async (req, res) => {
     params = [question, answer, status, display_order || 0, users_user_id, category];
   }
   try {
+    const db = getConnection();
     const [result] = await db.query(sql, params);
     res.json({ success: true, faq_id: result.insertId });
   } catch (err) {
@@ -183,6 +193,7 @@ router.put('/api/admin/faqs/:id', isAdmin, async (req, res) => {
     params = [question, answer, status, display_order || 0, category, faqId];
   }
   try {
+    const db = getConnection();
     const [result] = await db.query(sql, params);
     res.json({ success: true });
   } catch (err) {
@@ -196,6 +207,7 @@ router.delete('/api/admin/faqs/:id', isAdmin, async (req, res) => {
   console.log('DELETE /api/admin/faqs/:id called');
   const faqId = req.params.id;
   try {
+    const db = getConnection();
     await db.query('DELETE FROM faq WHERE faq_id = ?', [faqId]);
     res.json({ success: true });
   } catch (err) {
@@ -205,8 +217,10 @@ router.delete('/api/admin/faqs/:id', isAdmin, async (req, res) => {
 
 // GET /admin/faq/:id/edit - Render edit form for a single FAQ (admin)
 router.get('/admin/faq/:id/edit', isAdmin, async (req, res) => {
+  console.log('GET /admin/faq/:id/edit called');
   const faqId = req.params.id;
   try {
+    const db = getConnection();
     const [faqRows] = await db.query('SELECT * FROM faq WHERE faq_id = ?', [faqId]);
     if (!faqRows || faqRows.length === 0) {
       return res.status(404).send('FAQ not found');
@@ -219,12 +233,14 @@ router.get('/admin/faq/:id/edit', isAdmin, async (req, res) => {
 
 // POST /admin/faq/:id/edit - Update FAQ in the database (admin)
 router.post('/admin/faq/:id/edit', isAdmin, async (req, res) => {
+  console.log('POST /admin/faq/:id/edit called');
   const faqId = req.params.id;
   const { question, answer, category, status, is_published, display_order } = req.body;
   if (!question || !status) {
     return res.status(400).send('Question and status are required');
   }
   try {
+    const db = getConnection();
     let sql, params;
     if (is_published === 'yes') {
       sql = `UPDATE faq SET question=?, answer=?, category=?, status=?, is_published='yes', display_order=?, published_at=IFNULL(published_at, NOW()) WHERE faq_id=?`;

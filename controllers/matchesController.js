@@ -24,7 +24,8 @@ exports.getAllMatches = async (req, res) => {
     }
     res.json(matches);
   } catch (err) {
-    res.status(500).json({ error: 'Database error' });
+    console.error('GetAllMatches DB error:', err.message, err.stack);
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 };
 
