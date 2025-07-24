@@ -88,6 +88,10 @@
       publishTypeRadios.forEach(r => r.addEventListener('change', updateForm));
       updateForm();
       form.addEventListener('submit', function(e) {
+        // Ensure TinyMCE content is synced to textarea before submit
+        if (window.tinymce) {
+          tinymce.triggerSave();
+        }
         const selected = document.querySelector('input[name="publish_type"]:checked').value;
         if (selected === 'schedule') {
           if (!publishDateInput.value) {

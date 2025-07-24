@@ -34,6 +34,7 @@ router.post('/loginAccount', async (req, res) => {
     );
     
     if (users.length === 0) {
+      console.log('No user found for:', login_username);
       return res.render('login', { 
         error: 'Invalid username/email or password',
         query: req.query 
@@ -41,7 +42,11 @@ router.post('/loginAccount', async (req, res) => {
     }
     
     const user = users[0];
+    console.log('User from DB:', user);
+    console.log('Password from form:', login_password);
+    console.log('Password hash from DB:', user.password);
     const isValidPassword = await bcrypt.compare(login_password, user.password);
+    console.log('Password match:', isValidPassword);
     
     if (!isValidPassword) {
       return res.render('login', { 

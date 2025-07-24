@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../../models/db');
+const { getConnection } = require('../../models/db');
 const { isAuthenticated } = require('../../models/auth');
 const multer = require('multer');
 const path = require('path');
@@ -9,7 +9,8 @@ const upload = multer({ dest: 'public/images/news/' });
 // GET /admin/news - News dashboard & Bookmark Count
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const [newsRows] = await db.query(
+    const db = getConnection();
+    const [newsRows] = await db.execute(
       `SELECT n.*, u.username as author_name, 
         COALESCE(bc.bookmark_count, 0) as bookmark_count
       FROM news n
@@ -21,9 +22,8 @@ router.get('/', isAuthenticated, async (req, res) => {
       ) bc ON n.news_id = bc.news_id
       ORDER BY n.created_at DESC`
     );
-    
     // Stats
-    const [statsRows] = await db.query(
+    const [statsRows] = await db.execute(
       `SELECT 
         COUNT(*) as total,
         SUM(status = 'published') as published,
@@ -47,6 +47,7 @@ router.get('/create', isAuthenticated, (req, res) => {
 // POST /admin/news - Create news
 router.post('/', isAuthenticated, upload.single('featured_image'), async (req, res) => {
   try {
+    const db = getConnection();
     let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
     if (req.file) {
@@ -61,7 +62,7 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
     if (status === 'draft' && (!published_at || new Date(published_at) <= new Date())) {
       published_at = null;
     }
-    await db.query(
+    await db.execute(
       'INSERT INTO news (title, summary, content, featured_image, category, status, published_at, users_user_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ' + (status === 'published' && !published_at ? 'CURRENT_TIMESTAMP' : '?') + ', ?, ?)',
       status === 'published' && !published_at
         ? [title, summary, content, featured_image, category, status, user_id, user_id]
@@ -77,8 +78,9 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
 // GET /admin/news/:id/edit - Edit news form
 router.get('/:id/edit', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
-    const [rows] = await db.query('SELECT * FROM news WHERE news_id = ?', [newsId]);
+    const [rows] = await db.execute('SELECT * FROM news WHERE news_id = ?', [newsId]);
     if (rows.length === 0) return res.redirect('/admin/news');
     const article = rows[0];
     res.render('admin/news-edit', { article });
@@ -91,6 +93,7 @@ router.get('/:id/edit', isAuthenticated, async (req, res) => {
 // PUT /admin/news/:id - Update news
 router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
     let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
@@ -116,7 +119,7 @@ router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req,
     }
     updateSql += ' WHERE news_id=?';
     params.push(newsId);
-    await db.query(updateSql, params);
+    await db.execute(updateSql, params);
     res.redirect('/admin/news?success=updated');
   } catch (err) {
     console.error('Error updating news:', err);
@@ -127,8 +130,9 @@ router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req,
 // DELETE /admin/news/:id - Delete news
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
-    await db.query('DELETE FROM news WHERE news_id = ?', [newsId]);
+    await db.execute('DELETE FROM news WHERE news_id = ?', [newsId]);
     res.redirect('/admin/news');
   } catch (err) {
     console.error('Error deleting news:', err);
@@ -139,9 +143,10 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
 // POST /admin/news/:id/publish - Publish news
 router.post('/:id/publish', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
     // Set status to published and published_at to CURRENT_TIMESTAMP
-    await db.query('UPDATE news SET status = "published", published_at = CURRENT_TIMESTAMP WHERE news_id = ?', [newsId]);
+    await db.execute('UPDATE news SET status = "published", published_at = CURRENT_TIMESTAMP WHERE news_id = ?', [newsId]);
     res.redirect('/admin/news');
   } catch (err) {
     console.error('Error publishing news:', err);
@@ -152,9 +157,10 @@ router.post('/:id/publish', isAuthenticated, async (req, res) => {
 // POST /admin/news/:id/unpublish - Unpublish news (set to draft)
 router.post('/:id/unpublish', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
     // Set status to draft and published_at to NULL
-    await db.query('UPDATE news SET status = "draft", published_at = NULL WHERE news_id = ?', [newsId]);
+    await db.execute('UPDATE news SET status = "draft", published_at = NULL WHERE news_id = ?', [newsId]);
     res.redirect('/admin/news');
   } catch (err) {
     console.error('Error unpublishing news:', err);
@@ -192,7 +198,8 @@ router.get('/api/list', isAuthenticated, async (req, res) => {
     params.push(`%${search}%`);
   }
   try {
-    const [newsRows] = await db.query(
+    const db = getConnection();
+    const [newsRows] = await db.execute(
       `SELECT n.*, u.username as author_name,
               COALESCE(bc.bookmark_count, 0) as bookmark_count
        FROM news n
@@ -216,7 +223,8 @@ router.get('/api/list', isAuthenticated, async (req, res) => {
 // GET /admin/news/scheduled - Get scheduled articles (status='draft' and published_at in future)
 router.get('/scheduled', isAuthenticated, async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const db = getConnection();
+    const [rows] = await db.execute(
       `SELECT n.*, u.username as author_name FROM news n JOIN users u ON n.users_user_id = u.user_id
         WHERE n.status = 'draft' AND n.published_at IS NOT NULL AND n.published_at > CURRENT_TIMESTAMP
         ORDER BY n.published_at ASC`
@@ -231,10 +239,11 @@ router.get('/scheduled', isAuthenticated, async (req, res) => {
 // POST /admin/news/:id/schedule - Schedule an article for future publication
 router.post('/:id/schedule', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     const newsId = parseInt(req.params.id);
     const { published_at } = req.body;
     if (!published_at) return res.status(400).json({ success: false, error: 'Missing publish date/time' });
-    await db.query('UPDATE news SET published_at = ?, status = "draft" WHERE news_id = ?', [published_at, newsId]);
+    await db.execute('UPDATE news SET published_at = ?, status = "draft" WHERE news_id = ?', [published_at, newsId]);
     res.json({ success: true });
   } catch (err) {
     console.error('Error scheduling news:', err);
@@ -245,15 +254,16 @@ router.post('/:id/schedule', isAuthenticated, async (req, res) => {
 // POST /admin/news/auto-publish - Manually trigger auto-publish (for testing)
 router.post('/auto-publish', isAuthenticated, async (req, res) => {
   try {
+    const db = getConnection();
     // Find articles ready to publish
-    const [rows] = await db.query(`
+    const [rows] = await db.execute(`
       SELECT news_id FROM news
       WHERE status = 'draft'
         AND published_at IS NOT NULL
         AND published_at <= CURRENT_TIMESTAMP
     `);
     if (rows.length > 0) {
-      await db.query(`
+      await db.execute(`
         UPDATE news
         SET status = 'published', updated_at = CURRENT_TIMESTAMP
         WHERE status = 'draft'
@@ -271,7 +281,8 @@ router.post('/auto-publish', isAuthenticated, async (req, res) => {
 // GET /admin/news/scheduled-count - Get count of scheduled articles
 router.get('/scheduled-count', isAuthenticated, async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const db = getConnection();
+    const [rows] = await db.execute(
       `SELECT COUNT(*) as scheduled_count FROM news WHERE status = 'draft' AND published_at IS NOT NULL AND published_at > CURRENT_TIMESTAMP`
     );
     res.json({ success: true, scheduled_count: rows[0].scheduled_count });

@@ -984,21 +984,8 @@ router.get('/admin/orders', isAuthenticated, isAdmin, async (req, res) => {
   res.render('admin_orders', { user: req.session.user, orders });
 });
 
-//manage news 
-router.get('/admin/news', isAuthenticated, isAdmin, async (req, res) => {
-  const db = getConnection();
-  const [news] = await db.execute('SELECT * FROM news ORDER BY created_at DESC');
-  res.render('admin_news', { user: req.session.user, news });
-});
-
-//manage faq 
-router.get('/admin/faqs', isAuthenticated, isAdmin, async (req, res) => {
-  const db = getConnection();
-  const [faqs] = await db.execute('SELECT * FROM faq ORDER BY display_order ASC');
-  res.render('admin_faqs', { user: req.session.user, faqs });
-});
-
-//manage players 
+// manage news 
+// manage news 
 router.get('/admin/players', isAuthenticated, isAdmin, async (req, res) => {
   const db = getConnection();
   const [players] = await db.execute('SELECT * FROM players ORDER BY player_name ASC');
@@ -1150,6 +1137,12 @@ router.get('/my-orders', isAuthenticated, async (req, res) => {
     order.items = itemsByOrder[order.order_id] || [];
   });
   res.render('my_orders', { user: req.session.user, orders });
+});
+
+// Admin Matches Management
+router.get('/admin/matches', isAuthenticated, isAdmin, async (req, res) => {
+  // TODO: Fetch matches data if needed
+  res.render('admin_matches', { user: req.session.user });
 });
 
 module.exports = router;

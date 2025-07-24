@@ -11,6 +11,7 @@ const stripe = require('stripe')(require('./config/stripe_config').stripeSecretK
 const app = express();
 const stripeConfig = require('./config/stripe_config.js');
 const dotenv = require('dotenv');
+const methodOverride = require('method-override');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -61,6 +62,7 @@ const cleanupExpiredReservations = async (req, res, next) => {
 };
 
 app.use(cleanupExpiredReservations);
+app.use(methodOverride('_method'));
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -90,6 +92,7 @@ app.use('/', membershipRoutes);
 app.use('/', eventsRoutes);
 app.use('/', ticketsRoutes);
 app.use('/', adminRoutes);
+app.use('/admin/news', adminNewsRoutes);
 app.use('/', staticRoutes);
 app.use('/', cartRoutes);
 app.use('/', storeRoutes);
@@ -99,7 +102,6 @@ app.use('/unified-payments', unifiedPaymentsRoutes);
 app.use('/', playersRoutes);
 app.use('/', scheduleRoutes);
 app.use('/news', newsRoutes);
-app.use('/admin/news', adminNewsRoutes);
 app.use(faqRoutes);
 app.use('/api/bookmarks', bookmarksRoutes);
 app.use(matchRoutes);
