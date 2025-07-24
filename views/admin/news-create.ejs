@@ -10,7 +10,10 @@
 <body>
   <div class="container mt-5">
     <h2>Create News Article</h2>
-    <form action="/admin/news" method="POST" enctype="multipart/form-data" class="mt-4">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <form action="/admin/news" method="POST" enctype="multipart/form-data" class="mt-4" novalidate>
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
         <input type="text" class="form-control" id="title" name="title" maxlength="200" required>
@@ -88,10 +91,27 @@
       publishTypeRadios.forEach(r => r.addEventListener('change', updateForm));
       updateForm();
       form.addEventListener('submit', function(e) {
-        // Ensure TinyMCE content is synced to textarea before submit
         if (window.tinymce) {
           tinymce.triggerSave();
         }
+        // Custom validation for required fields
+        let valid = true;
+        const requiredFields = ['title', 'summary', 'content'];
+        requiredFields.forEach(function(name) {
+          const el = form.querySelector('[name="' + name + '"]');
+          if (el && !el.value.trim()) {
+            valid = false;
+            el.classList.add('is-invalid');
+          } else if (el) {
+            el.classList.remove('is-invalid');
+          }
+        });
+        if (!valid) {
+          e.preventDefault();
+          alert('Please fill in all required fields.');
+          return false;
+        }
+        // Schedule validation
         const selected = document.querySelector('input[name="publish_type"]:checked').value;
         if (selected === 'schedule') {
           if (!publishDateInput.value) {
@@ -108,5 +128,6 @@
       });
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

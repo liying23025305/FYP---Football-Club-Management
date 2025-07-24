@@ -71,7 +71,7 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
     res.redirect('/admin/news?success=created');
   } catch (err) {
     console.error('Error creating news:', err);
-    res.redirect('/admin/news');
+    res.render('admin/news-create', { error: 'Failed to create news. Please check your input and try again.' });
   }
 });
 

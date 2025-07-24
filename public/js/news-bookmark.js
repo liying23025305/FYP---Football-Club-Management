@@ -3,8 +3,11 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Event delegation for all bookmark buttons
   document.body.addEventListener('click', async function (e) {
+    // Only respond to left mouse button
+    if (e.button !== 0) return;
     const btn = e.target.closest('.bookmark-btn');
     if (!btn) return;
+    console.log('Bookmark button clicked:', btn);
     e.preventDefault();
     e.stopPropagation();
     await toggleBookmark(btn);
@@ -14,8 +17,16 @@ document.addEventListener('DOMContentLoaded', function () {
 async function toggleBookmark(button) {
   if (!button) return;
   const newsId = button.getAttribute('data-news-id');
-  const icon = button.querySelector('.bookmark-icon');
-  if (!newsId || !icon) return;
+  // Find the icon inside the button, even if the click was on the icon
+  let icon = button.querySelector('.bookmark-icon');
+  if (!icon && button.classList.contains('bookmark-icon')) {
+    icon = button;
+  }
+  if (!newsId || !icon) {
+    console.log('Missing newsId or icon', { newsId, icon });
+    return;
+  }
+  console.log('Toggling bookmark for newsId:', newsId);
   const isBookmarked = icon.classList.contains('bookmarked') || icon.classList.contains('bi-bookmark-fill');
   button.disabled = true;
   try {
@@ -23,12 +34,13 @@ async function toggleBookmark(button) {
       // Remove bookmark
       const res = await fetch(`/api/bookmarks/${newsId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
       const data = await res.json();
+      console.log('Remove bookmark response:', data);
       if (data.success) {
         icon.classList.remove('bookmarked', 'bi-bookmark-fill');
         icon.classList.add('bi-bookmark');
         showBookmarkToast('Bookmark removed');
         // If on bookmarked news page, remove the card
-        if (window.location.pathname === '/bookmarked-news') {
+        if (window.location.pathname === '/news/bookmarked-news') {
           const card = button.closest('.col-md-3');
           if (card) card.remove();
           // Show empty state if no more bookmarks
@@ -49,6 +61,7 @@ async function toggleBookmark(button) {
         credentials: 'include'
       });
       const data = await res.json();
+      console.log('Add bookmark response:', data);
       if (data.success) {
         icon.classList.add('bookmarked', 'bi-bookmark-fill');
         icon.classList.remove('bi-bookmark');
@@ -58,6 +71,7 @@ async function toggleBookmark(button) {
       }
     }
   } catch (err) {
+    console.error('Bookmark network error:', err);
     showBookmarkToast('Network error', true);
   } finally {
     button.disabled = false;

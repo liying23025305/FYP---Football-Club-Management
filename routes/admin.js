@@ -7,6 +7,7 @@ const { validateRegistration, validateMembershipTier,calculateAge,validatePasswo
 const multer = require('multer');
 const path = require('path');
 const router = express.Router();
+const newsAdminRouter = require('./admin/newsAdmin');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -984,8 +985,7 @@ router.get('/admin/orders', isAuthenticated, isAdmin, async (req, res) => {
   res.render('admin_orders', { user: req.session.user, orders });
 });
 
-// manage news 
-// manage news 
+// manage players 
 router.get('/admin/players', isAuthenticated, isAdmin, async (req, res) => {
   const db = getConnection();
   const [players] = await db.execute('SELECT * FROM players ORDER BY player_name ASC');
@@ -1144,5 +1144,7 @@ router.get('/admin/matches', isAuthenticated, isAdmin, async (req, res) => {
   // TODO: Fetch matches data if needed
   res.render('admin_matches', { user: req.session.user });
 });
+
+router.use('/admin/news', newsAdminRouter);
 
 module.exports = router;
