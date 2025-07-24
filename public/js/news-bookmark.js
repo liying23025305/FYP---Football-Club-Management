@@ -70,6 +70,27 @@ async function toggleBookmark(button) {
         setTimeout(() => { window.location.href = '/login'; }, 1500);
         return;
       }
+      if (res.status === 409) {
+        // Already bookmarked, so toggle to unbookmark
+        const delRes = await fetch(`/api/bookmarks/${newsId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+        const delData = await delRes.json();
+        if (delData.success) {
+          icon.classList.remove('bookmarked', 'bi-bookmark-fill');
+          icon.classList.add('bi-bookmark');
+          showBookmarkToast('Bookmark removed');
+          if (window.location.pathname === '/news/bookmarked-news') {
+            const card = button.closest('.col-md-3');
+            if (card) card.remove();
+            const list = document.getElementById('bookmarked-news-list');
+            if (list && list.children.length === 0) {
+              list.innerHTML = '<div class="col-12 text-center text-muted py-5"><h4>No bookmarked articles yet.</h4></div>';
+            }
+          }
+        } else {
+          showBookmarkToast(delData.error || 'Failed to remove bookmark', true);
+        }
+        return;
+      }
       const data = await res.json();
       console.log('Add bookmark response:', data);
       if (data.success) {

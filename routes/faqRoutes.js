@@ -127,6 +127,11 @@ router.get('/faqs', (req, res) => {
   res.render('faqs', { user: req.session.user || null });
 });
 
+// UI route for /admin/faqs (Admin FAQ Dashboard)
+router.get('/admin/faqs', isAdmin, (req, res) => {
+  res.render('admin_faqs', { user: req.session.user || null });
+});
+
 // =========================
 // ADMIN ENDPOINTS
 // =========================

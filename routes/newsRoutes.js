@@ -58,10 +58,7 @@ router.get('/', async (req, res) => {
 });
 
 // Render Bookmarked News Page
-router.get('/bookmarked-news', async (req, res) => {
-  if (!req.session.loggedIn || !req.session.user) {
-    return res.redirect('/login');
-  }
+router.get('/bookmarked-news', isAuthenticated, async (req, res) => {
   const userId = req.session.user.user_id;
   try {
     const db = getConnection();
