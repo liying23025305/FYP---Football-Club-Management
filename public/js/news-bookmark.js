@@ -33,6 +33,11 @@ async function toggleBookmark(button) {
     if (isBookmarked) {
       // Remove bookmark
       const res = await fetch(`/api/bookmarks/${newsId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+      if (res.status === 401) {
+        showBookmarkToast('Please log in to bookmark news.', true);
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+        return;
+      }
       const data = await res.json();
       console.log('Remove bookmark response:', data);
       if (data.success) {
@@ -60,6 +65,11 @@ async function toggleBookmark(button) {
         body: JSON.stringify({ news_id: newsId }),
         credentials: 'include'
       });
+      if (res.status === 401) {
+        showBookmarkToast('Please log in to bookmark news.', true);
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+        return;
+      }
       const data = await res.json();
       console.log('Add bookmark response:', data);
       if (data.success) {

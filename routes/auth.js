@@ -7,6 +7,12 @@ const router = express.Router();
 
 // Login Routes
 router.get('/login', (req, res) => {
+  if (req.session.user && req.session.returnTo) {
+    // If user is logged in and there is a returnTo, redirect there
+    const redirectTo = req.session.returnTo;
+    delete req.session.returnTo;
+    return res.redirect(redirectTo);
+  }
   if (req.session.user) {
     return res.redirect(req.session.user.role === 'admin' ? '/admin/dashboard' : '/profile');
   }
@@ -63,12 +69,10 @@ router.post('/loginAccount', async (req, res) => {
       surname: user.surname,
       role: user.role
     };
-    
-    if (user.role === 'admin') {
-      return res.redirect('/admin/dashboard');
-    } else {
-      return res.redirect('/profile');
-    }
+    // Redirect to originally requested page if present
+    const redirectTo = req.session.returnTo || (user.role === 'admin' ? '/admin/dashboard' : '/profile');
+    delete req.session.returnTo;
+    return res.redirect(redirectTo);
   } catch (error) {
     console.error('Login error:', error);
     res.render('login', { 

@@ -3,6 +3,12 @@ const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
         next();
     } else {
+        // If AJAX/API request, return 401 JSON
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            return res.status(401).json({ success: false, error: 'Not authenticated' });
+        }
+        // Store original URL for redirect after login
+        req.session.returnTo = req.originalUrl;
         if (req.originalUrl === '/login' || req.originalUrl === '/register') {
             next();
         } else {
