@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const addFaqBtn = document.getElementById('add-faq-btn');
           if (addFaqBtn) addFaqBtn.focus();
           setTimeout(() => {
-            window.location.assign('/admin/faq?success=updated');
+            window.location.assign('/admin/faqs?success=updated');
           }, 300);
           return;
         } else {
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const addFaqBtn = document.getElementById('add-faq-btn');
           if (addFaqBtn) addFaqBtn.focus();
           setTimeout(() => {
-            window.location.assign('/admin/faq?success=created');
+            window.location.assign('/admin/faqs?success=created');
           }, 300);
           return;
         }

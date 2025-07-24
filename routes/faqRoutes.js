@@ -255,7 +255,8 @@ router.post('/admin/faq/:id/edit', isAdmin, async (req, res) => {
       params = [question, answer, category, status, display_order || 0, faqId];
     }
     await db.query(sql, params);
-    res.redirect('/admin/faq');
+    // Instead of redirecting to /admin/faq, redirect to /admin/faqs with success message
+    res.redirect('/admin/faqs?success=updated');
   } catch (err) {
     res.status(500).send('Database error');
   }
