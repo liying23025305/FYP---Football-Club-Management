@@ -1145,6 +1145,27 @@ router.get('/admin/matches', isAuthenticated, isAdmin, async (req, res) => {
   res.render('admin_matches', { user: req.session.user });
 });
 
+// Add Match - render form
+router.get('/admin/matches-create', isAuthenticated, isAdmin, (req, res) => {
+  res.render('admin/matches-create', { user: req.session.user });
+});
+
+// Edit Match - render form
+router.get('/admin/matches-edit', isAuthenticated, isAdmin, async (req, res) => {
+  const matchId = req.query.id;
+  let match = null;
+  if (matchId) {
+    try {
+      const db = getConnection();
+      const [rows] = await db.execute('SELECT * FROM matches WHERE match_id = ?', [matchId]);
+      if (rows.length > 0) match = rows[0];
+    } catch (err) {
+      console.error('Error fetching match for edit:', err);
+    }
+  }
+  res.render('admin/matches-edit', { user: req.session.user, match });
+});
+
 router.use('/admin/news', newsAdminRouter);
 
 module.exports = router;

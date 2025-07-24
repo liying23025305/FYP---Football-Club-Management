@@ -16,7 +16,7 @@ INSERT INTO `faq` (`question`, `category`, `answer`, `status`, `is_published`, `
 ('How do I purchase match tickets?', 'Tickets', 'You can purchase match tickets directly from our official website by navigating to the "Tickets" section and selecting your desired match.', 'answered', 'yes', 1, 1),
 ('What are the benefits of a membership?', 'Membership', 'Our membership tiers offer various benefits including discounted tickets, exclusive merchandise access, and priority event invitations. Please refer to the "Membership" page for full details.', 'answered', 'yes', 3, 1),
 ('I forgot my password. How can I reset it?', 'Technical', 'To reset your password, click on "Forgot Password" on the login page and follow the instructions sent to your registered email address.', 'answered', 'yes', 1, 1),
-('Can I exchange my gear if it doesn\'t fit?', 'Store', 'Yes, we offer exchanges for gear within 30 days of purchase, provided the item is unworn and in its original packaging. Please see our returns policy for more information.', 'answered', 'yes', 1, 1);
+('Can I exchange my gear if it does not fit?', 'Store', 'Yes, we offer exchanges for gear within 30 days of purchase, provided the item is unworn and in its original packaging. Please see our returns policy for more information.', 'answered', 'yes', 1, 1);
 
 -- For 'matches' table
 INSERT INTO `matches` (`home_team`, `away_team`, `home_score`, `away_score`, `season`, `competition`, `match_date`, `venue`, `status`, `result`, `match_notes`, `schedule_id`) VALUES
