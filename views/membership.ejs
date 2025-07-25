@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Membership - Football Club</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/stylesheet/style.css" />
+    <style>
+      .membership-card {
+        transition: transform 0.3s ease;
+        height: 100%;
+      }
+      .membership-card:hover {
+        transform: translateY(-5px);
+      }
+      .tier-bronze {
+        border-left: 5px solid #cd7f32;
+      }
+      .tier-silver {
+        border-left: 5px solid #c0c0c0;
+      }
+      .tier-gold {
+        border-left: 5px solid #ffd700;
+      }
+      .current-membership {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .expiring-soon {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+      .feature-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      .feature-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+      }
+      .feature-list li:last-child {
+        border-bottom: none;
+      }
+      .feature-list li i {
+        color: #28a745;
+        margin-right: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="mb-4"><i class="fas fa-crown me-2"></i>Membership</h1>
+
+          <!-- Success/Error Messages -->
+          <% if (typeof success !== 'undefined' && success) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <% if (success === 'purchased') { %> Membership purchased
+            successfully! Welcome to your new tier. <% } else if (success ===
+            'renewed') { %> Membership renewed successfully! Your membership is
+            now active. <% } %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          <% } %> <% if (typeof error !== 'undefined' && error) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <% if (error === 'invalid_tier') { %> Invalid membership tier
+            selected. <% } else if (error === 'already_active') { %> You already
+            have an active membership. Please wait until it expires to purchase
+            a new one. <% } else if (error === 'purchase_failed') { %> Failed to
+            purchase membership. Please try again. <% } else if (error ===
+            'no_expired_membership') { %> No expired membership found to renew.
+            <% } else if (error === 'renewal_failed') { %> Failed to renew
+            membership. Please try again. <% } %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          <% } %>
+
+          <!-- Current Membership Status -->
+          <% if (currentMembership) { %>
+          <div class="row mb-4">
+            <div class="col-12">
+              <div
+                class="card <%= currentMembership.status === 'active' ? 'current-membership' : 'expiring-soon' %>"
+              >
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <i class="fas fa-crown me-2"></i>Your Current Membership
+                  </h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6><%= currentMembership.tier_name %> Tier</h6>
+                      <p class="mb-1">
+                        <strong>Status:</strong>
+                        <span
+                          class="badge <%= currentMembership.status === 'active' ? 'bg-success' : 'bg-warning' %>"
+                        >
+                          <%= currentMembership.status.charAt(0).toUpperCase() +
+                          currentMembership.status.slice(1) %>
+                        </span>
+                      </p>
+                      <p class="mb-1">
+                        <strong>Join Date:</strong> <%= new
+                        Date(currentMembership.join_date).toLocaleDateString()
+                        %>
+                      </p>
+                      <p class="mb-1">
+                        <strong>Expiry Date:</strong> <%= new
+                        Date(currentMembership.expiry_date).toLocaleDateString()
+                        %>
+                      </p>
+                      <% if (currentMembership.status === 'active' &&
+                      currentMembership.days_remaining <= 7) { %>
+                      <p class="mb-0 fw-bold">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Expires in <%= currentMembership.days_remaining %>
+                        day(s)!
+                      </p>
+                      <% } %>
+                    </div>
+                    <div class="col-md-6">
+                      <h6>Your Benefits</h6>
+                      <p class="mb-1">
+                        <strong>Discount:</strong> <%=
+                        currentMembership.discount_percentage %>% on all
+                        purchases
+                      </p>
+                      <p class="mb-1">
+                        <strong>Cashback Rate:</strong> <%=
+                        currentMembership.cashback_rate %>%
+                      </p>
+                      <p class="mb-1">
+                        <strong>Cashback Accumulated:</strong> $<%=
+                        parseFloat(currentMembership.cashback_accumulated).toFixed(2)
+                        %>
+                      </p>
+
+                      <!-- For renewal -->
+                      <% if (currentMembership && currentMembership.status ===
+                      'expired') { %>
+                      <a
+                        href="/membership-payment/<%= currentMembership.tier_id %>?renewal=true"
+                        class="btn btn-success"
+                      >
+                        Renew Membership
+                      </a>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Available Membership Tiers -->
+          <% if (!currentMembership || currentMembership.status === 'expired') {
+          %>
+          <div class="row mb-4">
+            <div class="col-12">
+              <h3>Choose Your Membership Tier</h3>
+              <p class="text-muted">
+                Select a membership tier that suits your needs and enjoy
+                exclusive benefits!
+              </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <% tiers.forEach(function(tier) { %>
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div
+                class="card membership-card tier-<%= tier.tier_name.toLowerCase() %>"
+              >
+                <div class="card-header text-center bg-primary text-white">
+                  <h5 class="mb-0">
+                    <i class="fas fa-crown me-2"></i><%= tier.tier_name %>
+                  </h5>
+                  <h2 class="mt-2 mb-0">
+                    $<%= parseFloat(tier.price).toFixed(2) %>
+                  </h2>
+                  <small>for <%= tier.duration_months %> month(s)</small>
+                </div>
+                <div class="card-body">
+                  <p class="card-text"><%= tier.tier_desc %></p>
+
+                  <ul class="feature-list">
+                    <li>
+                      <i class="fas fa-percentage"></i>
+                      <strong><%= tier.discount_percentage %>%</strong> discount
+                      on all purchases
+                    </li>
+                    <li>
+                      <i class="fas fa-coins"></i>
+                      <strong><%= tier.cashback_rate %>%</strong> cashback on
+                      purchases
+                    </li>
+                    <li>
+                      <i class="fas fa-calendar"></i>
+                      <strong><%= tier.duration_months %></strong> month(s)
+                      membership
+                    </li>
+                    <li>
+                      <i class="fas fa-star"></i>
+                      Exclusive member benefits
+                    </li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                <a href="/membership-payment/<%= tier.tier_id %>" class="btn btn-primary btn-lg w-100">
+                    Purchase Now
+                </a>
+            </div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } else { %>
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h5>You currently have an active membership</h5>
+                  <p class="text-muted">
+                    You can purchase a new membership tier after your current
+                    membership expires.
+                  </p>
+                  <a href="/store" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag me-1"></i>Visit Store
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Membership Benefits Information -->
+          <div class="row mt-5">
+            <div class="col-12">
+              <h3>Membership Benefits</h3>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body text-center">
+                      <i class="fas fa-percentage fa-3x text-primary mb-3"></i>
+                      <h5>Exclusive Discounts</h5>
+                      <p>
+                        Save on all your purchases with member-exclusive
+                        discounts ranging from 5% to 15%!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body text-center">
+                      <i class="fas fa-coins fa-3x text-success mb-3"></i>
+                      <h5>Cashback Rewards</h5>
+                      <p>
+                        Earn cashback on every purchase. Higher tiers earn more
+                        cashback that you can use later!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body text-center">
+                      <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                      <h5>VIP Access</h5>
+                      <p>
+                        Get priority access to events, early ticket sales, and
+                        exclusive member-only content!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script>
+      const stripe = Stripe(
+        '<%= typeof stripePublishableKey !== "undefined" ? stripePublishableKey : "" %>'
+      );
+
+      // Handle membership purchase
+      document.querySelectorAll(".purchase-membership").forEach((button) => {
+        button.addEventListener("click", async function (e) {
+          e.preventDefault();
+
+          const tierId = this.dataset.tierId;
+          const tierName = this.dataset.tierName;
+          const tierPrice = this.dataset.tierPrice;
+
+          // Show loading state
+          this.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Processing...';
+          this.disabled = true;
+
+          try {
+            // Create payment intent
+            const response = await fetch("/create-membership-payment-intent", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ tier_id: tierId }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || "Payment setup failed");
+            }
+
+            // Redirect to membership payment page
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/membership-payment";
+
+            const clientSecretInput = document.createElement("input");
+            clientSecretInput.type = "hidden";
+            clientSecretInput.name = "client_secret";
+            clientSecretInput.value = data.clientSecret;
+
+            const tierIdInput = document.createElement("input");
+            tierIdInput.type = "hidden";
+            tierIdInput.name = "tier_id";
+            tierIdInput.value = tierId;
+
+            const tierNameInput = document.createElement("input");
+            tierNameInput.type = "hidden";
+            tierNameInput.name = "tier_name";
+            tierNameInput.value = tierName;
+
+            const amountInput = document.createElement("input");
+            amountInput.type = "hidden";
+            amountInput.name = "amount";
+            amountInput.value = data.amount;
+
+            form.appendChild(clientSecretInput);
+            form.appendChild(tierIdInput);
+            form.appendChild(tierNameInput);
+            form.appendChild(amountInput);
+
+            document.body.appendChild(form);
+            form.submit();
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Error: " + error.message);
+
+            // Reset button
+            this.innerHTML = "Purchase Now";
+            this.disabled = false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
