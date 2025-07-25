@@ -1,27 +1,27 @@
 /*footer*/
 html, body {
-    height: 100%;
-  }
+  height: 100%;
+}
 
-  body {
-    display: flex;
-    flex-direction: column;
-  }
+body {
+  display: flex;
+  flex-direction: column;
+}
 
-  main {
-    flex: 1;
-  }
+main {
+  flex: 1;
+}
 
 /* Adjust the logo size */
 .navbar .logo {
-    height: 50px; /* Set a fixed height */
-    width: auto; /* Maintain aspect ratio */
-    max-width: 150px; /* Optional: Limit the maximum width */
-    object-fit: contain; /* Ensure the image fits within the specified dimensions */
-    margin-right: 10px; /* Add spacing if needed */
+  height: 50px; /* Set a fixed height */
+  width: auto; /* Maintain aspect ratio */
+  max-width: 150px; /* Optional: Limit the maximum width */
+  object-fit: contain; /* Ensure the image fits within the specified dimensions */
+  margin-right: 10px; /* Add spacing if needed */
 }
 
 /* Ensure the navbar background color is consistent */
 .navbar {
-    background-color: #212529 !important; /* Dark background */
+  background-color: #212529 !important; /* Dark background */
 }

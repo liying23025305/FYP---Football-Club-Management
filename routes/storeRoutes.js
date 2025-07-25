@@ -113,7 +113,8 @@ router.get('/store', async (req, res) => {
       categories,
       selectedSize: typeof req.query.size !== 'undefined' ? req.query.size : 'All',
       selectedSizeKids: typeof req.query.sizeKids !== 'undefined' ? req.query.sizeKids : 'All',
-      sortBy: typeof sortBy !== 'undefined' ? sortBy : 'featured'
+      sortBy: typeof sortBy !== 'undefined' ? sortBy : 'featured',
+      user: req.session.user
     });
   } catch (err) {
     console.error('Error fetching gear:', err);
@@ -134,7 +135,8 @@ router.get('/store', async (req, res) => {
       categories,
       selectedSize: 'All',
       selectedSizeKids: 'All',
-      sortBy: 'featured'
+      sortBy: 'featured',
+      user: req.session.user
     });
   }
 });
@@ -170,7 +172,8 @@ router.get('/store/hospitality', async (req, res) => {
       selectedSize: 'All',
       selectedSizeKids: 'All',
       sortBy: 'featured',
-      isHospitality: true // for UI logic if needed
+      isHospitality: true, // for UI logic if needed
+      user: req.session.user
     });
   } catch (err) {
     console.error('Error fetching hospitality packages:', err);
@@ -186,7 +189,8 @@ router.get('/store/hospitality', async (req, res) => {
       selectedSize: 'All',
       selectedSizeKids: 'All',
       sortBy: 'featured',
-      isHospitality: true
+      isHospitality: true,
+      user: req.session.user
     });
   }
 });

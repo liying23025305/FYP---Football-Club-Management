@@ -220,9 +220,9 @@ router.delete('/api/admin/faqs/:id', isAdmin, async (req, res) => {
   }
 });
 
-// GET /admin/faq/:id/edit - Render edit form for a single FAQ (admin)
-router.get('/admin/faq/:id/edit', isAdmin, async (req, res) => {
-  console.log('GET /admin/faq/:id/edit called');
+// GET /admin/faqs/:id/edit - Render edit form for a single FAQ (admin)
+router.get('/admin/faqs/:id/edit', isAdmin, async (req, res) => {
+  console.log('GET /admin/faqs/:id/edit called');
   const faqId = req.params.id;
   try {
     const db = getConnection();
@@ -236,9 +236,9 @@ router.get('/admin/faq/:id/edit', isAdmin, async (req, res) => {
   }
 });
 
-// POST /admin/faq/:id/edit - Update FAQ in the database (admin)
-router.post('/admin/faq/:id/edit', isAdmin, async (req, res) => {
-  console.log('POST /admin/faq/:id/edit called');
+// POST /admin/faqs/:id/edit - Update FAQ in the database (admin)
+router.post('/admin/faqs/:id/edit', isAdmin, async (req, res) => {
+  console.log('POST /admin/faqs/:id/edit called');
   const faqId = req.params.id;
   const { question, answer, category, status, is_published, display_order } = req.body;
   if (!question || !status) {

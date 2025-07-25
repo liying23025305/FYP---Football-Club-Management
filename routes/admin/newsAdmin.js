@@ -32,10 +32,10 @@ router.get('/', isAuthenticated, async (req, res) => {
       FROM news`
     );
     const stats = statsRows[0];
-    res.render('admin_news', { news: newsRows, stats, success: req.query.success });
+    res.render('admin_news', { news: newsRows, stats, success: req.query.success, user: req.session.user });
   } catch (err) {
     console.error('Admin news dashboard error:', err);
-    res.render('admin_news', { news: [], stats: null, success: null });
+    res.render('admin_news', { news: [], stats: null, success: null, user: req.session.user });
   }
 });
 

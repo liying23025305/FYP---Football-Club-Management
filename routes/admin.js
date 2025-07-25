@@ -950,10 +950,9 @@ router.get('/admin/orders', isAuthenticated, isAdmin, async (req, res) => {
   const db = getConnection();
   // Get all orders with user info
   const [orders] = await db.execute(`
-    SELECT o.*, u.username, u.email, p.payment_type, p.payment_status
+    SELECT o.*, u.username, u.email
     FROM orders o
     JOIN users u ON o.user_id = u.user_id
-    LEFT JOIN payments p ON o.order_id = p.order_id
     ORDER BY o.order_date DESC
   `);
 
