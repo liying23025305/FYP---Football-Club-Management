@@ -51,7 +51,7 @@ router.post('/', isAuthenticated, upload.single('featured_image'), async (req, r
     let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
     if (req.file) {
-      featured_image = '/images/news/' + req.file.filename;
+      featured_image = '/images/news/' + req.file.originalname; // Store only the filename
     }
     const user_id = req.session.user.user_id;
     // If publishing now and no published_at, set to CURRENT_TIMESTAMP
@@ -98,7 +98,7 @@ router.put('/:id', isAuthenticated, upload.single('featured_image'), async (req,
     let { title, summary, content, category, status, published_at } = req.body;
     let featured_image = null;
     if (req.file) {
-      featured_image = '/images/news/' + req.file.filename;
+      featured_image = '/images/news/' + req.file.originalname; // Store only the filename
     }
     // If publishing now and no published_at, set to CURRENT_TIMESTAMP
     if (status === 'published' && !published_at) {
