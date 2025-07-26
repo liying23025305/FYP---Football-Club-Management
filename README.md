@@ -82,14 +82,24 @@ Open your browser and go to:
 
 ## Tech Stack
 
-| Component         | Package/Tool Used                          |
-|-------------------|--------------------------------------------|
-| Server Framework  | express@5.1.0                              |
-| Templating        | ejs@3.1.10                                 |
-| MySQL Connection  | mysql2@3.14.1                              |
-| Authentication    | express-session@1.18.1                    |
-| Input Validation  | express-validator@7.2.1                   |
-| Email Service     | nodemailer@6.10.1                          |
-| Payment Gateway   | stripe@18.3.0, @paypal/checkout-server-sdk@1.0.3 |
-| Environment Vars  | dotenv@16.5.0                              |
-| Dev Tool          | nodemon@3.1.10   
+| Component             | Package/Tool Used                                        |
+|------------------------|----------------------------------------------------------|
+| Server Framework       | express@5.1.0                                            |
+| Templating Engine      | ejs@3.1.10                                               |
+| MySQL Connection       | mysql2@3.14.1                                            |
+| Authentication         | express-session@1.18.1, bcrypt@5.1.1                     |
+| Input Validation       | express-validator@7.2.1                                  |
+| Email Service          | nodemailer@6.10.1                                        |
+| Payment Gateway        | stripe@18.3.0, @paypal/checkout-server-sdk@1.0.3         |
+| File Uploads           | multer@2.0.2                                             |
+| Input Sanitization     | sanitize-html@2.17.0                                     |
+| Rate Limiting          | express-rate-limit@7.5.0                                 |
+| Body Parsing           | body-parser@2.2.0                                        |
+| Environment Variables  | dotenv@16.5.0                                            |
+| Development Tool       | nodemon@3.1.10                                           |
+| Frontend Libraries     | Bootstrap 5.3, Font Awesome                              |
+| Database Tools         | phpMyAdmin, MySQL Workbench                              |
+| IDE & Version Control  | Visual Studio Code, GitHub                               |
+| Planning & Diagrams    | draw.io (ERD, Use Case), Excel (Timeline), canva (Storyboard) |
+| Payment Dashboard      | Stripe Dashboard, PayPal Developer Dashboard             |
+
